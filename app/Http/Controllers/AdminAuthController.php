@@ -33,7 +33,7 @@ class AdminAuthController extends Controller
                 'type' => 'login_error',
                 'description' => "Login failed: no user with email {$credentials['email']}",
             ]);
-            return back()->withErrors(['email' => 'Invalid credentials.'])->onlyInput('email');
+            return back()->withErrors(['email' => 'Email does not exist.'])->onlyInput('email');
         }
 
         if ($user->role !== 'admin') {
