@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\WEB;
 use App\Models\Log;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog; // for system logs if needed
+use App\Http\Controllers\Controller;
 
 
 class AdminAuthController extends Controller
@@ -18,22 +19,27 @@ class AdminAuthController extends Controller
   public function login(Request $request)
 {
     $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
+        'username' => 'required|string',
+        'password' => [
+            'required',
+            // 'string',
+            // 'min:6',
+            // 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/'
+        ],
     ]);
 
     try {
         // First find user by email
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('username', $credentials['username'])->first();
 
         if (!$user) {
             // Log failed attempt (no such user)
             Log::create([
                 'user_id' => null,
                 'type' => 'login_error',
-                'description' => "Login failed: no user with email {$credentials['email']}",
+                'description' => "Login failed: no user with username {$credentials['username']}",
             ]);
-            return back()->withErrors(['email' => 'Email does not exist.'])->onlyInput('email');
+            return back()->withErrors(['Username' => 'Username does not exist.'])->onlyInput('username');
         }
 
         if ($user->role !== 'admin') {
@@ -41,9 +47,9 @@ class AdminAuthController extends Controller
             Log::create([
                 'user_id' => $user->id,
                 'type' => 'login_error',
-                'description' => "Login failed: user is not admin (email: {$user->email})",
+                'description' => "Login failed: user is not admin (Username: {$user->username})",
             ]);
-            return back()->withErrors(['email' => 'Access denied. Admins only.'])->onlyInput('email');
+            return back()->withErrors(['username' => 'Access denied. Admins only.'])->onlyInput('username');
         }
 
         // Attempt login
@@ -54,7 +60,7 @@ class AdminAuthController extends Controller
             Log::create([
                 'user_id' => $user->id,
                 'type' => 'login_success',
-                'description' => "Admin login successful for {$user->email}",
+                'description' => "Admin login successful for {$user->username}",
             ]);
 
             return redirect()->intended(route('admin.dashboard'));
@@ -63,16 +69,16 @@ class AdminAuthController extends Controller
             Log::create([
                 'user_id' => $user->id,
                 'type' => 'login_error',
-                'description' => "Login failed: wrong password for {$user->email}",
+                'description' => "Login failed: wrong password for {$user->username}",
             ]);
 
-            return back()->withErrors(['email' => 'Invalid credentials.'])->onlyInput('email');
+            return back()->withErrors(['username' => 'Wrong password.'])->onlyInput('username');
         }
     } catch (\Exception $e) {
         // Log exception error (optional)
         LaravelLog::error("Login error: " . $e->getMessage());
 
-        return back()->withErrors(['email' => 'Something went wrong. Please try again later.'])->onlyInput('email');
+        return back()->withErrors(['username' => 'Something went wrong. Please try again later.'])->onlyInput('username');
     }
 }
 }

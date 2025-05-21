@@ -32,18 +32,18 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
+                            <label for="username" class="form-label">Username address</label>
                             <input
-                                type="email"
-                                name="email"
-                                id="email"
-                                class="form-control @error('email') is-invalid @enderror"
-                                placeholder="Enter email"
-                                value="{{ old('email') }}"
+                                type="text"
+                                name="username"
+                                id="username"
+                                class="form-control @error('username') is-invalid @enderror"
+                                placeholder="Enter username"
+                                value="{{ old('username') }}"
                                 required
                                 autofocus
                             >
-                            @error('email')
+                            @error('username')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

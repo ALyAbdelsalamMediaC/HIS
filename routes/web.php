@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\WEB\AdminAuthController;
+use App\Http\Controllers\WEB\CategoryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
