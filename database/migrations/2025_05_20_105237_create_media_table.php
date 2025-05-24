@@ -16,9 +16,10 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('media_type', ['video', 'image']);
             $table->string('file_path');
+            $table->string('pdf');
             $table->string('thumbnail_path')->nullable();
+            $table->string('status')->default('approved');
             $table->boolean('is_featured')->default(false);
             $table->boolean('is_recommended')->default(false);
             $table->timestamps();

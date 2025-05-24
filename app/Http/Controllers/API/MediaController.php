@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\WEB;
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Log;
 use App\Models\Media;
@@ -11,14 +11,8 @@ use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
 use App\Services\GoogleDriveService; // Make sure this service is built
-
 class MediaController extends Controller
 {
-    public function show()
-    {
-        $categories = Category::all();
-        return view('media.upload', compact('categories'));
-    }
     public function store(Request $request)
     {
         try {
@@ -69,8 +63,8 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
-                'status' => 'approved',
                 'thumbnail_path' => $thumbnailPath,
+                'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
             ]);

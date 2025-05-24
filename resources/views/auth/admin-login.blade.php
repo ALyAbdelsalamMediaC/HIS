@@ -65,6 +65,11 @@
 
                         <button type="submit" class="btn btn-primary w-100">Login</button>
                     </form>
+
+                    <div class="mt-3 text-center">
+                        <span>Don't have an account?</span>
+                        <a href="{{ route('admin.register') }}">Register</a>
+                    </div>
                 </div>
             </div>
 

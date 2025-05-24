@@ -29,8 +29,13 @@
         @csrf
 
         <div class="mb-3">
-            <label for="category_id" class="form-label">Category ID</label>
-            <input type="number" class="form-control" name="category_id" required>
+            <label for="category_id" class="form-label">Category</label>
+            <select class="form-control" name="category_id" required>
+            <option value="">Select Category</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
+            </select>
         </div>
 
         <div class="mb-3">
@@ -43,21 +48,19 @@
             <textarea class="form-control" name="description"></textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="media_type" class="form-label">Media Type</label>
-            <select class="form-select" name="media_type" required>
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-            </select>
-        </div>
+       
 
         <div class="mb-3">
-            <label for="file" class="form-label">Media File</label>
+            <label for="file" class="form-label">Media Video</label>
             <input type="file" class="form-control" name="file" required>
         </div>
+        <div class="mb-3">
+            <label for="pdf" class="form-label">Media pdf</label>
+            <input type="file" class="form-control" name="pdf" required>
+        </div>
 
         <div class="mb-3">
-            <label for="thumbnail" class="form-label">Thumbnail (optional)</label>
+            <label for="thumbnail" class="form-label">Image</label>
             <input type="file" class="form-control" name="thumbnail">
         </div>
 
