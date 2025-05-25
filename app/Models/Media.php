@@ -10,7 +10,7 @@ class Media extends Model
   use HasFactory;
 
     protected $fillable = [
-        'category_id', 'title', 'description', 'media_type',
+        'category_id', 'title', 'description','pdf',
         'file_path', 'thumbnail_path', 'is_featured', 'is_recommended'
     ];
 

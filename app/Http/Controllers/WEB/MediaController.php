@@ -14,7 +14,21 @@ use App\Services\GoogleDriveService; // Make sure this service is built
 
 class MediaController extends Controller
 {
-    public function show()
+    public function getall(){
+        $media = Media::with('category')->get();
+        return view('media.index', compact('media'));
+    }
+
+    public function getone($id)
+    {
+        $media = Media::with(['category', 'comments'])->findOrFail($id);
+        return view('media.show', compact('media'));
+        
+
+    }
+    
+    
+    public function create()
     {
         $categories = Category::all();
         return view('media.upload', compact('categories'));
