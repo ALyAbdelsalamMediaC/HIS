@@ -15,7 +15,7 @@ class AdminAuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.admin-login'); // Create this Blade view
+        return view('pages.auth.admin-login'); // Create this Blade view
     }
 
     public function login(Request $request)
@@ -92,28 +92,28 @@ class AdminAuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'             => 'required|string|max:255',
-            'email'            => 'required|email|unique:users,email',
-            'role'             => 'required|string',
-            'username'         => 'required|string|max:50|unique:users,username',
-            'device_id'        => 'nullable|string|max:255|unique:users,device_id',
-            'password'         => 'required|string|min:8|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|string',
+            'username' => 'required|string|max:50|unique:users,username',
+            'device_id' => 'nullable|string|max:255|unique:users,device_id',
+            'password' => 'required|string|min:8|confirmed',
         ]);
         try {
             // Create user
             $user = User::create([
-                'name'      => $data['name'],
-                'email'     => $data['email'],
-                'username'  => $data['username'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'username' => $data['username'],
                 'device_id' => $data['device_id'] ?? null,
-                'role'      => $data['role'],
-                'password'  => Hash::make($data['password']),
+                'role' => $data['role'],
+                'password' => Hash::make($data['password']),
             ]);
-            
+
             // Optionally log the event
             Log::create([
-                'user_id'     => $user->id,
-                'type'        => 'registration',
+                'user_id' => $user->id,
+                'type' => 'registration',
                 'description' => "New admin registered ({$user->username})",
             ]);
 
