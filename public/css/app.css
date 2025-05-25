@@ -1,0 +1,367 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+/* ========================================================
+    Global Resets and Defaults
+   ======================================================== */
+
+/* Normalize/reset styles or your own CSS reset */
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+dl,
+dd,
+ol,
+ul,
+figure,
+hr {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    list-style: none;
+    font: inherit;
+    text-decoration: none;
+}
+
+ul {
+    padding-left: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin-bottom: 0 !important;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+/* Set box-sizing globally */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* ========================================================
+    Global Styles
+   ======================================================== */
+
+/* :root section for defining colors and other variables */
+
+:root {
+    --primary-color: #35758c; /* Primary color */
+    --secondary-color: #154d62; /* Secondary color */
+    --text-color: #000000; /* Text color */
+    --text-gray-color: #adadad; /* Text Gray color */
+    --white-color: #ffffff;
+    --hover-button: #2f5d6f;
+    --border-color: #ededed;
+    --main-border-radius-sm: 10px;
+    --main-border-radius-md: 12px;
+    --main-border-radius-lg: 14px;
+}
+
+/* Body and Typography */
+body {
+    font-family: "Poppins", serif;
+    background-color: var(--white-color) !important;
+}
+
+.container-fix {
+    margin: 0 auto;
+    padding: 0 30px !important;
+}
+
+/* 
+    =======================================================
+    Headings Styles
+   ======================================================== 
+*/
+.h1-semibold,
+.h2-semibold,
+.h3-semibold,
+.h4-semibold,
+.h5-semibold,
+.h6-semibold {
+    font-weight: 600;
+    line-height: 48px;
+}
+.h1-semibold {
+    font-size: 2.5rem;
+}
+.h2-semibold {
+    font-size: 2rem;
+}
+.h3-semibold {
+    font-size: 1.5rem;
+}
+.h4-semibold {
+    font-size: 1.25rem;
+}
+.h5-semibold {
+    font-size: 1rem;
+}
+.h6-semibold {
+    font-size: 0.875rem;
+}
+
+.h3-ragular,
+.h4-ragular,
+.h5-ragular {
+    font-weight: 400;
+    line-height: 48px;
+}
+
+.h2-ragular {
+    font-size: 2rem;
+}
+
+.h3-ragular {
+    font-size: 1.5rem;
+}
+
+.h4-ragular {
+    font-size: 1.25rem;
+}
+
+.h5-ragular {
+    font-size: 1rem;
+}
+.h6-ragular {
+    font-size: 0.875rem;
+}
+
+/* ========================================================
+    Login Page Styles
+   ======================================================== */
+
+.auth-container {
+    max-width: 1440px;
+    height: 100dvh;
+    margin: 0px auto;
+}
+
+.auth-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.login-img {
+    height: 100%;
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 12px 0;
+}
+
+.login-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.log-form-side {
+    height: 100%;
+    width: 60%;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.login-logo img {
+    width: 111px;
+    height: 53px;
+}
+
+.login-form-con {
+    width: 100%;
+    margin-top: 56px;
+}
+
+.login-form-head h1 {
+    background: linear-gradient(
+        96deg,
+        var(--primary-color) 18.34%,
+        var(--secondary-color) 68.21%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-form-head p {
+    color: var(--text-gray-color);
+}
+
+.button-login {
+    color: var(--white-color);
+    background-color: var(--primary-color);
+    padding: 10px 24px;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--main-border-radius-sm);
+    background: var(--primary-color);
+    box-shadow: 0px 1px 2px 0px #1a1c1e, 0px 0px 0px 1px #6c7278;
+}
+
+.button-login:hover {
+    background-color: var(--hover-button);
+}
+
+/* ========================================================
+    Global Forms & Inputs Styles
+   ======================================================== */
+
+.form-infield {
+    position: relative;
+    margin-top: 24px;
+    width: 100%;
+}
+
+.form-infield .label-form-inner {
+    position: absolute;
+    top: 50%;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 30px;
+    color: var(--text-gray-color);
+    pointer-events: none;
+    background-color: transparent;
+    left: 24px;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+}
+
+.form-infield .input-form-inner {
+    padding: 24px;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 30px;
+    color: #232323;
+    border-radius: var(--main-border-radius-md);
+    border: solid 1.822px var(--border-color);
+    width: 100%;
+}
+
+/* When input is focused */
+.form-infield .input-form-inner:focus {
+    outline: none;
+    border: solid 1.822px var(--primary-color);
+}
+
+.form-infield .input-form-inner:focus ~ .label-form-inner {
+    transform: translateY(-180%) translateX(-10px) scale(0.8);
+    padding: 0px 5px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #404e68;
+    border: none;
+    background-color: #fff;
+    border-radius: 100px;
+}
+
+/* When input has content (using a class that we'll add with JavaScript) */
+.form-infield .input-form-inner.has-content ~ .label-form-inner {
+    transform: translateY(-180%) translateX(-10px) scale(0.8);
+    padding: 0px 5px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #404e68;
+    border: none;
+    background-color: #fff;
+    border-radius: 100px;
+}
+
+/* Style the icon container */
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-eye {
+    cursor: pointer;
+}
+
+.input-icon .input-icon-eye svg {
+    position: absolute;
+    right: 10px;
+    transform: translate(-50%, -50%);
+}
+
+.forget-pass {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.forget-pass a {
+    color: var(--text-gray-color);
+    transition: all 0.3s ease;
+}
+
+.forget-pass a:hover {
+    color: var(--hover-button);
+}
+
+.fixed-textarea {
+    width: 100%; /* Set your desired fixed width */
+    max-width: 100%; /* Ensure it doesn't exceed container width on smaller screens */
+    height: 150px; /* Set a fixed height if needed */
+    resize: none; /* Prevent users from resizing the textarea */
+    overflow: auto; /* Enable scrollbars when content overflows */
+}
+
+.select-border {
+    border: 1px solid var(--secondary-color);
+}
+
+.error-input-login {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 8px;
+    color: var(--primary-color);
+}
+
+.select-form-inner {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    outline: none;
+    border-radius: var(--main-border-radius-sm);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select-form-inner {
+    appearance: none; /* Remove default browser appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="9" viewBox="0 0 14 9" fill="none"><path d="M1.00005 1.5C1.00005 1.5 5.41895 7.49999 7.00005 7.5C8.58115 7.50001 13 1.5 13 1.5" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding: 10px 14px;
+    cursor: pointer;
+}
