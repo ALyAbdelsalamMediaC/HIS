@@ -65,7 +65,7 @@ class AdminAuthController extends Controller
                     'description' => "Admin login successful for {$user->username}",
                 ]);
 
-                return redirect()->intended(route('admin.dashboard'));
+                return redirect()->intended(route('pages.admin.dashboard'));
             } else {
                 // Log failed attempt (wrong password)
                 Log::create([
@@ -119,7 +119,7 @@ class AdminAuthController extends Controller
 
             // Auto‐login and redirect
             Auth::login($user);
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('pages.admin.dashboard');
 
         } catch (\Exception $e) {
             LaravelLog::error("Registration error: " . $e->getMessage());

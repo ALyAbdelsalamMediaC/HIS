@@ -10,19 +10,55 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use App\Models\User;
 use App\Services\GoogleDriveService; // Make sure this service is built
 
 class MediaController extends Controller
 {
-    public function getall(){
-        $media = Media::with('category')->get();
-        return view('media.index', compact('media'));
+    public function getall(Request $request)
+    {
+        try {
+            $query = Media::with('category');
+
+            // Search by title
+            if ($request->filled('title')) {
+                $query->where('title', 'like', '%' . $request->input('title') . '%');
+            }
+
+            // Filter by category name
+            if ($request->filled('category')) {
+                $query->whereHas('category', function ($q) use ($request) {
+                    $q->where('name', $request->input('category'));
+                });
+            }
+
+            // Filter by date (created_at)
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->input('date_to'));
+            }
+
+            // Order by latest
+            $media = $query->orderBy('created_at', 'desc')->get();
+
+            // Get all users with role 'reviewer'
+            $reviewers = User::whereHas('roles', function ($q) {
+                $q->where('name', 'reviewer');
+            })->get();
+
+            return view('pages.content.index', compact('media', 'reviewers'));
+        } catch (Exception $e) {
+            LaravelLog::error('Media getall error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to fetch media.');
+        }
     }
 
     public function getone($id)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
-        return view('media.show', compact('media'));
+        return view('content.show', compact('media'));
         
 
     }
@@ -31,7 +67,7 @@ class MediaController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('media.upload', compact('categories'));
+        return view('content.upload', compact('categories'));
     }
     public function store(Request $request)
     {

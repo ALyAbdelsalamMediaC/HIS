@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\Auth;
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/admin/dashboard', function () { return view('admin.dashboard');})->name('admin.dashboard');
+    Route::get('/admin/dashboard', function () { return view('pages.admin.dashboard');})->name('pages.admin.dashboard');
         Route::resource('categories', CategoryController::class);
 
-        Route::get('/media/upload', [MediaController::class, 'create']);
-        Route::post('/media/upload', [MediaController::class, 'store']);
-        Route::get('/media/getall', [MediaController::class, 'getall']);
-        Route::get('/media/getone/{id}', [MediaController::class, 'getone']);
+        Route::get('/content/upload', [MediaController::class, 'create']);
+        Route::post('/content/upload', [MediaController::class, 'store']);
+        Route::get('/content/getall', [MediaController::class, 'getall']);
+        Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
     });
 
 
-    Route::get('admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+    Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
     Route::post('admin/login', [AdminAuthController::class, 'login']);
 
     Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
