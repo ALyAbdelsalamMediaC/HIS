@@ -148,28 +148,26 @@ body {
 /* ========================================================
     Login Page Styles
    ======================================================== */
-
 .auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     max-width: 1440px;
-    height: 100dvh;
     margin: 0px auto;
+    min-height: 100dvh;
 }
 
 .auth-flex {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    gap: 58px;
 }
 
 .login-img {
-    height: 100%;
     width: 40%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 12px 0;
+    height: 100%;
+    padding: 12px 0px 12px 12px;
 }
 
 .login-img img {
@@ -185,6 +183,7 @@ body {
     align-items: start;
     justify-content: center;
     flex-direction: column;
+    padding-right: 100px;
 }
 
 .login-logo img {
@@ -220,6 +219,7 @@ body {
     border-radius: var(--main-border-radius-sm);
     background: var(--primary-color);
     box-shadow: 0px 1px 2px 0px #1a1c1e, 0px 0px 0px 1px #6c7278;
+    margin-top: 40px;
 }
 
 .button-login:hover {
@@ -251,7 +251,7 @@ body {
 }
 
 .form-infield .input-form-inner {
-    padding: 24px;
+    padding: 22px;
     font-size: 20px;
     font-weight: 400;
     line-height: 30px;
@@ -364,4 +364,77 @@ body {
     background-position: right 10px center;
     padding: 10px 14px;
     cursor: pointer;
+}
+
+/* ========================================================
+    Media Queries and Responsive Styles
+   ======================================================== */
+
+@media only screen and (max-width: 992px) {
+    .auth-flex {
+        gap: 24px;
+    }
+    .login-logo img {
+        width: 90px;
+        height: 45px;
+    }
+
+    .login-form-con {
+        margin-top: 30px;
+    }
+
+    .log-form-side {
+        padding-right: 50px;
+        padding-top: 40px;
+        padding-bottom: 20px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .auth-container {
+        padding: 0 15px;
+    }
+
+    .auth-flex {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .login-img {
+        display: none;
+    }
+
+    .log-form-side {
+        width: 100%;
+        padding-right: 0px;
+    }
+
+    .login-form-head h1 {
+        font-size: 34px;
+    }
+    .login-form-head p {
+        font-size: 18px;
+        line-height: 30px;
+    }
+
+    .form-infield .label-form-inner {
+        font-size: 18px;
+    }
+
+    .form-infield .input-form-inner {
+        padding: 18px;
+    }
+
+    .forget-pass a {
+        font-size: 16px;
+    }
+
+    .button-login {
+        padding: 0px 22px;
+        margin-top: 30px;
+    }
+
+    .button-login span {
+        font-size: 16px;
+    }
 }

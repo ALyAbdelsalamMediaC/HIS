@@ -52,7 +52,7 @@
                 <a href="#" class="h4-semibold">Forgot Password?</a>
             </div>
 
-            <button type="submit" style="margin-top:40px;" class="w-100 button-login">
+            <button type="submit" class="w-100 button-login">
                 <span class="h4-semibold">Login</span>
                 <x-svg-icon name="right-arrow" size="18" color="#fff" />
             </button>
