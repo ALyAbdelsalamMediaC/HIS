@@ -58,7 +58,7 @@ class MediaController extends Controller
     public function getone($id)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
-        return view('content.show', compact('media'));
+        return view('pages.content.show', compact('media'));
         
 
     }
@@ -67,7 +67,7 @@ class MediaController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('content.upload', compact('categories'));
+        return view('pages.content.add', compact('categories'));
     }
     public function store(Request $request)
     {

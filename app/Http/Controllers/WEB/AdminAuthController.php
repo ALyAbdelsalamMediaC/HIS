@@ -86,7 +86,7 @@ class AdminAuthController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('auth.admin-register');
+        return view('pages.auth.admin-register');
     }
 
     public function register(Request $request)
