@@ -12,20 +12,25 @@ use App\Http\Controllers\Web\UserController;
 
 Route::middleware('auth')->group(function () {
     
-    Route::get('/admin/dashboard', function () {
+    Route::get('/', function () {
         return view('pages.admin.dashboard');
     })->name('pages.admin.dashboard');
 
     Route::resource('categories', CategoryController::class);
 
+    Route::get('/content', [MediaController::class, 'validation']);
     Route::get('/content/upload', [MediaController::class, 'create']);
     Route::post('/content/upload', [MediaController::class, 'store']);
     Route::get('/content/getall', [MediaController::class, 'getall']);
     Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
+    Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 
 
     Route::resource('users', UserController::class)->except(['create', 'store', 'show']);
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
+    Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+
 });
 
 

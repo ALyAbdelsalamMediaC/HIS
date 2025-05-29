@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
+use Google\Client;
+use Google\Service\Drive;
+use Google\Service\Drive\DriveFile;
 
 use Illuminate\Http\Request;
 use App\Models\Log;
@@ -15,6 +19,15 @@ use App\Services\GoogleDriveService; // Make sure this service is built
 
 class MediaController extends Controller
 {
+    protected $client;
+    protected $driveService;
+
+    public function __construct(GoogleDriveService $driveService)
+    {
+        $this->driveService = $driveService;
+        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+    }
+
     public function getall(Request $request)
     {
         try {
@@ -54,16 +67,40 @@ class MediaController extends Controller
             return back()->with('error', 'Failed to fetch media.');
         }
     }
+    public function recently_Added()
+    {
+        try {
+            $contents = Media::with('category')->orderBy('created_at', 'desc')->take(10)->get();
+            return view('pages.content.recently_added', compact('contents'));
+        } catch (Exception $e) {
+            LaravelLog::error('Recently Added error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'recently_added_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to fetch recently added media.');
+        }
+    }
 
     public function getone($id)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
         return view('pages.content.show', compact('media'));
-        
-
     }
-    
-    
+    public function validation()
+    {   
+             $categories = Category::all();
+
+        if ($this->client->isAccessTokenExpired()) {
+            return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+        } else {
+            return view('pages.content.add', compact('categories'));
+        }   
+    }
+
     public function create()
     {
         $categories = Category::all();
@@ -84,26 +121,24 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-              $video = null;
+            $video = null;
             if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('file')->isValid()) {
-                        $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('file'), $filename);
-                        $video = $url;
-                    }
-                
+                if ($request->file('file')->isValid()) {
+                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('file'), $filename);
+                    $video = $url;
+                }
             }
 
-              $pdf = null;
+            $pdf = null;
             if ($request->hasFile('pdf')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('pdf')->isValid()) {
-                        $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                        $pdf = $url;
-                    }
-                
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
             }
 
             // Store thumbnail if exists

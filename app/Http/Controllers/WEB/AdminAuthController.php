@@ -96,7 +96,6 @@ class AdminAuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string',
             'username' => 'required|string|max:50|unique:users,username',
-            'device_id' => 'nullable|string|max:255|unique:users,device_id',
             'password' => 'required|string|min:8|confirmed',
         ]);
         try {
@@ -105,7 +104,6 @@ class AdminAuthController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'username' => $data['username'],
-                'device_id' => $data['device_id'] ?? null,
                 'role' => $data['role'],
                 'password' => Hash::make($data['password']),
             ]);

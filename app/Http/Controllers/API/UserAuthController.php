@@ -60,12 +60,10 @@ class UserAuthController extends Controller
                 'username' => 'required|string|max:255',
                 'phone'    => 'required|string|max:20',
                 'password' => 'required|string|min:8|confirmed',
-                'device_id' => 'required|string|max:20',
             ]);
 
             // Check if device_id already exists
-            $existingDevice = User::where('device_id', $validated['device_id'])
-                ->orWhere('email', $validated['email'])
+            $existingDevice = User::where('email', $validated['email'])
                 ->first();
 
             if ($existingDevice) {
