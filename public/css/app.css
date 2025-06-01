@@ -78,12 +78,12 @@ a {
 /* Body and Typography */
 body {
     font-family: "Poppins", serif;
-    background-color: var(--white-color) !important;
+    background-color: #f7f7f7 !important;
 }
 
 .container-fix {
     margin: 0 auto;
-    padding: 0 30px !important;
+    padding: 0 35px !important;
 }
 
 /* 
@@ -143,6 +143,37 @@ body {
 }
 .h6-ragular {
     font-size: 0.875rem;
+}
+
+/* ========================================================
+    Loading Styles
+   ======================================================== */
+
+/* Loading Overlay Styles */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(
+        255,
+        255,
+        255,
+        0.8
+    ); /* Semi-transparent background */
+    z-index: 9999; /* Ensure it's above all other elements in .main-content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+    opacity: 1;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* ========================================================
@@ -238,7 +269,7 @@ body {
 
 .form-infield .label-form-inner {
     position: absolute;
-    top: 50%;
+    top: 37px; /* Start from the middle */
     font-size: 20px;
     font-weight: 400;
     line-height: 30px;
@@ -246,7 +277,7 @@ body {
     pointer-events: none;
     background-color: transparent;
     left: 24px;
-    transform: translateY(-50%);
+    transform: translateY(-50%); /* Center vertically initially */
     transition: all 0.3s ease;
 }
 
@@ -268,7 +299,8 @@ body {
 }
 
 .form-infield .input-form-inner:focus ~ .label-form-inner {
-    transform: translateY(-180%) translateX(-10px) scale(0.8);
+    top: -15px; /* Move to the top */
+    transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
     padding: 0px 5px;
     font-size: 20px;
     font-weight: 600;
@@ -280,7 +312,8 @@ body {
 
 /* When input has content (using a class that we'll add with JavaScript) */
 .form-infield .input-form-inner.has-content ~ .label-form-inner {
-    transform: translateY(-180%) translateX(-10px) scale(0.8);
+    top: -15px; /* Move to the top */
+    transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
     padding: 0px 5px;
     font-size: 20px;
     font-weight: 600;
@@ -340,7 +373,7 @@ body {
     font-size: 14px;
     font-weight: 400;
     margin-top: 8px;
-    color: var(--primary-color);
+    color: #ff0000;
 }
 
 .select-form-inner {
@@ -364,6 +397,238 @@ body {
     background-position: right 10px center;
     padding: 10px 14px;
     cursor: pointer;
+}
+
+/* ========================================================
+    Buttons Styles
+   ======================================================== */
+
+.btn-nothing {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+}
+
+.btn-nothing:hover {
+    background-color: transparent;
+}
+
+/* 
+    =======================================================
+    Sidebar Styles
+   ======================================================== 
+*/
+
+.sidebar-relative {
+    position: relative;
+    top: 0;
+}
+.sidebar {
+    position: fixed;
+    left: 0;
+    width: 256px;
+    height: 100dvh;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: column;
+    background-color: var(--white-color);
+    padding-top: 38px;
+    padding-bottom: 38px;
+    padding-left: 24px;
+    padding-right: 19px;
+    border-radius: 0px 12px 12px 0px;
+    transition-property: width;
+    transition: all 0.3s;
+    z-index: 50;
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+}
+
+.sidebar-mid {
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-gray-color) transparent; /* Set scrollbar thumb to text gray and track to transparent */
+}
+
+.sidebar-mid::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-mid::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-mid::-webkit-scrollbar-thumb {
+    background-color: var(
+        --text-gray-color
+    ); /* Set Webkit scrollbar thumb to text gray */
+    border-radius: 4px;
+}
+.sidebar-mid::-webkit-scrollbar-thumb:hover {
+    background-color: #888; /* Darken thumb on hover */
+}
+
+.sidebar .head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 32px;
+    width: 100%;
+}
+
+.side-logo img {
+    width: 92px;
+    height: 44px;
+}
+
+.sidebar-menu {
+    margin-right: 5px;
+}
+
+.sidebar-menu ul li {
+    margin-bottom: 12px;
+}
+
+.sidebar-menu ul li a {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--primary-color);
+    padding: 8px 16px;
+    border-radius: var(--main-border-radius-lg);
+    transition: all 0.3s;
+}
+
+.sidebar-menu ul li:hover a {
+    color: var(--white-color);
+    background-color: var(--primary-color);
+}
+
+.sidebar-menu ul li a svg {
+    color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.sidebar-menu ul li:hover svg {
+    color: var(--white-color) !important;
+}
+
+.sidebar-bottom {
+    width: 100%;
+}
+
+.sidebar-bottom button {
+    width: 100%;
+    text-align: left;
+    color: var(--primary-color);
+    padding: 8px 16px;
+    border-radius: var(--main-border-radius-lg);
+    transition: all 0.3s;
+}
+
+.sidebar-bottom button:hover {
+    color: var(--white-color);
+    background-color: var(--primary-color);
+}
+
+/* Mobile Backdrop */
+.mobile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 49;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Close Button */
+.mobile-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 51;
+}
+
+.mobile-close-btn button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-close-btn button:hover {
+    background-color: #82cce73f;
+}
+.main-content.collapsed {
+    margin-left: 80px;
+}
+/* 
+    =======================================================
+    Main Style
+   ======================================================== 
+*/
+
+.main-content {
+    margin-left: 256px;
+    transition-property: margin-left;
+    transition: all 0.3s;
+}
+
+/* 
+    =======================================================
+    Navbar Style
+   ======================================================== 
+*/
+
+.navbar-custome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 24px 26px 35px;
+    background: var(--white-color);
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+}
+
+.nav-search {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    color: var(--text-gray-color);
+    border: none;
+    outline: none;
+    margin-left: 2px;
+}
+
+.nav-search:focus {
+    outline: none;
+}
+
+.nav-profile {
+    background-color: var(--primary-color);
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.nav-mobile-hamburger {
+    border: 1px solid var(--border-color);
+    padding: 7px 10px;
+    border-radius: 6px;
 }
 
 /* ========================================================
@@ -436,5 +701,80 @@ body {
 
     .button-login span {
         font-size: 16px;
+    }
+
+    .sidebar {
+        width: 280px;
+        padding-top: 60px; /* More space for close button */
+        transform: translateX(-100%);
+        border-radius: 0;
+    }
+    .sidebar.mobile-hidden {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.mobile-active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Show mobile close button only when sidebar is active on mobile */
+    .mobile-close-btn {
+        display: block;
+    }
+
+    /* Logo adjustments for mobile */
+    .sidebar .logo-small {
+        display: none;
+    }
+
+    .sidebar .logo-large {
+        display: block;
+    }
+
+    /* Prevent body scroll when mobile sidebar is open */
+    body.sidebar-mobile-open {
+        overflow: hidden;
+    }
+}
+
+/* Tablet and larger screens */
+@media (min-width: 769px) {
+    .main-content {
+        margin-left: 256px;
+    }
+
+    .sidebar.active + .main-content {
+        margin-left: 80px;
+    }
+
+    /* Hide mobile elements on desktop */
+    .nav-mobile-hamburger {
+        display: none !important;
+    }
+
+    .mobile-close-btn {
+        display: none !important;
+    }
+
+    .mobile-backdrop {
+        display: none !important;
+    }
+
+    /* Logo states for desktop */
+    .sidebar .logo-small {
+        display: none;
+    }
+
+    .sidebar.active .logo-small {
+        display: block;
+    }
+
+    .sidebar.active .logo-large {
+        display: none;
     }
 }

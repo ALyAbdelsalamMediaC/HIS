@@ -1,13 +1,20 @@
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+
 <!-- Sidebar Component -->
-<div class="sidebar">
-  <!-- Sidebar Toggle Button -->
-  <div class="sidebar-open-btn">
-    <x-svg-icon name="arrow-right" size="12" color="#b12028" />
+<div class="sidebar" id="sidebar">
+  <!-- Mobile Close Button (only visible on mobile when sidebar is open) -->
+  <div class="mobile-close-btn d-md-none">
+    <button class="p-0 border-0 btn" type="button" id="mobileCloseBtn" aria-label="Close mobile menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="#35758c" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
   </div>
+
   <div class="head">
     <a href="" class="side-logo">
-      <img src="{{ asset('images/logo/logo-full-white.svg') }}" alt="logo" class="logo-large">
-      <img src="{{ asset('images/logo/hansy-small-white.svg') }}" alt="logo-small" class="logo-small">
+      <img src="{{ asset('images/logo/logo-dashboard.png') }}" alt="logo">
     </a>
   </div>
 
@@ -17,70 +24,42 @@
     <nav class="sidebar-menu">
       <ul>
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="dashboard" size="20" />
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="dashboard" size="18" />
             <span class="sidebar-menu-text">Dashboard</span>
           </a>
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="user-check" size="20" />
-            <span class="sidebar-menu-text">Employees</span>
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="user" size="18" />
+            <span class="sidebar-menu-text">User Management</span>
           </a>
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="money" size="20" />
-            <span class="sidebar-menu-text">Payroll</span>
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="content" size="18" />
+            <span class="sidebar-menu-text">Content</span>
           </a>
         </li>
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="user2" size="20" />
-            <span class="sidebar-menu-text">Attendance</span>
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="message" size="18" />
+            <span class="sidebar-menu-text">Comments</span>
           </a>
         </li>
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="calender" size="20" />
-            <span class="sidebar-menu-text">Meeting</span>
-          </a>
-        </li>
-
-        <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="lead" size="20" />
-            <span class="sidebar-menu-text">Leads</span>
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="shield-block" size="18" />
+            <span class="sidebar-menu-text">Blocked Users</span>
           </a>
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="history" size="20" />
-            <span class="sidebar-menu-text">Leave Request</span>
-          </a>
-        </li>
-
-        <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="analysis-up" size="20" />
-            <span class="sidebar-menu-text">Achievements</span>
-          </a>
-        </li>
-
-        <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="map-pin" size="20" />
-            <span class="sidebar-menu-text">Branches</span>
-          </a>
-        </li>
-
-        <li class="sidebar-menu-li">
-          <a href="" class="h3-semibold">
-            <x-svg-icon name="policy" size="20" />
-            <span class="sidebar-menu-text">Private Policy</span>
+          <a href="" class="h6-semibold">
+            <x-svg-icon name="setting" size="18" />
+            <span class="sidebar-menu-text">Settings</span>
           </a>
         </li>
       </ul>
@@ -89,7 +68,13 @@
 
   <!-- Account Section -->
   <div class="sidebar-bottom">
-
+    <form method="POST" action="{{ route('logout') }}">
+      @csrf
+      <x-button type="submit" class="h6-semibold btn-nothing">
+        <x-svg-icon name="logout" size="18" />
+        <span class="sidebar-menu-text">Log Out</span>
+      </x-button>
+    </form>
   </div>
 </div>
 

@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title> 
-</head>
-<body>
+@extends('layouts.app')
+@section('title', 'HIS | Dashboard')
+@section('content')
     <h1>Welcome to Admin Dashboard</h1>
 
     <p>Hello, {{ auth()->user()->name }}!</p>
@@ -12,5 +9,10 @@
         @csrf
         <button type="submit">Logout</button>
     </form>
-</body>
-</html>
+    </body>
+
+    </html>
+@endsection
+
+@push('scripts')
+@endpush

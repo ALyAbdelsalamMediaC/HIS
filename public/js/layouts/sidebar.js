@@ -2,12 +2,30 @@ $(document).ready(function () {
     // Function to set the initial sidebar state based on screen width
     function setSidebarState() {
         if ($(window).width() <= 768) {
-            $(".sidebar").addClass("active");
-            $(".main-content").addClass("collapsed");
-        } else {
-            $(".sidebar").removeClass("active");
+            // Mobile: Hide sidebar by default
+            $(".sidebar").addClass("mobile-hidden").removeClass("active");
             $(".main-content").removeClass("collapsed");
+            $(".mobile-backdrop").removeClass("active");
+        } else {
+            // Desktop: Show sidebar by default
+            $(".sidebar").removeClass("mobile-hidden active");
+            $(".main-content").removeClass("collapsed");
+            $(".mobile-backdrop").removeClass("active");
         }
+    }
+
+    // Function to show mobile sidebar
+    function showMobileSidebar() {
+        $(".sidebar").removeClass("mobile-hidden").addClass("mobile-active");
+        $(".mobile-backdrop").addClass("active");
+        $("body").addClass("sidebar-mobile-open");
+    }
+
+    // Function to hide mobile sidebar
+    function hideMobileSidebar() {
+        $(".sidebar").addClass("mobile-hidden").removeClass("mobile-active");
+        $(".mobile-backdrop").removeClass("active");
+        $("body").removeClass("sidebar-mobile-open");
     }
 
     // Set initial sidebar state and active menu item based on URL
@@ -20,14 +38,9 @@ $(document).ready(function () {
 
     // Highlight the active menu item based on the current URL
     $(".sidebar-menu ul li a").each(function () {
-        // Get the current URL path without query parameters
         var currentPath = window.location.pathname;
-
-        // Get the path from the link's href
         var linkPath = new URL(this.href).pathname;
 
-        // Check if the current URL starts with the link path
-        // This will match both exact URLs and subpages
         if (
             currentPath === linkPath ||
             currentPath.startsWith(linkPath + "/")
@@ -36,9 +49,36 @@ $(document).ready(function () {
         }
     });
 
-    // Toggle sidebar open/close on button click
-    $(".sidebar-open-btn").click(function () {
-        $(".sidebar").toggleClass("active");
-        $(".main-content").toggleClass("collapsed");
+    // Mobile hamburger menu toggle
+    $("#mobileMenuToggle").click(function () {
+        if ($(window).width() <= 768) {
+            showMobileSidebar();
+        }
+    });
+
+    // Mobile close button
+    $("#mobileCloseBtn").click(function () {
+        hideMobileSidebar();
+    });
+
+    // Mobile backdrop click to close sidebar
+    $(".mobile-backdrop").click(function () {
+        hideMobileSidebar();
+    });
+
+    // Close mobile sidebar when clicking on sidebar links (for better UX)
+    $(".sidebar-menu a").click(function () {
+        if ($(window).width() <= 768) {
+            setTimeout(function () {
+                hideMobileSidebar();
+            }, 150); // Small delay for better visual feedback
+        }
+    });
+
+    // Handle escape key to close mobile sidebar
+    $(document).keydown(function (e) {
+        if (e.key === "Escape" && $(window).width() <= 768) {
+            hideMobileSidebar();
+        }
     });
 });
