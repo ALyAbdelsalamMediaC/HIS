@@ -40,6 +40,11 @@ Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
 Route::post('register', [AdminAuthController::class, 'register']);
 
+// Password Reset Routes
+Route::get('password/reset', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
+Route::post('password/email', [AdminAuthController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+Route::get('password/reset/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
+Route::post('password/reset', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
 
 
 Route::post('/logout', function () {

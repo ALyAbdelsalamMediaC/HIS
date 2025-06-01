@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog; // for system logs if needed
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
 
 class AdminAuthController extends Controller
 {
@@ -127,4 +129,89 @@ class AdminAuthController extends Controller
         }
     }
 
+    public function showForgotPasswordForm()
+    {
+        return view('pages.auth.forgot-password');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user || !($user->role === 'admin' || $user->role === 'reviewer')) {
+            Log::create([
+                'user_id' => $user ? $user->id : null,
+                'type' => 'password_reset_error',
+                'description' => "Password reset failed: no admin user with email {$request->email}",
+            ]);
+            return back()->withErrors(['email' => 'We can\'t find an admin user with that email address.']);
+        }
+        
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'password_reset_request',
+                'description' => "Password reset link sent to {$user->email}",
+            ]);
+            return back()->with(['status' => __($status)]);
+        }
+
+        return back()->withErrors(['email' => __($status)]);
+    }
+
+    public function showResetPasswordForm($token)
+    {
+        return view('pages.auth.reset-password', ['token' => $token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !($user->role === 'admin' || $user->role === 'reviewer')) {
+            Log::create([
+                'user_id' => $user ? $user->id : null,
+                'type' => 'password_reset_error',
+                'description' => "Password reset failed: no admin user with email {$request->email}",
+            ]);
+            return back()->withErrors(['email' => 'We can\'t find an admin user with that email address.']);
+        }
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+
+                Log::create([
+                    'user_id' => $user->id,
+                    'type' => 'password_reset_success',
+                    'description' => "Password reset successful for {$user->email}",
+                ]);
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('admin.login')->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)]);
+    }
 }

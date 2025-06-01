@@ -49,7 +49,7 @@
             </div>
 
             <div class="forget-pass ">
-                <a href="#" class="h4-semibold">Forgot Password?</a>
+                <a href="{{ route('admin.password.request') }}" class="h4-semibold">Forgot Password?</a>
             </div>
 
             <button type="submit" class="w-100 button-login">
