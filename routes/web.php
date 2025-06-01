@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\WEB\AdminAuthController;
+use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\MediaController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 
+    Route::get('/article/upload', [ArticleController::class, 'create']);
+    Route::post('/article/upload', [ArticleController::class, 'store']);
+    Route::get('/article/getall', [ArticleController::class, 'getall'])->name('article.getall');
+    Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
+    Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
     Route::resource('users', UserController::class, [
         'names' => [
