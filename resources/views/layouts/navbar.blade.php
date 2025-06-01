@@ -12,9 +12,9 @@
   </div>
 
   <div class="gap-3 d-flex align-items-center">
-    <x-svg-icon name="bell" size="18" color="#ADADAD" class="search-icon" />
+    <x-svg-icon name="bell" size="18" color="#ADADAD" />
     <a href="" class="nav-profile">
-      <x-svg-icon name="user" size="18" color="#fff" class="search-icon" />
+      <x-svg-icon name="user" size="18" color="#fff" />
     </a>
   </div>
 </header>

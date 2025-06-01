@@ -39,9 +39,13 @@
         @include('layouts.sidebar')
         <div class="main-content w-100 min-vh-100 d-flex justify-content-between flex-column position-relative">
             <div>
-                @include('layouts.navbar')
+                @if(Route::is('pages.admin.dashboard'))
+                    @include('layouts.navbarHome')
+                @else
+                    @include('layouts.navbar')
+                @endif
 
-                <main class="mt-4 mb-5 container-fluid container-fix ">
+                <main class="mt-4 mb-5 container-fluid container-fix">
                     @yield('content')
                 </main>
             </div>
