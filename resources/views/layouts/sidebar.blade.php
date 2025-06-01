@@ -1,8 +1,20 @@
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+
 <!-- Sidebar Component -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
+  <!-- Mobile Close Button (only visible on mobile when sidebar is open) -->
+  <div class="mobile-close-btn d-md-none">
+    <button class="p-0 border-0 btn" type="button" id="mobileCloseBtn" aria-label="Close mobile menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="#35758c" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+
   <div class="head">
     <a href="" class="side-logo">
-      <img src="{{ asset('images/logo/logo-full-white.svg') }}" alt="logo">
+      <img src="{{ asset('images/logo/logo-dashboard.png') }}" alt="logo">
     </a>
   </div>
 
@@ -56,10 +68,13 @@
 
   <!-- Account Section -->
   <div class="sidebar-bottom">
-    <a href="" class="h6-semibold">
-      <x-svg-icon name="logout" size="18" />
-      <span class="sidebar-menu-text">Log Out</span>
-    </a>
+    <form method="POST" action="{{ route('logout') }}">
+      @csrf
+      <x-button type="submit" class="h6-semibold btn-nothing">
+        <x-svg-icon name="logout" size="18" />
+        <span class="sidebar-menu-text">Log Out</span>
+      </x-button>
+    </form>
   </div>
 </div>
 
