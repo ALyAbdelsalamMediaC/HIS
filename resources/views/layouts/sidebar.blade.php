@@ -24,25 +24,32 @@
     <nav class="sidebar-menu">
       <ul>
         <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
+            <a href="{{ route('pages.admin.dashboard') }}" class="h6-semibold">
             <x-svg-icon name="dashboard" size="18" />
             <span class="sidebar-menu-text">Dashboard</span>
           </a>
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
+            <a href="{{ route('users.index') }}" class="h6-semibold">
             <x-svg-icon name="user" size="18" />
             <span class="sidebar-menu-text">User Management</span>
           </a>
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
+          <a href="{{ route('content.validation') }}" class="h6-semibold">
             <x-svg-icon name="content" size="18" />
             <span class="sidebar-menu-text">Content</span>
           </a>
         </li>
+         <li class="sidebar-menu-li">
+          <a href="{{ route('categories.index') }}" class="h6-semibold">
+            <x-svg-icon name="content" size="18" />
+            <span class="sidebar-menu-text">Categories</span>
+          </a>
+        </li>
+        
         <li class="sidebar-menu-li">
           <a href="" class="h6-semibold">
             <x-svg-icon name="message" size="18" />

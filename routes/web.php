@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('categories', CategoryController::class);
 
-    Route::get('/content', [MediaController::class, 'validation']);
+    Route::get('/content', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/upload', [MediaController::class, 'create']);
     Route::post('/content/upload', [MediaController::class, 'store']);
     Route::get('/content/getall', [MediaController::class, 'getall']);
@@ -26,7 +26,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 
 
-    Route::resource('users', UserController::class)->except(['create', 'store', 'show']);
+    Route::prefix('pages')->group(function () {
+    Route::resource('users', UserController::class, [
+        'names' => [
+            'index' => 'users.index',
+            'edit' => 'users.edit',
+            'update' => 'users.update',
+            'destroy' => 'users.destroy',
+        ]
+    ])->except(['create', 'store', 'show']);
+});
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
