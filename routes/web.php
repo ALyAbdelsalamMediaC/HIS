@@ -26,7 +26,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 
 
-    Route::prefix('pages')->group(function () {
     Route::resource('users', UserController::class, [
         'names' => [
             'index' => 'users.index',
@@ -35,7 +34,6 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'users.destroy',
         ]
     ])->except(['create', 'store', 'show']);
-});
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
