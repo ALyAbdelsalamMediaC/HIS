@@ -95,4 +95,46 @@ class MediaController extends Controller
             ], 500);
         }
     }
+    public function views(Request $request)
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'video_id' => 'required|string'
+            ]);
+
+            $video_id = $validated['video_id'];
+            $media = Media::where('file_path', $video_id)->first();
+
+            if (!$media) {
+                throw new Exception('Media not found.');
+            }
+
+            $media->views += 1;
+            $media->save();
+
+            // Log success
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_view_success',
+                'description' => 'Viewed media: ' . $media->title,
+            ]);
+
+            return response()->json($media, 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Media view error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_view_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update media views.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
 }

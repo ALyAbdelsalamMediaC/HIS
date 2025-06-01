@@ -10,7 +10,7 @@ class Media extends Model
   use HasFactory;
 
     protected $fillable = [
-        'category_id', 'title', 'description', 'media_type',
+        'category_id','user_id', 'title','views', 'description','pdf',
         'file_path', 'thumbnail_path', 'is_featured', 'is_recommended'
     ];
 
@@ -32,5 +32,9 @@ class Media extends Model
     public function likes()
     {
         return $this->hasMany(Like::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

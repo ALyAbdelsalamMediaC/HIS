@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
 
 
@@ -22,7 +23,7 @@ class CategoryController extends Controller
             $categories = Category::all();
             return view('categories.index', compact('categories'));
         } catch (Exception $e) {
-             $this->logError('Failed to load categories: ' . $e->getMessage());
+            $this->logError('Failed to load categories: ' . $e->getMessage());
             return back()->with('error', 'Something went wrong while loading categories.');
         }
     }
@@ -36,16 +37,23 @@ class CategoryController extends Controller
     // Store new category
     public function store(Request $request)
     {
+        $user = Auth::user();
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-            ]);
+            if (!$user || !$user->hasRole('admin')) {
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'description' => 'nullable|string',
+                ]);
 
-            Category::create($request->only('name', 'description'));
+                Category::create([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'user_id' => $user->id,
+                ]);
 
-            $this->logSuccess('Created a new category: ' . $request->name);
-            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+                $this->logSuccess('Created a new category: ' . $request->name);
+                return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+            }
         } catch (Exception $e) {
             $this->logError('Failed to create category: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Failed to create category.');
@@ -97,7 +105,7 @@ class CategoryController extends Controller
         }
     }
 
-     private function logSuccess($description)
+    private function logSuccess($description)
     {
         $this->log('success', $description);
     }

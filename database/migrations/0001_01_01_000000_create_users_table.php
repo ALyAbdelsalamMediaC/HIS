@@ -16,12 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('username')->unique();
-            $table->string('device_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->boolean('is_reviewer')->nullable();
             $table->string('role')->default('admin');
             $table->rememberToken();
             $table->string('password');
+            $table->softDeletes();
             $table->timestamps();
         });
 

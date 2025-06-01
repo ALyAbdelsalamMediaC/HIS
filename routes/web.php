@@ -5,32 +5,42 @@ use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\MediaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Web\UserController;
 
 
-// Route::get('/login', function () {
-//     return redirect()->route('admin.login');
-// })->name('login');
+
 
 Route::middleware('auth')->group(function () {
-    Route::get('/admin/dashboard', function () { return view('admin.dashboard');})->name('admin.dashboard');
-        Route::resource('categories', CategoryController::class);
+    
+    Route::get('/', function () {
+        return view('pages.admin.dashboard');
+    })->name('pages.admin.dashboard');
 
-        Route::get('/media/upload', [MediaController::class, 'show']);
-        Route::post('/media/upload', [MediaController::class, 'store']);
+    Route::resource('categories', CategoryController::class);
+
+    Route::get('/content', [MediaController::class, 'validation']);
+    Route::get('/content/upload', [MediaController::class, 'create']);
+    Route::post('/content/upload', [MediaController::class, 'store']);
+    Route::get('/content/getall', [MediaController::class, 'getall']);
+    Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
+    Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
+
+
+    Route::resource('users', UserController::class)->except(['create', 'store', 'show']);
+    Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
+    Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+
 });
 
-// Route::prefix('admin')->group(function() {
-    // Login
-    Route::get('admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('admin/login', [AdminAuthController::class, 'login']);
 
-    // Registration
-    Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
-    Route::post('register', [AdminAuthController::class, 'register']);
+Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('admin/login', [AdminAuthController::class, 'login']);
 
-    // Dashboard (protected)
-    // Route::middleware('auth')->get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
-// });
+Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
+Route::post('register', [AdminAuthController::class, 'register']);
+
+
 
 Route::post('/logout', function () {
     Auth::logout();

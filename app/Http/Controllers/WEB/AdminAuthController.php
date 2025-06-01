@@ -65,7 +65,7 @@ class AdminAuthController extends Controller
                     'description' => "Admin login successful for {$user->username}",
                 ]);
 
-                return redirect()->intended(route('admin.dashboard'));
+                return redirect()->intended(route('pages.admin.dashboard'));
             } else {
                 // Log failed attempt (wrong password)
                 Log::create([
@@ -86,7 +86,7 @@ class AdminAuthController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('auth.admin-register');
+        return view('pages.auth.admin-register');
     }
 
     public function register(Request $request)
@@ -96,7 +96,6 @@ class AdminAuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string',
             'username' => 'required|string|max:50|unique:users,username',
-            'device_id' => 'nullable|string|max:255|unique:users,device_id',
             'password' => 'required|string|min:8|confirmed',
         ]);
         try {
@@ -105,7 +104,6 @@ class AdminAuthController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'username' => $data['username'],
-                'device_id' => $data['device_id'] ?? null,
                 'role' => $data['role'],
                 'password' => Hash::make($data['password']),
             ]);
@@ -119,7 +117,7 @@ class AdminAuthController extends Controller
 
             // Auto‐login and redirect
             Auth::login($user);
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('pages.admin.dashboard');
 
         } catch (\Exception $e) {
             LaravelLog::error("Registration error: " . $e->getMessage());

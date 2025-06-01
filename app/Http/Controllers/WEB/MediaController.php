@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
+use Google\Client;
+use Google\Service\Drive;
+use Google\Service\Drive\DriveFile;
 
 use Illuminate\Http\Request;
 use App\Models\Log;
@@ -10,14 +14,97 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use App\Models\User;
 use App\Services\GoogleDriveService; // Make sure this service is built
 
 class MediaController extends Controller
 {
-    public function show()
+    protected $client;
+    protected $driveService;
+
+    public function __construct(GoogleDriveService $driveService)
+    {
+        $this->driveService = $driveService;
+        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+    }
+
+    public function getall(Request $request)
+    {
+        try {
+            $query = Media::with('category');
+
+            // Search by title
+            if ($request->filled('title')) {
+                $query->where('title', 'like', '%' . $request->input('title') . '%');
+            }
+
+            // Filter by category name
+            if ($request->filled('category')) {
+                $query->whereHas('category', function ($q) use ($request) {
+                    $q->where('name', $request->input('category'));
+                });
+            }
+
+            // Filter by date (created_at)
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->input('date_to'));
+            }
+
+            // Order by latest
+            $media = $query->orderBy('created_at', 'desc')->get();
+
+            // Get all users with role 'reviewer'
+            $reviewers = User::whereHas('roles', function ($q) {
+                $q->where('name', 'reviewer');
+            })->get();
+
+            return view('pages.content.index', compact('media', 'reviewers'));
+        } catch (Exception $e) {
+            LaravelLog::error('Media getall error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to fetch media.');
+        }
+    }
+    public function recently_Added()
+    {
+        try {
+            $contents = Media::with('category')->orderBy('created_at', 'desc')->take(10)->get();
+            return view('pages.content.recently_added', compact('contents'));
+        } catch (Exception $e) {
+            LaravelLog::error('Recently Added error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'recently_added_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to fetch recently added media.');
+        }
+    }
+
+    public function getone($id)
+    {
+        $media = Media::with(['category', 'comments'])->findOrFail($id);
+        return view('pages.content.show', compact('media'));
+    }
+    public function validation()
+    {   
+             $categories = Category::all();
+
+        if ($this->client->isAccessTokenExpired()) {
+            return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+        } else {
+            return view('pages.content.add', compact('categories'));
+        }   
+    }
+
+    public function create()
     {
         $categories = Category::all();
-        return view('media.upload', compact('categories'));
+        return view('pages.content.add', compact('categories'));
     }
     public function store(Request $request)
     {
@@ -34,26 +121,24 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-              $video = null;
+            $video = null;
             if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('file')->isValid()) {
-                        $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('file'), $filename);
-                        $video = $url;
-                    }
-                
+                if ($request->file('file')->isValid()) {
+                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('file'), $filename);
+                    $video = $url;
+                }
             }
 
-              $pdf = null;
+            $pdf = null;
             if ($request->hasFile('pdf')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('pdf')->isValid()) {
-                        $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                        $pdf = $url;
-                    }
-                
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
             }
 
             // Store thumbnail if exists
