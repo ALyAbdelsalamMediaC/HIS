@@ -177,6 +177,30 @@ body {
 }
 
 /* ========================================================
+    Buttons Styles
+   ======================================================== */
+
+.link-btn-comp,
+.btn-comp {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--white-color);
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: var(--main-border-radius-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border: none;
+}
+
+.link-btn-comp:hover,
+.btn-comp:hover {
+    background-color: var(--hover-button);
+}
+
+/* ========================================================
     Login Page Styles
    ======================================================== */
 .auth-container {
@@ -308,6 +332,13 @@ body {
     border: none;
     background-color: #fff;
     border-radius: 100px;
+    background: linear-gradient(
+        to bottom,
+        #f7f7f7 0%,
+        #f7f7f7 50%,
+        #ffffff 50%,
+        #ffffff 100%
+    );
 }
 
 /* When input has content (using a class that we'll add with JavaScript) */
@@ -717,10 +748,25 @@ body {
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
 }
 
-.card-icon1 {
+.card-icon1,
+.card-icon2,
+.card-icon3,
+.card-icon4 {
     padding: 12px 16px;
     border-radius: var(--main-border-radius-md);
+}
+
+.card-icon1 {
     background: #e2e0ff;
+}
+.card-icon2 {
+    background: #e3f5ff;
+}
+.card-icon3 {
+    background: #e9ffdb;
+}
+.card-icon4 {
+    background: #ffecec;
 }
 
 .card-icon-text h4 {
@@ -728,6 +774,84 @@ body {
 }
 .card-icon-text h3 {
     line-height: 25px;
+}
+
+.dashboard-contetn-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.dashboard-contetn-left {
+    width: 60%;
+    height: 100%;
+}
+.dashboard-contetn-right {
+    width: 40%;
+    height: 100%;
+}
+
+.dashboard-content-items {
+    padding: 24px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+}
+
+.dashboard-video-card {
+    display: flex;
+    align-items: start;
+    gap: 8px;
+    border-radius: var(--main-border-radius-md);
+    border: 1px solid var(--border-color);
+    background: #fff;
+    margin-top: 12px;
+}
+
+.dashboard-video-card-image {
+    position: relative;
+    width: 30%;
+    height: 185px;
+}
+
+.dashboard-video-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-top-left-radius: var(--main-border-radius-md);
+    border-bottom-left-radius: var(--main-border-radius-md);
+}
+
+.dashboard-video-card-image span {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--primary-color);
+    padding: 8px;
+    border-radius: var(--main-border-radius-md);
+    background-color: #f1f9fa;
+    margin: 8px;
+}
+
+.dashboard-video-card-content {
+    width: 70%;
+    height: 100%;
+    padding: 12px 20px 24px 20px;
+}
+
+.dashboard-video-card-content-top {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.dashboard-video-card-content-down {
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
 }
 
 /* ========================================================
