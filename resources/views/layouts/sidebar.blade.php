@@ -49,7 +49,7 @@
             <span class="sidebar-menu-text">Article</span>
           </a>
         </li>
-         <li class="sidebar-menu-li">
+        <li class="sidebar-menu-li">
           <a href="{{ route('categories.index') }}" class="h6-semibold">
             <x-svg-icon name="content" size="18" />
             <span class="sidebar-menu-text">Categories</span>
