@@ -46,7 +46,7 @@ class ArticleController extends Controller
                 $q->where('name', 'reviewer');
             })->get();
 
-            return view('pages.article.index', compact('article', 'reviewers'));
+            return view('pages.content.articles', compact('article', 'reviewers'));
         } catch (Exception $e) {
             LaravelLog::error('Article getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
@@ -75,7 +75,7 @@ class ArticleController extends Controller
         $article = Article::with(['category', 'comments'])->findOrFail($id);
         return view('pages.article.show', compact('article'));
     }
-   
+
 
     public function create()
     {
@@ -90,14 +90,14 @@ class ArticleController extends Controller
                 'category_id' => 'required|exists:categories,id',
                 'title' => 'required|string|max:255',
                 'name' => 'required|string|max:255',
-                'hyperlink' => 'nullable|url|max:2048', 
+                'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
                 'iamge_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-          
+
 
             // Store thumbnail if exists
             $iamge_path = null;

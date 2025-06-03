@@ -430,6 +430,9 @@ body {
     cursor: pointer;
 }
 
+.search-input-container {
+}
+
 /* ========================================================
     Buttons Styles
    ======================================================== */
@@ -967,9 +970,8 @@ body {
 
 .nav-pills {
     gap: 25px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--main-border-radius-sm);
-    padding: 12px 0;
+    border-radius: var(--main-border-radius-md);
+    padding: 12px 24px;
 }
 
 .nav-fill .nav-item,
@@ -995,6 +997,17 @@ body {
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
     color: var(--white-color);
+}
+
+/* ========================================================
+    Content Page Styles
+   ======================================================== */
+
+.content-container {
+    padding: 0px 24px 24px 24px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
 }
 
 /* ========================================================

@@ -11,7 +11,7 @@
             </div>
 
             <div class="gap-3 d-flex align-items-center">
-                <x-link_btn href="">
+                <x-link_btn href="{{  route('content.store') }}">
                     <x-svg-icon name="content" size="18" />
                     <span>Add Video</span>
                 </x-link_btn>
@@ -26,12 +26,14 @@
         <!-- Articles & Videos -->
 
         <div class="mt-4">
-
             <!-- Tabs using the component -->
             <x-tabs_pages :tabs="[
             ['id' => 'videos', 'label' => 'videos', 'route' => route('content.videos')],
             ['id' => 'articles', 'label' => 'articles', 'route' => route('content.articles')],
         ]" activeTab="videos" />
+        </div>
+
+        <div class="content-container">
 
         </div>
 

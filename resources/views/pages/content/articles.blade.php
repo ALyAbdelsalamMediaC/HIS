@@ -26,13 +26,11 @@
     <!-- Articles & Videos -->
 
     <div class="mt-4">
-
     <!-- Tabs using the component -->
     <x-tabs_pages :tabs="[
     ['id' => 'videos', 'label' => 'videos', 'route' => route('content.videos')],
     ['id' => 'articles', 'label' => 'articles', 'route' => route('content.articles')],
     ]" activeTab="articles" />
-
     </div>
 
   </section>

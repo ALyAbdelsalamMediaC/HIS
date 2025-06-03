@@ -32,7 +32,7 @@ class MediaController extends Controller
     {
         try {
             $query = Media::with('category');
-            
+
             // Search by title
             if ($request->filled('title')) {
                 $query->where('title', 'like', '%' . $request->input('title') . '%');
@@ -58,7 +58,7 @@ class MediaController extends Controller
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
-            
+
             return view('pages.content.videos', compact('media', 'reviewers'));
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
@@ -149,6 +149,7 @@ class MediaController extends Controller
             $media = Media::create([
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
+                'user_id' => Auth::id(),
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
@@ -157,7 +158,6 @@ class MediaController extends Controller
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
             ]);
-
             // Log success
             Log::create([
                 'user_id' => Auth::id(),
