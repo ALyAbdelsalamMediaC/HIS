@@ -13,6 +13,17 @@ use App\Models\Category;
 use App\Services\GoogleDriveService; // Make sure this service is built
 class MediaController extends Controller
 {
+    public function show()
+    {
+        try {
+            $categories = Category::all();
+
+            return response()->json($categories, 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Media retrieval error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve media.'], 500);
+        }
+    }
     public function store(Request $request)
     {
         try {
@@ -28,26 +39,24 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-              $video = null;
+            $video = null;
             if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('file')->isValid()) {
-                        $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('file'), $filename);
-                        $video = $url;
-                    }
-                
+                if ($request->file('file')->isValid()) {
+                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('file'), $filename);
+                    $video = $url;
+                }
             }
 
-              $pdf = null;
+            $pdf = null;
             if ($request->hasFile('pdf')) {
                 $driveService = new GoogleDriveService();
-                    if ($request->file('pdf')->isValid()) {
-                        $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                        $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                        $pdf = $url;
-                    }
-                
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
             }
 
             // Store thumbnail if exists
@@ -136,5 +145,4 @@ class MediaController extends Controller
             ], 500);
         }
     }
-    
 }

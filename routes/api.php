@@ -10,3 +10,4 @@ Route::post('/login', [UserAuthController::class, 'login']);
 Route::post('/comments', [CommentsController::class, 'addComment']);
 Route::post('/comments/reply', [CommentsController::class, 'reply']);
 Route::post('/media/store', [MediaController::class, 'store']);
+Route::get('/media/show', [MediaController::class, 'show']);
