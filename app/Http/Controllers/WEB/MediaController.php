@@ -61,7 +61,7 @@ class MediaController extends Controller
                 $q->where('name', 'reviewer');
             })->get();
 
-            return view('pages.content.index', compact('media', 'reviewers'));
+            return view('pages.content.videos', compact('media', 'reviewers'));
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch media.');
@@ -91,14 +91,14 @@ class MediaController extends Controller
         return view('pages.content.show', compact('media'));
     }
     public function validation()
-    {   
-             $categories = Category::all();
+    {
+        $categories = Category::all();
 
         if ($this->client->isAccessTokenExpired()) {
             return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
         } else {
             return view('pages.content.add', compact('categories'));
-        }   
+        }
     }
 
     public function create()

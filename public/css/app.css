@@ -855,6 +855,113 @@ body {
 }
 
 /* ========================================================
+    Table Styles
+   ======================================================== */
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--white-color);
+    color: #000;
+    border-radius: var(--main-border-radius-md);
+    overflow: hidden; /* Ensures border-radius is applied correctly */
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 150%;
+}
+
+.custom-table thead th {
+    padding: 12px 16px; /* Reduced padding for tighter layout */
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-color); /* Add bottom border for header */
+}
+
+.custom-table tbody td {
+    padding: 20px 16px; /* Reduced padding for consistency */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color); /* Add bottom border for rows */
+}
+
+/* Narrower checkbox and ID columns */
+.custom-table th:first-child,
+.custom-table td:first-child {
+    width: 5%; /* Very narrow for checkbox */
+    padding-left: 8px; /* Adjusted padding for narrower column */
+}
+
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2) {
+    width: 5%; /* Narrower for ID column */
+    padding-left: 8px; /* Adjusted padding for narrower column */
+}
+
+/* Ensure the checkbox fits within its cell */
+.custom-table td,
+.custom-table th {
+    vertical-align: middle; /* Align checkbox vertically in the cell */
+}
+
+/* No results styling (if needed) */
+.table-empty {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--text-color);
+    padding: 20px 0 !important;
+    text-align: center;
+}
+
+.table-info-showing {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--secondary-color);
+    padding-top: 20px;
+}
+
+.table-status {
+    border-radius: var(--main-border-radius-lg);
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 25px;
+}
+
+.pagination-link {
+    color: var(--border-color) !important;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.pagination-link-number {
+    color: var(--border-color);
+    background-color: transparent;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pagination-link-number:hover {
+    color: var(--white-color);
+    background-color: var(--primary-color);
+}
+
+.pagination-link-number.active {
+    color: var(--white-color);
+    background-color: var(--primary-color);
+}
+
+/* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
 

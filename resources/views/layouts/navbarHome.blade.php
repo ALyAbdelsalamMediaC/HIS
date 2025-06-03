@@ -1,6 +1,11 @@
 <header class="navbar-home-container">
   <div class="navbar-home-custome">
-    <div class="w-50">
+    <div class="gap-3 w-50 d-flex align-items-center">
+      <div class="nav-mobile-hamburger d-md-none">
+        <button class="p-0 border-0 btn" type="button" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+          <x-svg-icon name="three-dots" size="18" color="#fff" />
+        </button>
+      </div>
       <h2 class="h3-semibold" style="color:#fff;">Welcome , {{ auth()->user()->name }} 👋🏻</h2>
     </div>
 

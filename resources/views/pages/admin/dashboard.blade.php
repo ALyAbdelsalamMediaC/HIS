@@ -59,7 +59,6 @@
                                 <span>Add Article</span>
                             </x-link_btn>
                         </div>
-
                     </div>
 
                     <div class="dashboard-video-card">
@@ -74,20 +73,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h4 class="h6-semibold" style="color:#35758C;">Men's health</h4>
                                     <h4 class="h6-ragular"
-                                        style="
-                                                                                                                                                                            color:#35758C;
-                                                                                                                                                                            padding: 8px;
-                                                                                                                                                                            border-radius: 12px;
-                                                                                                                                                                            background: #F1F9FA;">
+                                        style="color:#35758C; padding: 8px; border-radius: 12px; background: #F1F9FA;">
                                         Puplished
                                     </h4>
                                 </div>
 
-                                <h3 class="h5-semibold"
-                                    style="
-                                                                                                                                                                        margin-top:8px;
-                                                                                                                                                                            line-height: 1.5em;
-                                                                                                                                                                    ">
+                                <h3 class="h5-semibold" style="margin-top:8px; line-height: 1.5em;">
                                     Lorem
                                     ipsum
                                     dolor
@@ -126,7 +117,80 @@
                 </div>
             </div>
             <!-- right -->
-            <div class="dashboard-contetn-right"></div>
+            <div class="dashboard-contetn-right">
+                <!-- Top Articles -->
+                <div class="dashboard-content-items w-100">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="h4-semibold" style="color:#35758c;">Top Articles</h3>
+
+                        <x-link_btn href="h6-ragular" class="btn-nothing" style="color: #7B7B7B;">View
+                            all</x-link_btn>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead style="color:#ADADAD;">
+                                <tr>
+                                    <th style="width:20%; text-align: left;">#</th>
+                                    <th style="width:30%; text-align: left;">Name</th>
+                                    <th style="width:20%; text-align: left;">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;">1</td>
+                                    <td style="text-align: left;">Ahmed</td>
+                                    <td style="text-align: left;">50</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <x-data-not-found>No branches found.</x-data-not-found>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Top Videos -->
+                <div class="mt-4 dashboard-content-items w-100">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="h4-semibold" style="color:#35758c;">Top Videos</h3>
+
+                        <x-link_btn href="h6-ragular" class="btn-nothing" style="color: #7B7B7B;">View
+                            all</x-link_btn>
+
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead style="color:#ADADAD;">
+                                <tr>
+                                    <th style="width:20%; text-align: left;">#</th>
+                                    <th style="width:30%; text-align: left;">Name</th>
+                                    <th style="width:20%; text-align: left;">Views</th>
+                                    <th style="width:20%; text-align: left;">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;">1</td>
+                                    <td style="text-align: left;">Ahmed</td>
+                                    <td style="text-align: left;">132k</td>
+                                    <td style="text-align: left;">50</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <x-data-not-found>No branches found.</x-data-not-found>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 @endsection
