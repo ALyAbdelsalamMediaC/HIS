@@ -962,6 +962,42 @@ body {
 }
 
 /* ========================================================
+    Pages tabs Styles
+   ======================================================== */
+
+.nav-pills {
+    gap: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--main-border-radius-sm);
+    padding: 12px 0;
+}
+
+.nav-fill .nav-item,
+.nav-fill > .nav-link {
+    margin: 0 14px;
+}
+
+.nav-fill .nav-item .nav-link,
+.nav-justified .nav-item .nav-link {
+    font-size: 14px;
+    font-weight: 400;
+    padding: 16px 0;
+    color: var(--primary-color);
+}
+
+.nav-link.active,
+.nav-pills .show > .nav-link {
+    --bs-nav-pills-border-radius: var(--main-border-radius-sm);
+    --bs-nav-pills-link-active-color: var(--white-color);
+    --bs-nav-pills-link-active-bg: var(--primary-color);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: var(--white-color);
+}
+
+/* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
 
