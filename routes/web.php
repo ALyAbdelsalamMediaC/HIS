@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WEB\CommentController;
 use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\Web\UserController;
 
 
 Route::middleware('auth')->group(function () {
-    
+
     Route::get('/', function () {
         return view('pages.admin.dashboard');
     })->name('pages.admin.dashboard');
@@ -25,6 +26,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/getall', [MediaController::class, 'getall']);
     Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
+
+
+    Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
+    Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
+    Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
+    Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
+
 
     Route::get('/article/upload', [ArticleController::class, 'create']);
     Route::post('/article/upload', [ArticleController::class, 'store']);
@@ -43,7 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
-
 });
 
 
