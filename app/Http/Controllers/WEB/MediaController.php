@@ -31,6 +31,8 @@ class MediaController extends Controller
     public function getall(Request $request)
     {
         try {
+                        $categories = Category::all();
+
             $query = Media::with('category');
 
             // Search by title
@@ -54,12 +56,12 @@ class MediaController extends Controller
             }
 
             // Order by latest
-            $media = $query->orderBy('created_at', 'desc')->get();
+            $media = $query->orderBy('created_at', 'desc')->paginate(10);
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
 
-            return view('pages.content.videos', compact('media', 'reviewers'));
+            return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch media.');

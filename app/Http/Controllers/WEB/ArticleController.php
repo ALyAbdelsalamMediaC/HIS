@@ -16,37 +16,36 @@ class ArticleController extends Controller
     public function getall(Request $request)
     {
         try {
-            $query = Article::with('category');
+                        $categories = Category::all();
+
+            $article = Article::with('category')->orderBy('created_at', 'desc');
 
             // Search by title
             if ($request->filled('title')) {
-                $query->where('title', 'like', '%' . $request->input('title') . '%');
+                $article->where('title', 'like', '%' . $request->input('title') . '%');
             }
 
             // Filter by category name
             if ($request->filled('category')) {
-                $query->whereHas('category', function ($q) use ($request) {
+                $article->whereHas('category', function ($q) use ($request) {
                     $q->where('name', $request->input('category'));
                 });
             }
 
             // Filter by date (created_at)
             if ($request->filled('date_from')) {
-                $query->whereDate('created_at', '>=', $request->input('date_from'));
+                $article->whereDate('created_at', '>=', $request->input('date_from'));
             }
             if ($request->filled('date_to')) {
-                $query->whereDate('created_at', '<=', $request->input('date_to'));
+                $article->whereDate('created_at', '<=', $request->input('date_to'));
             }
-
             // Order by latest
-            $article = $query->orderBy('created_at', 'desc')->get();
 
             // Get all users with role 'reviewer'
-            $reviewers = User::whereHas('roles', function ($q) {
-                $q->where('name', 'reviewer');
-            })->get();
+                        $reviewers = User::where('role', 'reviewer')->get();
 
-            return view('pages.content.articles', compact('article', 'reviewers'));
+
+            return view('pages.content.articles', compact('article', 'reviewers', 'categories'));
         } catch (Exception $e) {
             LaravelLog::error('Article getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
