@@ -40,12 +40,13 @@ class UserAuthController extends Controller
     ]);
 
     // If you use Laravel Sanctum or Passport, generate token here
-    // $token = $user->createToken('auth_token')->plainTextToken;
+    $token = $user->createToken('auth_token')->plainTextToken;
 
     return response()->json([
         'message' => 'Login successful',
         'user' => $user,
-        // 'token' => $token,
+        
+        'token' => $token,
     ], 200);
 }
 

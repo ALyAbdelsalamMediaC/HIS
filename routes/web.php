@@ -18,6 +18,11 @@ Route::middleware('auth')->group(function () {
         return view('pages.admin.dashboard');
     })->name('pages.admin.dashboard');
 
+    // Route::middleware(['auth', 'session.expired'])->group(function () {
+    // Route::get('/', function () {
+    //     return view('pages.admin.dashboard');
+    // })->name('pages.admin.dashboard');
+    
     Route::resource('categories', CategoryController::class);
 
     Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');

@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
+'lifetime' => env('SESSION_LIFETIME', 120), // 120 minutes = 2 hours
     /*
     |--------------------------------------------------------------------------
     | Application Environment

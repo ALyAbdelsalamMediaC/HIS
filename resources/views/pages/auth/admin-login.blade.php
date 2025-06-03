@@ -1,5 +1,9 @@
 @extends('layouts.auth')
-
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 @section('content')
     <section class="auth-flex">
         {{-- left --}}
