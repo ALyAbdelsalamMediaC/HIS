@@ -6,7 +6,7 @@
 ])
 
 <div class="search-input-container">
-    <x-svg-icon name="search" size="14" color="#000" class="search-icon" />
+    <x-svg-icon name="search" size="18" color="#ADADAD" class="search-icon" />
     <input 
         type="text" 
         id="{{ $id }}"

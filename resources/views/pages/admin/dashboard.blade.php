@@ -51,11 +51,11 @@
 
                         <div class="gap-2 d-flex align-items-center">
                             <x-link_btn href="">
-                                <x-svg-icon name="content" size="18" />
+                                <x-svg-icon name="content" size="20" />
                                 <span>Add Video</span>
                             </x-link_btn>
                             <x-link_btn href="">
-                                <x-svg-icon name="article" size="18" />
+                                <x-svg-icon name="article" size="20" />
                                 <span>Add Article</span>
                             </x-link_btn>
                         </div>
