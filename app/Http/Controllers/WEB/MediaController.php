@@ -32,7 +32,7 @@ class MediaController extends Controller
     {
         try {
             $query = Media::with('category');
-
+            
             // Search by title
             if ($request->filled('title')) {
                 $query->where('title', 'like', '%' . $request->input('title') . '%');
@@ -57,10 +57,8 @@ class MediaController extends Controller
             $media = $query->orderBy('created_at', 'desc')->get();
 
             // Get all users with role 'reviewer'
-            $reviewers = User::whereHas('roles', function ($q) {
-                $q->where('name', 'reviewer');
-            })->get();
-
+            $reviewers = User::where('role', 'reviewer')->get();
+            
             return view('pages.content.videos', compact('media', 'reviewers'));
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
@@ -97,14 +95,14 @@ class MediaController extends Controller
         if ($this->client->isAccessTokenExpired()) {
             return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
         } else {
-            return view('pages.content.add', compact('categories'));
+            return view('pages.content.add_video', compact('categories'));
         }
     }
 
     public function create()
     {
         $categories = Category::all();
-        return view('pages.content.add', compact('categories'));
+        return view('pages.content.add_video', compact('categories'));
     }
     public function store(Request $request)
     {

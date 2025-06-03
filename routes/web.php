@@ -23,7 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/content', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/upload', [MediaController::class, 'create']);
     Route::post('/content/upload', [MediaController::class, 'store']);
-    Route::get('/content/getall', [MediaController::class, 'getall']);
+    Route::get('/content/videos', [MediaController::class, 'getall'])->name('content.videos');
     Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 

@@ -38,7 +38,7 @@
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="{{ route('content.validation') }}" class="h6-semibold">
+          <a href="{{ route('content.videos') }}" class="h6-semibold">
             <x-svg-icon name="content" size="18" />
             <span class="sidebar-menu-text">Content</span>
           </a>
