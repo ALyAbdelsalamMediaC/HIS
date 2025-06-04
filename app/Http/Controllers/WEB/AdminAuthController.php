@@ -209,7 +209,7 @@ class AdminAuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('admin.login')->with('status', __($status));
+            return redirect()->route('login')->with('status', __($status));
         }
 
         return back()->withErrors(['email' => __($status)]);

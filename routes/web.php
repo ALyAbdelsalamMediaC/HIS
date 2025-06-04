@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('login');
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 
 Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
@@ -74,5 +74,5 @@ Route::post('password/reset', [AdminAuthController::class, 'resetPassword'])->na
 
 Route::post('/logout', function () {
     Auth::logout();
-    return redirect()->route('admin.login');
+    return redirect()->route('login');
 })->name('logout');

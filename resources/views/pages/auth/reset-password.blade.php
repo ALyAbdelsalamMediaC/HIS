@@ -66,7 +66,7 @@
                 </form>
 
                 <div class="mt-3 forget-pass">
-                    <a href="{{ route('admin.login') }}" class="h4-semibold">Back to Login</a>
+                    <a href="{{ route('login') }}" class="h4-semibold">Back to Login</a>
                 </div>
             </div>
         </div>

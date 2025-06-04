@@ -79,7 +79,7 @@
 
                     <p class="mt-4 text-center">
                         Already have an account?
-                        <a href="{{ route('admin.login') }}">Login here</a>
+                        <a href="{{ route('login') }}">Login here</a>
                     </p>
                 </div>
             </div>

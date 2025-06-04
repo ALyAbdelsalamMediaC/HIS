@@ -17,7 +17,7 @@ class RedirectIfSessionExpired
             }
 
             Session::put('url.intended', $request->url());
-            return redirect()->route('admin.login')->with('error', 'Session expired. Please log in again.');
+            return redirect()->route('login')->with('error', 'Session expired. Please log in again.');
         }
 
         return $next($request);
