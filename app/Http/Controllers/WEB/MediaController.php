@@ -31,7 +31,7 @@ class MediaController extends Controller
     public function getall(Request $request)
     {
         try {
-                        $categories = Category::all();
+            $categories = Category::all();
 
             $query = Media::with('category');
 
@@ -56,7 +56,7 @@ class MediaController extends Controller
             }
 
             // Order by latest
-            $media = $query->orderBy('created_at', 'desc')->paginate(10);
+            $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
