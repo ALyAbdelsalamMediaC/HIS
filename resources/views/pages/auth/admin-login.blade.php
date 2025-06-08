@@ -27,11 +27,11 @@
                 <form action="{{ url('/admin/login') }}" method="POST" novalidate>
                     @csrf
                     <div class="form-infield">
-                        <x-text_input type="text" id="username" name="username" 
-                            :value="old('username')" data-required="true" data-name="Username" />
-                        <x-text_label for="username">Username</x-text_label>
-                        <div id="username-error-container">
-                            <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                        <x-text_input type="text" id="login" name="login" 
+                            :value="old('login')" data-required="true" data-name="login" />
+                        <x-text_label for="login">login</x-text_label>
+                        <div id="login-error-container">
+                            <x-input-error :messages="$errors->get('login')" class="mt-2" />
                         </div>
                     </div>
 

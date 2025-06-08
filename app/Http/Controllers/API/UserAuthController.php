@@ -14,41 +14,49 @@ class UserAuthController extends Controller
 {
 
     public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'username' => 'required|string',
-        'password' => 'required|string',
-    ]);
-
-    if (!Auth::attempt($credentials)) {
-        Log::create([
-            'user_id' => null,
-            'type' => 'login_failed',
-            'description' => 'Failed login attempt for username: ' . $credentials['username'],
+    {
+        $credentials = $request->validate([
+            'login'    => 'required|string', // can be phone or email
+            'password' => 'required|string',
         ]);
+
+        // Determine if login is email or phone
+        $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        // Build credentials array for Auth::attempt
+        $authCredentials = [
+            $loginField => $credentials['login'],
+            'password'  => $credentials['password'],
+        ];
+
+        if (!Auth::attempt($authCredentials)) {
+            Log::create([
+                'user_id' => null,
+                'type' => 'login_failed',
+                'description' => 'Failed login attempt for ' . $loginField . ': ' . $credentials['login'],
+            ]);
+            return response()->json([
+                'error' => 'Invalid credentials',
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        Log::create([
+            'user_id' => $user->id,
+            'type' => 'login_success',
+            'description' => 'User logged in: ' . ($user->email ?? $user->phone),
+        ]);
+
+        // If you use Laravel Sanctum or Passport, generate token here
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'error' => 'Invalid credentials',
-        ], 401);
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
     }
-
-    $user = Auth::user();
-
-    Log::create([
-        'user_id' => $user->id,
-        'type' => 'login_success',
-        'description' => 'User logged in: ' . $user->username,
-    ]);
-
-    // If you use Laravel Sanctum or Passport, generate token here
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login successful',
-        'user' => $user,
-        
-        'token' => $token,
-    ], 200);
-}
 
     public function register(Request $request)
     {
