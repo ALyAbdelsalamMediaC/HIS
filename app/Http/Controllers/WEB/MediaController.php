@@ -60,7 +60,7 @@ class MediaController extends Controller
             }
 
             // Order by latest
-            $media = $query->orderBy('created_at', 'desc')->paginate(10);
+            $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();

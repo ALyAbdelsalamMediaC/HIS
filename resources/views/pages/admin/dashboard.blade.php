@@ -78,7 +78,7 @@
                                     </h4>
                                 </div>
 
-                                <h3 class="h5-semibold" style="margin-top:8px; line-height: 1.5em;">
+                                <h3 class="h5-semibold" style="line-height: 1.5em;">
                                     Lorem
                                     ipsum
                                     dolor
@@ -86,7 +86,7 @@
                                     amet
                                     consectetur.
                                 </h3>
-                                <p class="h6-ragular" style="color:#ADADAD;">15:24 . Updated 2 days ago</p>
+                                <p class="h6-ragular" style="color:#ADADAD;">15:24 . Uploaded 2 days ago</p>
                             </div>
 
                             <div class="dashboard-video-card-content-down">
