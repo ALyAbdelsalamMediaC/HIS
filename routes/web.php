@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\WEB\CommentController;
 use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\ArticleController;
@@ -71,6 +72,10 @@ Route::post('password/email', [AdminAuthController::class, 'sendResetLinkEmail']
 Route::get('password/reset/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
 Route::post('password/reset', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
 
+Route::get('login/google', [SocialAuthController::class, 'redirectToGoogle'])->name('social.google.redirect');
+Route::get('login/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+Route::get('login/apple', [SocialAuthController::class, 'redirectToApple'])->name('social.apple.redirect');
+Route::get('login/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
 
 Route::post('/logout', function () {
     Auth::logout();

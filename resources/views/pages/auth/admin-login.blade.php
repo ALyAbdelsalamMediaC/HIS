@@ -62,6 +62,20 @@
             </button>
             </form>
 
+            <div class="mt-4">
+            <p class="text-center text-sm text-gray-600">Or login with</p>
+            <div class="flex justify-center space-x-4 mt-2">
+                <a href="{{ route('social.google.redirect') }}"
+                   class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                    Google
+                </a>
+                <a href="{{ route('social.apple.redirect') }}"
+                   class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800">
+                    Apple
+                </a>
+            </div>
+        </div>
+
             <!-- <div class="mt-3 text-center">
                 <span>Don't have an account?</span>
                 <a href="{{ route('admin.register') }}">Register</a>

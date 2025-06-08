@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('role')->default('admin');
             $table->rememberToken();
             $table->string('password');
+            $table->string('google_id')->nullable();
+            $table->string('apple_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
