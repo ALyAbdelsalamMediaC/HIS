@@ -42,10 +42,6 @@
                 <input type="text" name="device_id" id="device_id" class="form-control" value="{{ old('device_id', $user->device_id) }}">
             </div>
 
-            <div class="form-group">
-                <label for="is_reviewer">Is Reviewer</label>
-                <input type="checkbox" name="is_reviewer" id="is_reviewer" value="1" {{ old('is_reviewer', $user->is_reviewer) ? 'checked' : '' }}>
-            </div>
 
             <div class="form-group">
                 <label for="role">Role</label>
