@@ -25,10 +25,10 @@ Route::middleware('auth')->group(function () {
     
     Route::resource('categories', CategoryController::class);
 
+    Route::get('/content/videos', [MediaController::class, 'getall'])->name('content.videos');
     Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/videos/add', [MediaController::class, 'create']);
     Route::post('/content/videos/add', [MediaController::class, 'store'])->name('content.store');
-    Route::get('/content/videos', [MediaController::class, 'getall'])->name('content.videos');
     Route::get('/content/getone/{id}', [MediaController::class, 'getone']);
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 

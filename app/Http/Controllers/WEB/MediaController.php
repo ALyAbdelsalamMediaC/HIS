@@ -31,8 +31,12 @@ class MediaController extends Controller
     public function getall(Request $request)
     {
         try {
-                        $categories = Category::all();
+            $categories = Category::all();
 
+            if ($this->client->isAccessTokenExpired()) {
+                return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+            } else {
+               
             $query = Media::with('category');
 
             // Search by title
@@ -62,6 +66,7 @@ class MediaController extends Controller
             $reviewers = User::where('role', 'reviewer')->get();
 
             return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
+        }
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch media.');

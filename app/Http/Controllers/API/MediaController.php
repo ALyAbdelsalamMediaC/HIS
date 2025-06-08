@@ -30,6 +30,7 @@ class MediaController extends Controller
             // Validate input
             $validated = $request->validate([
                 'category_id' => 'required|exists:categories,id',
+                'user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'required|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
@@ -67,6 +68,7 @@ class MediaController extends Controller
 
             // Save to database
             $media = Media::create([
+                'user_id' => $validated['category_id'],
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
