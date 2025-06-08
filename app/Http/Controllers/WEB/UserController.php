@@ -83,7 +83,6 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'device_id' => 'nullable|string|max:255',
-            'is_reviewer' => 'nullable|boolean',
             'role' => 'required|in:admin,reviewer,user',
         ]);
 

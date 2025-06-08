@@ -23,66 +23,65 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'username' => 'required|string',
+            'login' => 'required|string', // can be email or phone
             'password' => [
                 'required',
-                // 'string',
-                // 'min:6',
-                // 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/'
             ],
         ]);
 
         try {
-            // First find user by email
-            $user = User::where('username', $credentials['username'])->first();
+            // Determine if login is email or phone
+            $loginInput = $credentials['login'];
+            if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+                $user = User::where('email', $loginInput)->first();
+                $loginField = 'email';
+            } else {
+                $user = User::where('phone', $loginInput)->first();
+                $loginField = 'phone';
+            }
 
             if (!$user) {
-                // Log failed attempt (no such user)
                 Log::create([
                     'user_id' => null,
                     'type' => 'login_error',
-                    'description' => "Login failed: no user with username {$credentials['username']}",
+                    'description' => "Login failed: no user with {$loginField} {$loginInput}",
                 ]);
-                return back()->withErrors(['Username' => 'Username does not exist.'])->onlyInput('username');
+                return back()->withErrors(['login' => ucfirst($loginField) . ' does not exist.'])->onlyInput('login');
             }
 
             if (!($user->role === 'admin' || $user->role === 'reviewer')) {
-                // Log failed attempt (not admin)
                 Log::create([
                     'user_id' => $user->id,
                     'type' => 'login_error',
-                    'description' => "Login failed: user is not admin (Username: {$user->username})",
+                    'description' => "Login failed: user is not admin (Login: {$loginInput})",
                 ]);
-                return back()->withErrors(['username' => 'Access denied. Admins only.'])->onlyInput('username');
+                return back()->withErrors(['login' => 'Access denied. Admins only.'])->onlyInput('login');
             }
 
             // Attempt login
-            if (Auth::attempt($credentials)) {
+            if (Auth::attempt([$loginField => $loginInput, 'password' => $credentials['password']])) {
                 $request->session()->regenerate();
 
-                // Log success
                 Log::create([
                     'user_id' => $user->id,
                     'type' => 'login_success',
-                    'description' => "Admin login successful for {$user->username}",
+                    'description' => "Admin login successful for {$loginInput}",
                 ]);
 
                 return redirect()->intended(route('pages.admin.dashboard'));
             } else {
-                // Log failed attempt (wrong password)
                 Log::create([
                     'user_id' => $user->id,
                     'type' => 'login_error',
-                    'description' => "Login failed: wrong password for {$user->username}",
+                    'description' => "Login failed: wrong password for {$loginInput}",
                 ]);
 
-                return back()->withErrors(['username' => 'Wrong password.'])->onlyInput('username');
+                return back()->withErrors(['login' => 'Wrong password.'])->onlyInput('login');
             }
         } catch (\Exception $e) {
-            // Log exception error (optional)
             LaravelLog::error("Login error: " . $e->getMessage());
 
-            return back()->withErrors(['username' => 'Something went wrong. Please try again later.'])->onlyInput('username');
+            return back()->withErrors(['login' => 'Something went wrong. Please try again later.'])->onlyInput('login');
         }
     }
 
