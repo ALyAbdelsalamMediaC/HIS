@@ -32,6 +32,10 @@
     <x-toast :messages="$errors->all()" type="danger" />
   @endif
 
+  @if (session('error'))
+    <x-toast :messages="session('error')" type="danger" />
+  @endif
+
   <div class="auth-container">
     @yield('content')
   </div>
