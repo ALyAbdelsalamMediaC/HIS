@@ -10,15 +10,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
-use App\Services\GoogleDriveService; // Make sure this service is built
+use getID3;
+
 class MediaController extends Controller
 {
     public function show()
     {
         try {
-            $categories = Category::all();
+            $categories = Category::with('media')->get();
 
-            return response()->json($categories, 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Media categories retrieved successfully.',
+                'data' => $categories
+            ], 200);
         } catch (Exception $e) {
             LaravelLog::error('Media retrieval error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
@@ -26,6 +31,11 @@ class MediaController extends Controller
     }
     public function store(Request $request)
     {
+
+        // Get the original file name
+        $originalName = $request->file('file')->getClientOriginalName();
+        var_dump($originalName);
+
         try {
             // Validate input
             $validated = $request->validate([
@@ -40,25 +50,16 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-            $video = null;
-            if ($request->hasFile('file')) {
-                $driveService = new GoogleDriveService();
-                if ($request->file('file')->isValid()) {
-                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = $url;
-                }
+            $getID3 = new getID3();
+            $duration = null;
+
+            // Get video duration
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $videoPath = $request->file('file')->getRealPath();
+                $fileInfo = $getID3->analyze($videoPath);
+                $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
             }
 
-            $pdf = null;
-            if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
-                if ($request->file('pdf')->isValid()) {
-                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                    $pdf = $url;
-                }
-            }
 
             // Store thumbnail if exists
             $thumbnailPath = null;
@@ -66,18 +67,31 @@ class MediaController extends Controller
                 $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
             }
 
+            $videoPath = null;
+            if ($request->hasFile('file')) {
+                $videoPath = $request->file('file')->store('Videos', 'public');
+            }
+
+            $pdfPath = null;
+            if ($request->hasFile('pdf')) {
+                $pdfPath = $request->file('pdf')->store('Pdfs', 'public');
+            }
+
+
             // Save to database
             $media = Media::create([
-                'user_id' => $validated['category_id'],
+                'user_id' => $validated['user_id'],
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'file_path' => $video,
-                'pdf' => $pdf,
+                'file_path' => $videoPath,
+                'pdf' => $pdfPath,
                 'thumbnail_path' => $thumbnailPath,
                 'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
+                'duration' => $duration, // Save duration
+
             ]);
 
             // Log success
@@ -88,7 +102,7 @@ class MediaController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Media uploaded successfully.',
+                'message' => 'Media uploaded successfully.'. ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
                 'media' => $media
             ], 201);
         } catch (Exception $e) {

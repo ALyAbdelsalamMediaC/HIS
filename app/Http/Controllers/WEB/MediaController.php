@@ -16,6 +16,7 @@ use Exception;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\GoogleDriveService; // Make sure this service is built
+use getID3;
 
 class MediaController extends Controller
 {
@@ -64,6 +65,7 @@ class MediaController extends Controller
 
                 // Get all users with role 'reviewer'
                 $reviewers = User::where('role', 'reviewer')->get();
+
                 return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
             }
         } catch (Exception $e) {
@@ -125,6 +127,16 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
+            $getID3 = new getID3();
+            $duration = null;
+
+            // Get video duration
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $videoPath = $request->file('file')->getRealPath();
+                $fileInfo = $getID3->analyze($videoPath);
+                $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+            }
+
             $video = null;
             if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveService();
@@ -163,6 +175,7 @@ class MediaController extends Controller
                 'thumbnail_path' => $thumbnailPath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
+                'duration' => $duration, // Save duration
             ]);
             // Log success
             Log::create([
@@ -171,10 +184,7 @@ class MediaController extends Controller
                 'description' => 'Uploaded media: ' . $media->title,
             ]);
 
-            return response()->json([
-                'message' => 'Media uploaded successfully.',
-                'media' => $media
-            ], 201);
+            return redirect()->route('content.videos')->with('success', 'Media uploaded successfully.');
         } catch (Exception $e) {
             LaravelLog::error('Media upload error: ' . $e->getMessage());
 
@@ -183,11 +193,8 @@ class MediaController extends Controller
                 'type' => 'media_upload_error',
                 'description' => $e->getMessage(),
             ]);
+            return back()->withInput()->with('error', 'Media upload failed. ' . $e->getMessage());
 
-            return response()->json([
-                'error' => 'Media upload failed.',
-                'message' => $e->getMessage()
-            ], 500);
         }
     }
 }
