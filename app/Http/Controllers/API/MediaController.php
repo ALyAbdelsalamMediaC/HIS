@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use getID3;
+
 class MediaController extends Controller
 {
     public function show()
@@ -29,6 +31,11 @@ class MediaController extends Controller
     }
     public function store(Request $request)
     {
+
+        // Get the original file name
+        $originalName = $request->file('file')->getClientOriginalName();
+        var_dump($originalName);
+
         try {
             // Validate input
             $validated = $request->validate([
@@ -43,7 +50,16 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-           
+            $getID3 = new getID3();
+            $duration = null;
+
+            // Get video duration
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $videoPath = $request->file('file')->getRealPath();
+                $fileInfo = $getID3->analyze($videoPath);
+                $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+            }
+
 
             // Store thumbnail if exists
             $thumbnailPath = null;
@@ -51,12 +67,12 @@ class MediaController extends Controller
                 $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
             }
 
-                $videoPath = null;
+            $videoPath = null;
             if ($request->hasFile('file')) {
                 $videoPath = $request->file('file')->store('Videos', 'public');
             }
 
-                $pdfPath = null;
+            $pdfPath = null;
             if ($request->hasFile('pdf')) {
                 $pdfPath = $request->file('pdf')->store('Pdfs', 'public');
             }
@@ -74,6 +90,8 @@ class MediaController extends Controller
                 'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
+                'duration' => $duration, // Save duration
+
             ]);
 
             // Log success
@@ -84,7 +102,7 @@ class MediaController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Media uploaded successfully.',
+                'message' => 'Media uploaded successfully.'. ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
                 'media' => $media
             ], 201);
         } catch (Exception $e) {
