@@ -30,6 +30,11 @@ class GoogleDriveService
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
+
+            if ($this->client->isAccessTokenExpired()) {
+            header('Location: http://localhost:8000/get-google-token.php');
+            exit;
+        }
             $accessToken = $this->client->fetchAccessTokenWithRefreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
             if (isset($accessToken['error'])) {
                 throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
