@@ -15,9 +15,13 @@ class MediaController extends Controller
     public function show()
     {
         try {
-            $categories = Category::all();
+            $categories = Category::with('media')->get();
 
-            return response()->json($categories, 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Media categories retrieved successfully.',
+                'data' => $categories
+            ], 200);
         } catch (Exception $e) {
             LaravelLog::error('Media retrieval error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
