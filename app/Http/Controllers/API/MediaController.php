@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
-use App\Services\GoogleDriveService; // Make sure this service is built
 class MediaController extends Controller
 {
     public function show()
@@ -40,25 +39,7 @@ class MediaController extends Controller
                 'is_recommended' => 'nullable|boolean',
             ]);
 
-            $video = null;
-            if ($request->hasFile('file')) {
-                $driveService = new GoogleDriveService();
-                if ($request->file('file')->isValid()) {
-                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = $url;
-                }
-            }
-
-            $pdf = null;
-            if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
-                if ($request->file('pdf')->isValid()) {
-                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                    $pdf = $url;
-                }
-            }
+           
 
             // Store thumbnail if exists
             $thumbnailPath = null;
@@ -66,14 +47,25 @@ class MediaController extends Controller
                 $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
             }
 
+                $videoPath = null;
+            if ($request->hasFile('file')) {
+                $videoPath = $request->file('file')->store('Videos', 'public');
+            }
+
+                $pdfPath = null;
+            if ($request->hasFile('pdf')) {
+                $pdfPath = $request->file('pdf')->store('Pdfs', 'public');
+            }
+
+
             // Save to database
             $media = Media::create([
                 'user_id' => $validated['category_id'],
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'file_path' => $video,
-                'pdf' => $pdf,
+                'file_path' => $videoPath,
+                'pdf' => $pdfPath,
                 'thumbnail_path' => $thumbnailPath,
                 'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
