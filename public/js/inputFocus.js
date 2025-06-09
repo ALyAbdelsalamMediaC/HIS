@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Get all form inputs
-    const formInputs = document.querySelectorAll(".input-form-inner");
+    const formInputs = document.querySelectorAll(".input-form-inner-login");
 
     formInputs.forEach(function (input) {
         // Check initial state (for cases with old() values)

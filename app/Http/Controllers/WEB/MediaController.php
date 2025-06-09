@@ -36,37 +36,36 @@ class MediaController extends Controller
             if ($this->client->isAccessTokenExpired()) {
                 return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
             } else {
-               
-            $query = Media::with('category');
 
-            // Search by title
-            if ($request->filled('title')) {
-                $query->where('title', 'like', '%' . $request->input('title') . '%');
+                $query = Media::with('category');
+
+                // Search by title
+                if ($request->filled('title')) {
+                    $query->where('title', 'like', '%' . $request->input('title') . '%');
+                }
+
+                // Filter by category name
+                if ($request->filled('category')) {
+                    $query->whereHas('category', function ($q) use ($request) {
+                        $q->where('name', $request->input('category'));
+                    });
+                }
+
+                // Filter by date (created_at)
+                if ($request->filled('date_from')) {
+                    $query->whereDate('created_at', '>=', $request->input('date_from'));
+                }
+                if ($request->filled('date_to')) {
+                    $query->whereDate('created_at', '<=', $request->input('date_to'));
+                }
+
+                // Order by latest
+                $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+
+                // Get all users with role 'reviewer'
+                $reviewers = User::where('role', 'reviewer')->get();
+                return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
             }
-
-            // Filter by category name
-            if ($request->filled('category')) {
-                $query->whereHas('category', function ($q) use ($request) {
-                    $q->where('name', $request->input('category'));
-                });
-            }
-
-            // Filter by date (created_at)
-            if ($request->filled('date_from')) {
-                $query->whereDate('created_at', '>=', $request->input('date_from'));
-            }
-            if ($request->filled('date_to')) {
-                $query->whereDate('created_at', '<=', $request->input('date_to'));
-            }
-
-            // Order by latest
-            $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
-
-            // Get all users with role 'reviewer'
-            $reviewers = User::where('role', 'reviewer')->get();
-
-            return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
-        }
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch media.');

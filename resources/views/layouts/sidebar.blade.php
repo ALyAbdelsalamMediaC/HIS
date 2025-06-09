@@ -14,7 +14,7 @@
 
   <div class="head">
     <a href="{{ route('pages.admin.dashboard') }}" class="side-logo">
-      <img src="{{ asset('images/logo/logo-dashboard.png') }}" alt="logo">
+      <img src="{{ asset('images/logo/logo-dashboard.svg') }}" alt="logo">
     </a>
   </div>
 

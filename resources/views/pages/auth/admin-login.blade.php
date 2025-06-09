@@ -10,7 +10,7 @@
         {{-- left --}}
         <div class="log-form-side">
             <div class="login-logo">
-                <img src="{{ asset('images/logo/his-login.png') }}" alt="HIS Logo">
+                <img src="{{ asset('images/logo/his-login.svg') }}" alt="HIS Logo">
             </div>
 
             <div class="login-form-con">
@@ -22,20 +22,20 @@
 
                 <form action="{{ url('/admin/login') }}" method="POST" novalidate>
                     @csrf
-                    <div class="form-infield">
+                    <div class="form-infield-focus">
                         <x-text_input type="text" id="login" name="login" 
-                            :value="old('login')" data-required="true" data-name="login" />
-                        <x-text_label for="login">login</x-text_label>
+                            :value="old('login')" data-required="true" data-name="login" class="input-form-inner-login" />
+                        <x-text_label for="login" class="label-form-inner-login">Email / Phone</x-text_label>
                         <div id="login-error-container">
                             <x-input-error :messages="$errors->get('login')" class="mt-2" />
                         </div>
                     </div>
 
-                    <div class="form-infield">
+                    <div class="form-infield-focus">
                         <div class="input-icon">
                             <x-text_input type="password" id="password" name="password"
-                                :value="old('password')" data-required="true" data-name="password" />
-                        <x-text_label for="password">Password</x-text_label>
+                                :value="old('password')" data-required="true" data-name="password" class="input-form-inner-login" />
+                        <x-text_label for="password" class="label-form-inner-login">Password</x-text_label>
 
                             <div class="input-icon-eye" id="togglePassword">
                                 <x-svg-icon name="eye" size="20" color="#000" class="eye-icon eye-show d-none" />
@@ -48,7 +48,7 @@
                     </div>
             </div>
 
-            <div class="forget-pass ">
+            <div class="forget-pass">
                 <a href="{{ route('admin.password.request') }}" class="h4-semibold">Forgot Password?</a>
             </div>
 
@@ -59,14 +59,14 @@
             </form>
 
             <div class="mt-4">
-            <p class="text-center text-sm text-gray-600">Or login with</p>
-            <div class="flex justify-center space-x-4 mt-2">
+            <p class="text-sm text-center text-gray-600">Or login with</p>
+            <div class="flex justify-center mt-2 space-x-4">
                 <a href="{{ route('social.google.redirect') }}"
-                   class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                   class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700">
                     Google
                 </a>
                 <a href="{{ route('social.apple.redirect') }}"
-                   class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800">
+                   class="px-4 py-2 text-white bg-black rounded-md hover:bg-gray-800">
                     Apple
                 </a>
             </div>

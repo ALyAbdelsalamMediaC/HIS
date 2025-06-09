@@ -42,63 +42,90 @@
                             value="{{ request('search') }}" class="w-100" />
                     </div>
 
+                    <div class="gap-2 d-flex align-items-center">
+                        @php
+                            $filters = [
+                                'category' => [
+                                    'placeholder' => '-- Select Category --',
+                                    'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
+                                ],
+                                'status' => [
+                                    'placeholder' => '-- Select status --',
+                                    'options' => [
+                                        'published' => 'Published',
+                                        'pending' => 'Pending',
+                                        'declined' => 'Declined'
+                                    ]
+                                ],
+                            ];
+                        @endphp
 
+                        @foreach($filters as $name => $data)
+                            <x-filter_select name="{{ $name }}" class="form-control-select" :options="$data['options']"
+                                placeholder="{{ $data['placeholder'] }}" :selected="request($name)">
+                            </x-filter_select>
+                        @endforeach
+
+                        <x-button id="reset-filters">
+                            <x-svg-icon name="refresh" size="16" /> Reset
+                        </x-button>
+                    </div>
                 </div>
             </div>
 
             <div class="content-container-cards">
                 @forelse ($media as $item)
-                    <div class="content-container-card">
-                        <div class="content-container-card-img">
-                            <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
+                        <div class="content-container-card">
+                            <div class="content-container-card-img">
+                                <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
 
-                            <span>Video</span>
-                        </div>
-
-                        <div class="dashboard-video-card-content-content">
-                            <div class="dashboard-video-card-content-content-top">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h4 class="h6-semibold" style="color:#35758C;">{{ $item->category->name }}</h4>
-                                    <h4 class="h6-ragular"
-                                        style="color:#35758C; padding: 8px; border-radius: 12px; background: #F1F9FA;">
-                                        {{ ucfirst($item->status) }}
-                                    </h4>
-                                </div>
-
-                                <h3 class="h5-semibold" style="margin-top:8px; line-height: 1.5em;">
-                                    {{ $item->title }}
-                                </h3>
-                                <p class="h6-ragular" style="color:#ADADAD;">15:24 . Uploaded
-                                    {{ $item->created_at->diffForHumans() }}
-                                </p>
+                                <span>Video</span>
                             </div>
 
-                            <div class="dashboard-video-card-content-content-down">
-                                <div class="gap-2 d-flex align-items-center">
-                                    <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                    <x-svg-icon name="trash" size="12" color="Black" />
-                                    <x-svg-icon name="three-dots" size="12" color="Black" />
+                            <div class="dashboard-video-card-content-content">
+                                <div class="dashboard-video-card-content-content-top">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="h6-semibold" style="color:#35758C;">{{ $item->category->name }}</h4>
+                                        <h4 class="h6-ragular"
+                                            style="color:#35758C; padding: 8px; border-radius: 12px; background: #F1F9FA;">
+                                            {{ ucfirst($item->status) }}
+                                        </h4>
+                                    </div>
+
+                                    <h3 class="h5-semibold" style="margin-top:8px; line-height: 1.5em;">
+                                        {{ $item->title }}
+                                    </h3>
+                                    <p class="h6-ragular" style="color:#ADADAD;">15:24 . Uploaded
+                                        {{ $item->created_at->diffForHumans() }}
+                                    </p>
                                 </div>
 
-                                <div class="gap-3 d-flex align-items-center">
-                                    <div>
-                                        <x-svg-icon name="eye" size="12" color="Black" />
-                                        <span class="h6-ragular">{{ $item->views}}</span>
+                                <div class="dashboard-video-card-content-content-down">
+                                    <div class="gap-2 d-flex align-items-center">
+                                        <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                        <x-svg-icon name="trash" size="12" color="Black" />
+                                        <x-svg-icon name="three-dots" size="12" color="Black" />
                                     </div>
-                                    <div>
-                                        <x-svg-icon name="message" size="12" color="Black" />
-                                        <span class="h6-ragular">{{ $item->comments }}</span>
+
+                                    <div class="gap-3 d-flex align-items-center">
+                                        <div>
+                                            <x-svg-icon name="eye" size="12" color="Black" />
+                                            <span class="h6-ragular">{{ $item->views}}</span>
+                                        </div>
+                                        <div>
+                                            <x-svg-icon name="message" size="12" color="Black" />
+                                            <span class="h6-ragular">{{ $item->comments }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="py-5 text-center">
-                        <p class="h5-ragular" style="color:#ADADAD;">No videos found</p>
-                    </div>
-                @endforelse
-            </div>
+                <div class="py-5 text-center" style="grid-column: 1 / -1;">
+                    <p class="h5-ragular" style="color:#ADADAD;">No videos found</p>
+                </div>
+            @endforelse
 
             <div class="mt-2 d-flex justify-content-between align-items-center">
                 <!-- Table Info and Pagination -->

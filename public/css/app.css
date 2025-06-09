@@ -98,7 +98,7 @@ body {
 .h5-semibold,
 .h6-semibold {
     font-weight: 600;
-    line-height: 48px;
+    line-height: normal;
 }
 .h1-semibold {
     font-size: 2.5rem;
@@ -123,7 +123,7 @@ body {
 .h4-ragular,
 .h5-ragular {
     font-weight: 400;
-    line-height: 48px;
+    line-height: normal;
 }
 
 .h2-ragular {
@@ -243,8 +243,9 @@ body {
 }
 
 .login-logo img {
-    width: 111px;
-    height: 53px;
+    width: 98.196px;
+    height: 70.862px;
+    aspect-ratio: 98.2/70.86;
 }
 
 .login-form-con {
@@ -286,18 +287,17 @@ body {
     Global Forms & Inputs Styles
    ======================================================== */
 
-.form-infield {
+.form-infield-focus {
     position: relative;
     margin-top: 24px;
     width: 100%;
 }
 
-.form-infield .label-form-inner {
+.form-infield-focus .label-form-inner-login {
     position: absolute;
     top: 37px; /* Start from the middle */
     font-size: 20px;
     font-weight: 400;
-    line-height: 30px;
     color: var(--text-gray-color);
     pointer-events: none;
     background-color: transparent;
@@ -306,11 +306,10 @@ body {
     transition: all 0.3s ease;
 }
 
-.form-infield .input-form-inner {
+.form-infield-focus .input-form-inner-login {
     padding: 22px;
     font-size: 20px;
     font-weight: 400;
-    line-height: 30px;
     color: #232323;
     border-radius: var(--main-border-radius-md);
     border: solid 1.822px var(--border-color);
@@ -318,12 +317,12 @@ body {
 }
 
 /* When input is focused */
-.form-infield .input-form-inner:focus {
+.form-infield-focus .input-form-inner-login:focus {
     outline: none;
     border: solid 1.822px var(--primary-color);
 }
 
-.form-infield .input-form-inner:focus ~ .label-form-inner {
+.form-infield-focus .input-form-inner-login:focus ~ .label-form-inner-login {
     top: -15px; /* Move to the top */
     transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
     padding: 0px 5px;
@@ -343,7 +342,9 @@ body {
 }
 
 /* When input has content (using a class that we'll add with JavaScript) */
-.form-infield .input-form-inner.has-content ~ .label-form-inner {
+.form-infield-focus
+    .input-form-inner-login.has-content
+    ~ .label-form-inner-login {
     top: -15px; /* Move to the top */
     transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
     padding: 0px 5px;
@@ -351,7 +352,13 @@ body {
     font-weight: 600;
     color: #404e68;
     border: none;
-    background-color: #fff;
+    background: linear-gradient(
+        to bottom,
+        #f7f7f7 0%,
+        #f7f7f7 50%,
+        #ffffff 50%,
+        #ffffff 100%
+    );
     border-radius: 100px;
 }
 
@@ -409,24 +416,12 @@ body {
 }
 
 .select-form-inner {
-    width: 100%;
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    outline: none;
-    border-radius: var(--main-border-radius-sm);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--text-color);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.select-form-inner {
     appearance: none; /* Remove default browser appearance */
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="9" viewBox="0 0 14 9" fill="none"><path d="M1.00005 1.5C1.00005 1.5 5.41895 7.49999 7.00005 7.5C8.58115 7.50001 13 1.5 13 1.5" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'%3E%3Cpath d='M1.00005 1.5C1.00005 1.5 5.41895 7.49999 7.00005 7.5C8.58115 7.50001 13 1.5 13 1.5' stroke='%2335758C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
     padding: 10px 14px;
     cursor: pointer;
 }
@@ -457,9 +452,136 @@ body {
     pointer-events: none; /* Allows clicks to pass through to the input */
 }
 
+.form-infield {
+    position: relative;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.label-form-inner {
+    color: #171712;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.input-form-inner,
+.select-form-inner {
+    width: 100%;
+    border-radius: var(--main-border-radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+    outline: none;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-color);
+    padding: 18px 24px;
+}
+
+.input-form-inner:focus,
+.select-form-inner:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.fixed-textarea {
+    width: 100%; /* Set your desired fixed width */
+    max-width: 100%; /* Ensure it doesn't exceed container width on smaller screens */
+    height: 150px; /* Set a fixed height if needed */
+    resize: none; /* Prevent users from resizing the textarea */
+    overflow: auto; /* Enable scrollbars when content overflows */
+}
+
+/* ========================================================
+    Select 2 Styles
+   ======================================================== */
+
+.select2-container .select2-selection--single {
+    width: 100%;
+    height: auto;
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--main-border-radius-md);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--primary-color);
+    padding: 10px 24px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__rendered {
+    color: var(--primary-color);
+    padding-left: 0;
+}
+
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__arrow {
+    height: 100%;
+    top: 0;
+    right: 10px;
+}
+
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__arrow
+    b {
+    display: none;
+}
+
+.select2-container--default .select2-selection--single {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'%3E%3Cpath d='M1.00005 1.5C1.00005 1.5 5.41895 7.49999 7.00005 7.5C8.58115 7.50001 13 1.5 13 1.5' stroke='%2335758C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Focus state */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+    outline: none;
+}
+
+/* Dropdown styling */
+.select2-dropdown {
+    border-color: var(--border-color);
+    border-radius: var(--main-border-radius-sm);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.select2-container--default
+    .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Placeholder color */
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__placeholder {
+    color: var(--medium-grey);
+}
+
 /* ========================================================
     Buttons Styles
    ======================================================== */
+.arrow-back-btn {
+    border: 1.5px solid var(--primary-color);
+    width: 48px;
+    height: 48px;
+    line-height: 45px;
+    text-align: center;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.arrow-back-btn:hover {
+    background-color: #98beca21;
+}
 
 .btn-nothing {
     background-color: transparent;
@@ -484,7 +606,7 @@ body {
 .sidebar {
     position: fixed;
     left: 0;
-    width: 25235;
+    width: 265px;
     height: 100dvh;
     display: flex;
     justify-content: space-between;
@@ -493,8 +615,8 @@ body {
     background-color: var(--white-color);
     padding-top: 38px;
     padding-bottom: 38px;
-    padding-left: 24px;
-    padding-right: 19px;
+    padding-left: 20px;
+    padding-right: 18px;
     border-radius: 0px 12px 12px 0px;
     transition-property: width;
     transition: all 0.3s;
@@ -535,12 +657,17 @@ body {
 }
 
 .side-logo img {
-    width: 92px;
-    height: 44px;
+    width: 140px;
+    height: 100px;
 }
 
 .sidebar-menu {
     margin-right: 5px;
+}
+
+.sidebar-menu-text {
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .sidebar-menu ul li {
@@ -552,7 +679,7 @@ body {
     align-items: center;
     gap: 16px;
     color: var(--primary-color);
-    padding: 4px 16px;
+    padding: 18px 20px;
     border-radius: var(--main-border-radius-lg);
     transition: all 0.3s;
 }
@@ -575,6 +702,7 @@ body {
 
 .sidebar-bottom {
     width: 100%;
+    margin-top: 20px;
 }
 
 .sidebar-bottom button {
@@ -582,7 +710,7 @@ body {
     display: flex;
     justify-content: start;
     color: var(--primary-color);
-    padding: 4px 16px;
+    padding: 18px 20px;
     border-radius: var(--main-border-radius-lg);
     transition: all 0.3s;
 }
@@ -645,7 +773,7 @@ body {
 */
 
 .main-content {
-    margin-left: 235px;
+    margin-left: 248px;
     transition-property: margin-left;
     transition: all 0.3s;
 }
@@ -669,7 +797,6 @@ body {
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-    line-height: 150%;
     color: var(--text-gray-color);
     border: none;
     outline: none;
@@ -731,7 +858,6 @@ body {
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-    line-height: 150%;
     border-radius: 12px;
     border: 1px solid #ededed;
     background: #fff;
@@ -795,13 +921,6 @@ body {
 }
 .card-icon4 {
     background: #ffecec;
-}
-
-.card-icon-text h4 {
-    line-height: 25px;
-}
-.card-icon-text h3 {
-    line-height: 25px;
 }
 
 .dashboard-contetn-container {
@@ -895,7 +1014,6 @@ body {
     overflow: hidden; /* Ensures border-radius is applied correctly */
     font-size: 13px;
     font-weight: 400;
-    line-height: 150%;
 }
 
 .custom-table thead th {
@@ -1003,7 +1121,7 @@ body {
     padding: 12px 0;
     margin: 12px 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
@@ -1107,6 +1225,75 @@ body {
 }
 
 /* ========================================================
+    Upload Box
+   ======================================================== */
+
+.uploadBox {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 12px;
+    border: 2px dashed var(--primary-color);
+    background: #f1f9fa;
+    padding: 62px 0px;
+    text-align: center;
+}
+
+.uploadBox:hover {
+    border-color: #2a5f73;
+    background-color: #e9ecef;
+}
+
+.uploadBox.dragging {
+    border-color: #28a745;
+    background-color: #d4edda;
+    transform: scale(1.02);
+}
+
+.uploadBox.uploading {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.upload-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.uploadBox.dragging .upload-icon {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
 
@@ -1158,14 +1345,13 @@ body {
     }
     .login-form-head p {
         font-size: 18px;
-        line-height: 30px;
     }
 
-    .form-infield .label-form-inner {
+    .form-infield-focus .label-form-inner-login {
         font-size: 18px;
     }
 
-    .form-infield .input-form-inner {
+    .form-infield-focus .input-form-inner-login {
         padding: 18px;
     }
 
@@ -1228,7 +1414,7 @@ body {
 /* Tablet and larger screens */
 @media (min-width: 769px) {
     .main-content {
-        margin-left: 235px;
+        margin-left: 248px;
     }
 
     .sidebar.active + .main-content {
