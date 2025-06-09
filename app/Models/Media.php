@@ -10,7 +10,7 @@ class Media extends Model
   use HasFactory;
 
     protected $fillable = [
-        'category_id','user_id', 'title','views', 'description','pdf',
+        'category_id','user_id', 'title','views', 'description','pdf','status',
         'file_path', 'thumbnail_path', 'is_featured', 'is_recommended'
     ];
 

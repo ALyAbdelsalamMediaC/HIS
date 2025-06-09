@@ -60,7 +60,7 @@ class MediaController extends Controller
 
             // Save to database
             $media = Media::create([
-                'user_id' => $validated['category_id'],
+                'user_id' => $validated['user_id'],
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,

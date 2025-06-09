@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('file_path');
             $table->string('pdf')->nullable();
             $table->string('thumbnail_path')->nullable();
-            $table->string('status')->default('approved');
+            $table->string('status');
             $table->boolean('is_featured')->default(false);
             $table->boolean('is_recommended')->default(false);
             $table->timestamps();
