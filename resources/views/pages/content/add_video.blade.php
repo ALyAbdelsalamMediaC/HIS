@@ -23,9 +23,9 @@
                 <x-text_label for="thumbnail" :required="true">Upload Thumbnail</x-text_label>
                 <div style="position: relative;">
                     <x-text_input type="file" id="thumbnail" name="thumbnail"
-                        placeholder="Choose an thumbnail from your gallery" data-required="true" data-name="Upload Image"
-                        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-                        onchange=" updateFileName(this)" />
+                        placeholder="Choose an thumbnail from your gallery" data-required="true"
+                        data-name="Upload Thumbnail" accept="image/jpeg,image/jpg,image/png"
+                        style="color: transparent; cursor: pointer;" onchange=" updateFileName(this)" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
                         <x-button type="button" onclick="document.getElementById('thumbnail').click()">Choose
                             file</x-button>
@@ -86,15 +86,15 @@
                 <x-textarea name="description" id="description" placeholder="Enter Description" rows="3" />
             </div>
 
-            <!-- <div class="mb-2 form-check">
-                                                                                                                                                <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
-                                                                                                                                                <label class="form-check-label" for="is_featured">Featured</label>
-                                                                                                                                            </div>
+            <div class="mb-2 form-check">
+                <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
+                <label class="form-check-label" for="is_featured">Featured</label>
+            </div>
 
-                                                                                                                                            <div class="mb-3 form-check">
-                                                                                                                                                <input class="form-check-input" type="checkbox" name="is_recommended" value="1" id="is_recommended">
-                                                                                                                                                <label class="form-check-label" for="is_recommended">Recommended</label>
-                                                                                                                                            </div> -->
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="checkbox" name="is_recommended" value="1" id="is_recommended">
+                <label class="form-check-label" for="is_recommended">Recommended</label>
+            </div>
 
             <div class="mt-3 d-flex justify-content-end">
                 <x-button type="submit">Upload Video</x-button>
@@ -151,28 +151,28 @@
 
             const style = document.createElement('style');
             style.textContent = `
-                                                                                                                                                                    input[type="file"]::-webkit-file-upload-button,
-                                                                                                                                                                    input[type="file"]::file-selector-button {
-                                                                                                                                                                        display: none;
-                                                                                                                                                                    }
-                                                                                                                                                                    input[type="file"] {
-                                                                                                                                                                        color: transparent;
-                                                                                                                                                                    }
-                                                                                                                                                                    input[type="file"]::before {
-                                                                                                                                                                        content: attr(data-placeholder);
-                                                                                                                                                                        color: #6c757d;
-                                                                                                                                                                        position: absolute;
-                                                                                                                                                                        padding-left:11px;
-                                                                                                                                                                        left: 12px;
-                                                                                                                                                                        top: 50%;
-                                                                                                                                                                        transform: translateY(-50%);
-                                                                                                                                                                        pointer-events: none;
-                                                                                                                                                                        white-space: nowrap;
-                                                                                                                                                                        overflow: hidden;
-                                                                                                                                                                        text-overflow: ellipsis;
-                                                                                                                                                                        max-width: calc(100% - 130px);
-                                                                                                                                                                    }
-                                                                                                                                                                `;
+                                                                                                                                                                                    input[type="file"]::-webkit-file-upload-button,
+                                                                                                                                                                                    input[type="file"]::file-selector-button {
+                                                                                                                                                                                        display: none;
+                                                                                                                                                                                    }
+                                                                                                                                                                                    input[type="file"] {
+                                                                                                                                                                                        color: transparent;
+                                                                                                                                                                                    }
+                                                                                                                                                                                    input[type="file"]::before {
+                                                                                                                                                                                        content: attr(data-placeholder);
+                                                                                                                                                                                        color: #6c757d;
+                                                                                                                                                                                        position: absolute;
+                                                                                                                                                                                        padding-left:11px;
+                                                                                                                                                                                        left: 12px;
+                                                                                                                                                                                        top: 50%;
+                                                                                                                                                                                        transform: translateY(-50%);
+                                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                                        white-space: nowrap;
+                                                                                                                                                                                        overflow: hidden;
+                                                                                                                                                                                        text-overflow: ellipsis;
+                                                                                                                                                                                        max-width: calc(100% - 130px);
+                                                                                                                                                                                    }
+                                                                                                                                                                                `;
             document.head.appendChild(style);
         });
     </script>

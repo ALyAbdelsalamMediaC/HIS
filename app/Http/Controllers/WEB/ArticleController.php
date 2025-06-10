@@ -16,9 +16,10 @@ class ArticleController extends Controller
     public function getall(Request $request)
     {
         try {
-                        $categories = Category::all();
+            $categories = Category::all();
 
-            $article = Article::with('category')->orderBy('created_at', 'desc');
+            $article = Article::with('category')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+            ;
 
             // Search by title
             if ($request->filled('title')) {
@@ -32,20 +33,7 @@ class ArticleController extends Controller
                 });
             }
 
-            // Filter by date (created_at)
-            if ($request->filled('date_from')) {
-                $article->whereDate('created_at', '>=', $request->input('date_from'));
-            }
-            if ($request->filled('date_to')) {
-                $article->whereDate('created_at', '<=', $request->input('date_to'));
-            }
-            // Order by latest
-
-            // Get all users with role 'reviewer'
-                        $reviewers = User::where('role', 'reviewer')->get();
-
-
-            return view('pages.content.articles', compact('article', 'reviewers', 'categories'));
+            return view('pages.content.articles', compact('article', 'categories'));
         } catch (Exception $e) {
             LaravelLog::error('Article getall error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
@@ -79,7 +67,7 @@ class ArticleController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('pages.article.add', compact('categories'));
+        return view('pages.content.add_article', compact('categories'));
     }
     public function store(Request $request)
     {

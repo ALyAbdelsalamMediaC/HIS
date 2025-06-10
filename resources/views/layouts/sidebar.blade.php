@@ -45,21 +45,8 @@
         </li>
         <li class="sidebar-menu-li">
           <a href="{{ route('categories.index') }}" class="h6-semibold">
-            <x-svg-icon name="content" size="18" />
+            <x-svg-icon name="article" size="18" />
             <span class="sidebar-menu-text">Categories</span>
-          </a>
-        </li>
-
-        <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
-            <x-svg-icon name="message" size="18" />
-            <span class="sidebar-menu-text">Comments</span>
-          </a>
-        </li>
-        <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
-            <x-svg-icon name="shield-block" size="18" />
-            <span class="sidebar-menu-text">Blocked Users</span>
           </a>
         </li>
 
