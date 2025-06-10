@@ -11,9 +11,18 @@ use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
 use getID3;
+use App\Services\GoogleDriveService; // Make sure this service is built
 
 class MediaController extends Controller
 {
+     protected $client;
+    protected $driveService;
+
+    public function __construct(GoogleDriveService $driveService)
+    {
+        $this->driveService = $driveService;
+        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+    }
     public function show()
     {
         try {
@@ -44,8 +53,9 @@ class MediaController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'required|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
-                'pdf' => 'required|file|mimes:pdf|max:51200', // 50MB limit
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
             ]);
@@ -63,18 +73,32 @@ class MediaController extends Controller
 
             // Store thumbnail if exists
             $thumbnailPath = null;
-            if ($request->hasFile('thumbnail')) {
-                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+            if ($request->hasFile('thumbnail_path')) {
+                $thumbnailPath = $request->file('thumbnail_path')->store('thumbnails', 'public');
+            }
+             $imagePath = null;
+            if ($request->hasFile('image_path')) {
+                $imagePath = $request->file('image_path')->store('images', 'public');
             }
 
-            $videoPath = null;
+             $video = null;
             if ($request->hasFile('file')) {
-                $videoPath = $request->file('file')->store('Videos', 'public');
+                $driveService = new GoogleDriveService();
+                if ($request->file('file')->isValid()) {
+                    $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('file'), $filename);
+                    $video = $url;
+                }
             }
 
-            $pdfPath = null;
+            $pdf = null;
             if ($request->hasFile('pdf')) {
-                $pdfPath = $request->file('pdf')->store('Pdfs', 'public');
+                $driveService = new GoogleDriveService();
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
             }
 
 
@@ -84,9 +108,10 @@ class MediaController extends Controller
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'file_path' => $videoPath,
-                'pdf' => $pdfPath,
+                'file_path' => $video,
+                'pdf' => $pdf,
                 'thumbnail_path' => $thumbnailPath,
+                'image_path' => $imagePath,
                 'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
