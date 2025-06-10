@@ -15,7 +15,7 @@
                     <x-svg-icon name="content" size="20" />
                     <span>Add Video</span>
                 </x-link_btn>
-                <x-link_btn href="">
+                <x-link_btn href="{{ route('articles.store') }}">
                     <x-svg-icon name="article" size="20" />
                     <span>Add Article</span>
                 </x-link_btn>
@@ -76,49 +76,67 @@
             <div class="content-container-cards">
                 @forelse ($media as $item)
                         <div class="content-container-card">
-                            <div class="content-container-card-img">
+                            <div class="d-flex justify-content-between align-items-end w-100">
+                                <div>
+                                    <h2 class="h4-semibold">{{ $item->user->name }}</h2>
+                                    <span class="h6-ragular" style="color:#ADADAD;">Uploaded
+                                        {{ $item->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h4 class="h6-ragular card-status {{ $item->status }}">
+                                        {{ ucfirst($item->status) }}
+                                    </h4>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 content-container-card-img">
                                 <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
 
-                                <span>Video</span>
+                                <span class="c-v-span">Video</span>
+                                <x-format-duration :seconds="$item->duration" class="c-d-span" />
                             </div>
 
-                            <div class="dashboard-video-card-content-content">
+                            <div class="video-card-content-content">
                                 <div class="dashboard-video-card-content-content-top">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h4 class="h6-semibold" style="color:#35758C;">{{ $item->category->name }}</h4>
-                                        <h4 class="h6-ragular"
-                                            style="color:#35758C; padding: 8px; border-radius: 12px; background: #F1F9FA;">
-                                            {{ ucfirst($item->status) }}
-                                        </h4>
-                                    </div>
-
-                                    <h3 class="h5-semibold" style="margin-top:8px; line-height: 1.5em;">
+                                    <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em;">
                                         {{ $item->title }}
                                     </h3>
-                                    <p class="h6-ragular" style="color:#ADADAD;">15:24 . Uploaded
-                                        {{ $item->created_at->diffForHumans() }}
-                                    </p>
+                                    <p class="h6-ragular">{{ Str::words($item->description, 15, '...') }}</p>
                                 </div>
 
-                                <div class="dashboard-video-card-content-content-down">
-                                    <div class="gap-2 d-flex align-items-center">
-                                        <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                        <x-svg-icon name="trash" size="12" color="Black" />
-                                        <x-svg-icon name="three-dots" size="12" color="Black" />
-                                    </div>
+                                @if($item->status !== 'pending')
+                                        <div class="dashboard-video-card-content-content-down">
+                                            <div class="gap-2 d-flex align-items-center">
+                                                <a href="">
+                                                    <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                                </a>
 
-                                    <div class="gap-3 d-flex align-items-center">
-                                        <div>
-                                            <x-svg-icon name="eye" size="12" color="Black" />
-                                            <span class="h6-ragular">{{ $item->views}}</span>
+                                                <button class="btn-nothing">
+                                                    <x-svg-icon name="trash" size="12" color="Black" />
+                                                </button>
+                                            </div>
+
+
+                                            <div class="gap-3 d-flex align-items-center">
+                                                <div>
+                                                    <x-svg-icon name="eye" size="12" color="Black" />
+                                                    <span class="h6-ragular">{{ $item->views}}</span>
+                                                </div>
+                                                <div>
+                                                    <x-svg-icon name="message" size="12" color="Black" />
+                                                    <span class="h6-ragular">{{ $item->comments }}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <x-svg-icon name="message" size="12" color="Black" />
-                                            <span class="h6-ragular">{{ $item->comments }}</span>
-                                        </div>
+                                    </div>
+                                @else
+                                <div class="gap-3 mt-3 d-flex align-items-center">
+                                    <h3 class="h5-semibold">Assigned to :</h3>
+                                    <div class="assign-to-btn">
+                                        <x-svg-icon name="plus" size="12" color="#35758C" />
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
                 @empty
@@ -127,13 +145,13 @@
                 </div>
             @endforelse
 
-            <div class="mt-2 d-flex justify-content-between align-items-center">
-                <!-- Table Info and Pagination -->
-                @if($media->count())
-                    <x-table-info :paginator="$media" />
-                    <x-pagination :paginator="$media" :appends="request()->query()" />
-                @endif
-            </div>
+        </div>
+        <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
+            <!-- Table Info and Pagination -->
+            @if($media->count())
+                <x-table-info :paginator="$media" />
+                <x-pagination :paginator="$media" :appends="request()->query()" />
+            @endif
         </div>
     </section>
 

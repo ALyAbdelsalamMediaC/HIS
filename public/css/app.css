@@ -622,7 +622,7 @@ body {
 }
 
 .arrow-back-btn:hover {
-    background-color: #98beca21;
+    background-color: #f1f9fa;
 }
 
 .btn-nothing {
@@ -962,7 +962,7 @@ body {
     background: #e9ffdb;
 }
 .card-icon4 {
-    background: #ffecec;
+    background: #fbfdd0;
 }
 
 .dashboard-contetn-container {
@@ -1158,10 +1158,7 @@ body {
 }
 
 .content-container-cards {
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    padding: 12px 0;
-    margin: 12px 0;
+    margin-top: 24px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1172,8 +1169,10 @@ body {
     flex-direction: column;
     align-items: start;
     border-radius: var(--main-border-radius-md);
-    border: 1px solid var(--border-color);
     background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+    padding: 24px;
 }
 
 .content-container-card-img {
@@ -1183,15 +1182,14 @@ body {
 
 .content-container-card-img img {
     width: 100%;
-    height: 185px;
+    height: 208px;
     object-fit: cover;
-    border-top-left-radius: var(--main-border-radius-md);
-    border-top-right-radius: var(--main-border-radius-md);
+    border-radius: var(--main-border-radius-md);
 }
 
-.content-container-card-img span {
+.content-container-card-img .c-v-span,
+.content-container-card-img .c-d-span {
     position: absolute;
-    top: 0;
     right: 0;
     font-size: 10px;
     font-weight: 400;
@@ -1199,7 +1197,47 @@ body {
     padding: 8px;
     border-radius: var(--main-border-radius-md);
     background-color: var(--primary-color);
-    margin: 8px;
+    margin: 12px;
+}
+
+.content-container-card-img .c-v-span {
+    top: 0;
+}
+
+.content-container-card-img .c-d-span {
+    bottom: 0;
+}
+
+.video-card-content-content {
+    width: 100%;
+    height: 100%;
+}
+
+.bottom-vid-pagination {
+    border-top: 1px solid var(--border-color);
+    margin-top: 26px;
+}
+
+.card-status {
+    padding: 8px;
+    border-radius: var(--main-border-radius-md);
+}
+
+.card-status.published {
+    color: #35758c;
+    background-color: #f1f9fa;
+}
+.card-status.decline {
+    color: #bb1313;
+    background-color: #fff3f3;
+}
+.card-status.in_review {
+    color: #3f8f43;
+    background-color: #deffe0;
+}
+.card-status.pending {
+    color: #e0b610;
+    background-color: #fbfdd0;
 }
 
 .dashboard-video-card-content-content {
@@ -1208,15 +1246,23 @@ body {
     padding: 12px 20px 24px 20px;
 }
 
-.dashboard-video-card-content-content-top {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 12px;
-}
-
 .dashboard-video-card-content-content-down {
+    border-top: 1px solid var(--border-color);
+    margin-top: 12px;
     padding-top: 12px;
     display: flex;
     justify-content: space-between;
+}
+
+.assign-to-btn {
+    width: 57px;
+    height: 57px;
+    line-height: 55px;
+    text-align: center;
+    background-color: #f1f9fa;
+    border-radius: 50%;
+    border: 1px dashed var(--primary-color);
+    cursor: pointer;
 }
 
 /* ========================================================

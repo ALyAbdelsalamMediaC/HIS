@@ -72,21 +72,9 @@
             </template>
         </div>
 
-        <!-- Progress Bar -->
-        <div x-show="isUploading" class="mt-3 progress" style="height: 8px;">
-            <div 
-                class="progress-bar bg-primary"
-                :style="{ width: uploadProgress + '%' }"
-                role="progressbar"
-                :aria-valuenow="uploadProgress"
-                aria-valuemin="0"
-                aria-valuemax="100"
-            ></div>
-        </div>
-
-        <!-- Progress Text -->
+        <!-- Upload Progress -->
         <div x-show="isUploading" class="mt-2">
-            <p class="h5-ragular" style="color:#35758C;" x-text="`Uploading... ${uploadProgress}%`"></p>
+            <p class="h5-ragular" style="color:#35758C;" x-text="`Uploading... ${Math.round(uploadProgress)}%`"></p>
         </div>
 
         <!-- Success Message -->
