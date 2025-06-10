@@ -17,14 +17,13 @@
         <form method="POST" action="{{ route('content.store') }}" enctype="multipart/form-data" novalidate>
             @csrf
 
-            <x-drag-drop-upload name="file" accept="video/mp4,video/avi,video/mov,video/wmv" max-size="1GB"
-                supported-formats="MP4, AVI, MOV, WMV" :required="true" />
+            <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="true" />
 
             <div class="mt-3 form-infield">
-                <x-text_label for="thumbnail" :required="true">Upload Image</x-text_label>
+                <x-text_label for="thumbnail" :required="true">Upload Thumbnail</x-text_label>
                 <div style="position: relative;">
                     <x-text_input type="file" id="thumbnail" name="thumbnail"
-                        placeholder="Choose an image from your gallery" data-required="true" data-name="Upload Image"
+                        placeholder="Choose an thumbnail from your gallery" data-required="true" data-name="Upload Image"
                         accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
                         onchange=" updateFileName(this)" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
@@ -38,17 +37,27 @@
             </div>
 
             <div class="form-infield">
-                <x-text_label for="pdf" :required="true">Media PDF</x-text_label>
+                <x-text_label for="image">Image</x-text_label>
                 <div style="position: relative;">
-                    <x-text_input type="file" id="pdf" name="pdf" placeholder="Choose a PDF file" data-required="true"
-                        data-name="Media PDF" accept="application/pdf" style="color: transparent; cursor: pointer;"
+                    <x-text_input type="file" id="image" name="image" placeholder="Choose an image from your gallery"
+                        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
+                        onchange=" updateFileName(this)" />
+                    <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
+                        <x-button type="button" onclick="document.getElementById('image').click()">Choose
+                            file</x-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-infield">
+                <x-text_label for="pdf">Media PDF</x-text_label>
+                <div style="position: relative;">
+                    <x-text_input type="file" id="pdf" name="pdf" placeholder="Choose a PDF file" accept="application/pdf"
+                        style="color: transparent; cursor: pointer;"
                         onchange="validateFile(this, 'application/pdf', 30 * 1024 * 1024, 'PDF size exceeds 30MB. Please choose a smaller file.', 'Choose a PDF file')" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
                         <x-button type="button" onclick="document.getElementById('pdf').click()">Choose file</x-button>
                     </div>
-                </div>
-                <div id="pdf-error-container">
-                    <x-input-error :messages="$errors->get('pdf')" class="mt-2" />
                 </div>
             </div>
 
@@ -78,14 +87,14 @@
             </div>
 
             <!-- <div class="mb-2 form-check">
-                                                                                                                            <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
-                                                                                                                            <label class="form-check-label" for="is_featured">Featured</label>
-                                                                                                                        </div>
+                                                                                                                                                <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
+                                                                                                                                                <label class="form-check-label" for="is_featured">Featured</label>
+                                                                                                                                            </div>
 
-                                                                                                                        <div class="mb-3 form-check">
-                                                                                                                            <input class="form-check-input" type="checkbox" name="is_recommended" value="1" id="is_recommended">
-                                                                                                                            <label class="form-check-label" for="is_recommended">Recommended</label>
-                                                                                                                        </div> -->
+                                                                                                                                            <div class="mb-3 form-check">
+                                                                                                                                                <input class="form-check-input" type="checkbox" name="is_recommended" value="1" id="is_recommended">
+                                                                                                                                                <label class="form-check-label" for="is_recommended">Recommended</label>
+                                                                                                                                            </div> -->
 
             <div class="mt-3 d-flex justify-content-end">
                 <x-button type="submit">Upload Video</x-button>
@@ -126,7 +135,8 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const fileInputs = [
-                { id: 'thumbnail', placeholder: 'Choose an image from your gallery' },
+                { id: 'thumbnail', placeholder: 'Choose an thumbnail from your gallery' },
+                { id: 'image', placeholder: 'Choose an image from your gallery' },
                 { id: 'pdf', placeholder: 'Choose a PDF file' }
             ];
 
@@ -141,28 +151,28 @@
 
             const style = document.createElement('style');
             style.textContent = `
-                                                                                                                                                input[type="file"]::-webkit-file-upload-button,
-                                                                                                                                                input[type="file"]::file-selector-button {
-                                                                                                                                                    display: none;
-                                                                                                                                                }
-                                                                                                                                                input[type="file"] {
-                                                                                                                                                    color: transparent;
-                                                                                                                                                }
-                                                                                                                                                input[type="file"]::before {
-                                                                                                                                                    content: attr(data-placeholder);
-                                                                                                                                                    color: #6c757d;
-                                                                                                                                                    position: absolute;
-                                                                                                                                                    padding-left:11px;
-                                                                                                                                                    left: 12px;
-                                                                                                                                                    top: 50%;
-                                                                                                                                                    transform: translateY(-50%);
-                                                                                                                                                    pointer-events: none;
-                                                                                                                                                    white-space: nowrap;
-                                                                                                                                                    overflow: hidden;
-                                                                                                                                                    text-overflow: ellipsis;
-                                                                                                                                                    max-width: calc(100% - 130px);
-                                                                                                                                                }
-                                                                                                                                            `;
+                                                                                                                                                                    input[type="file"]::-webkit-file-upload-button,
+                                                                                                                                                                    input[type="file"]::file-selector-button {
+                                                                                                                                                                        display: none;
+                                                                                                                                                                    }
+                                                                                                                                                                    input[type="file"] {
+                                                                                                                                                                        color: transparent;
+                                                                                                                                                                    }
+                                                                                                                                                                    input[type="file"]::before {
+                                                                                                                                                                        content: attr(data-placeholder);
+                                                                                                                                                                        color: #6c757d;
+                                                                                                                                                                        position: absolute;
+                                                                                                                                                                        padding-left:11px;
+                                                                                                                                                                        left: 12px;
+                                                                                                                                                                        top: 50%;
+                                                                                                                                                                        transform: translateY(-50%);
+                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                        white-space: nowrap;
+                                                                                                                                                                        overflow: hidden;
+                                                                                                                                                                        text-overflow: ellipsis;
+                                                                                                                                                                        max-width: calc(100% - 130px);
+                                                                                                                                                                    }
+                                                                                                                                                                `;
             document.head.appendChild(style);
         });
     </script>
