@@ -20,30 +20,30 @@
             <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="true" />
 
             <div class="mt-3 form-infield">
-                <x-text_label for="thumbnail" :required="true">Upload Thumbnail</x-text_label>
+                <x-text_label for="thumbnail_path" :required="true">Upload Thumbnail</x-text_label>
                 <div style="position: relative;">
-                    <x-text_input type="file" id="thumbnail" name="thumbnail"
+                    <x-text_input type="file" id="thumbnail_path" name="thumbnail_path"
                         placeholder="Choose an thumbnail from your gallery" data-required="true"
                         data-name="Upload Thumbnail" accept="image/jpeg,image/jpg,image/png"
                         style="color: transparent; cursor: pointer;" onchange=" updateFileName(this)" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
-                        <x-button type="button" onclick="document.getElementById('thumbnail').click()">Choose
+                        <x-button type="button" onclick="document.getElementById('thumbnail_path').click()">Choose
                             file</x-button>
                     </div>
                 </div>
                 <div id="thumbnail-error-container">
-                    <x-input-error :messages="$errors->get('thumbnail')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('thumbnail_path')" class="mt-2" />
                 </div>
             </div>
 
             <div class="form-infield">
                 <x-text_label for="image">Image</x-text_label>
                 <div style="position: relative;">
-                    <x-text_input type="file" id="image" name="image" placeholder="Choose an image from your gallery"
+                    <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
                         accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
                         onchange=" updateFileName(this)" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
-                        <x-button type="button" onclick="document.getElementById('image').click()">Choose
+                        <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
                             file</x-button>
                     </div>
                 </div>
@@ -91,11 +91,6 @@
                 <label class="form-check-label" for="is_featured">Featured</label>
             </div>
 
-            <div class="mb-3 form-check">
-                <input class="form-check-input" type="checkbox" name="is_recommended" value="1" id="is_recommended">
-                <label class="form-check-label" for="is_recommended">Recommended</label>
-            </div>
-
             <div class="mt-3 d-flex justify-content-end">
                 <x-button type="submit">Upload Video</x-button>
             </div>
@@ -135,8 +130,8 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const fileInputs = [
-                { id: 'thumbnail', placeholder: 'Choose an thumbnail from your gallery' },
-                { id: 'image', placeholder: 'Choose an image from your gallery' },
+                { id: 'thumbnail_path', placeholder: 'Choose an thumbnail from your gallery' },
+                { id: 'image_path', placeholder: 'Choose an image from your gallery' },
                 { id: 'pdf', placeholder: 'Choose a PDF file' }
             ];
 

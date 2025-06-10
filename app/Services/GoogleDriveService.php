@@ -83,6 +83,7 @@ class GoogleDriveService
 
         $this->service->permissions->create($uploadedFile->id, $permission);
 
-        return "{$uploadedFile->id}";
+        return "https://drive.google.com/file/d/{$uploadedFile->id}/preview";
+
     }
 }
