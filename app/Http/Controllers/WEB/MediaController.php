@@ -94,7 +94,7 @@ class MediaController extends Controller
     public function getone($id)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
-        return view('pages.content.sin', compact('media'));
+        return view('pages.content.single_video', compact('media'));
     }
     public function validation()
     {
