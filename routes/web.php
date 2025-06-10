@@ -59,7 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::get('/users/add', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
-    Route::post('register', [AdminAuthController::class, 'register']);
+    Route::post('/users/add', [AdminAuthController::class, 'register'])->name('admin.register');
+    // Route::post('register', [AdminAuthController::class, 'register']);
 });
 
 

@@ -96,6 +96,7 @@ class AdminAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string',
+            'phone' => 'required|string',
             'username' => 'required|string|max:50|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -106,6 +107,7 @@ class AdminAuthController extends Controller
                 'email' => $data['email'],
                 'username' => $data['username'],
                 'role' => $data['role'],
+                'phone' => $data['phone'],
                 'password' => Hash::make($data['password']),
             ]);
 
@@ -116,14 +118,16 @@ class AdminAuthController extends Controller
                 'description' => "New admin registered ({$user->username})",
             ]);
 
-            // Auto‐login and redirect
+            // Auto‐login and redirect with success message
             Auth::login($user);
-            return redirect()->route('pages.admin.dashboard');
+            return redirect()->route('pages.admin.dashboard')
+                ->with('success', 'Registration successful! Welcome, ' . $user->name . '.');
 
         } catch (\Exception $e) {
             LaravelLog::error("Registration error: " . $e->getMessage());
             return back()
                 ->withErrors(['email' => 'Unable to register. Please try again later.'])
+                ->with('error', 'Registration failed. Please try again.')
                 ->withInput($request->except('password'));
         }
     }

@@ -52,6 +52,11 @@ class MediaController extends Controller
                     });
                 }
 
+                // Filter by status
+                if ($request->filled('status')) {
+                    $query->where('status', $request->input('status'));
+                }
+
                 // Filter by date (created_at)
                 if ($request->filled('date_from')) {
                     $query->whereDate('created_at', '>=', $request->input('date_from'));

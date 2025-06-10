@@ -15,10 +15,27 @@ class UserController extends Controller
     /**
      * Display a listing of the users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::withTrashed()->get();
-        return view('pages.users.index', compact('users'));
+        try {
+            $query = User::withTrashed();
+
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where('name', 'like', '%' . $search . '%');
+            }
+
+            $users = $query->get();
+
+            return view('pages.users.index', compact('users'));
+        } catch (\Exception $e) {
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'user_index_error',
+                'description' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'An error occurred while loading the users.');
+        }
     }
 
     public function profile()
