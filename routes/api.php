@@ -13,8 +13,11 @@ Route::post('/comments', [CommentsController::class, 'addComment']);
 Route::post('/comments/reply', [CommentsController::class, 'reply']);
 Route::post('/media/store', [MediaController::class, 'store']);
 Route::get('/media/show', [MediaController::class, 'show']);
+Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
+Route::get('/media/featured', [MediaController::class, 'featured']);
 Route::post('/article/store', [ArticleController::class, 'store']);
 Route::get('/article/show', [ArticleController::class, 'show']);
+
      // return $request->user();
 // });
 Route::post('/register', [UserAuthController::class, 'register']);

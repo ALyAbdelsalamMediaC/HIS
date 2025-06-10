@@ -21,10 +21,10 @@ return new class extends Migration
             $table->string('file_path');
             $table->text('duration')->nullable();
             $table->string('pdf')->nullable();
-            $table->string('thumbnail_path')->nullable();
-            $table->string('status');
+            $table->string('thumbnail_path');
+            $table->string('image_path')->nullable();
+            $table->enum('status', ['published', 'pending', 'inreview', 'declined']);
             $table->boolean('is_featured')->default(false);
-            $table->boolean('is_recommended')->default(false);
             $table->timestamps();
         });
     }

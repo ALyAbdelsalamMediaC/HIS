@@ -161,4 +161,58 @@ class MediaController extends Controller
             ], 500);
         }
     }
+    public function recently_Added()
+    {
+        try {
+            $contents = Media::with('category')->orderBy('created_at', 'desc')->take(10)->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Recently added media retrieved successfully.',
+                'data' => $contents
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Recently Added error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'recently_added_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to fetch recently added media.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function featured()
+    {
+        try {
+            $contents = Media::with('category')
+                ->where('is_featured', true)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            return response()->json([
+                'success' => true,
+                'message' => 'Recently added media retrieved successfully.',
+                'data' => $contents
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Recently Added error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'recently_added_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to fetch recently added media.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

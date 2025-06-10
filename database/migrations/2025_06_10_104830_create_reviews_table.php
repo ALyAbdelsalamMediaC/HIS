@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('article', function (Blueprint $table) {
+        
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->text('description');
-            $table->text('status');
-            $table->string('image')->nullable();
-            $table->string('pdf')->nullable();
-            $table->string('hyperlink')->nullable();
+            $table->foreignId('media_id')->constrained()->onDelete('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('reviews')->onDelete('cascade');
+            $table->text('content');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('article');
+        Schema::dropIfExists('reviews');
     }
 };
