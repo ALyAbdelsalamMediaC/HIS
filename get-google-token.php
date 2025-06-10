@@ -23,7 +23,7 @@ if (!isset($_GET['code'])) {
         // Save the new token to the storage/app/google-token.json file
         $tokenPath = __DIR__ . '/storage/app/google-token.json'; // Assumes script is in project root
         file_put_contents($tokenPath, json_encode($accessToken));
-        header('Location: http://127.0.0.1:8000/content/upload');
+        header('Location: http://127.0.0.1:8000/content/videos');
         exit;
     }
 }

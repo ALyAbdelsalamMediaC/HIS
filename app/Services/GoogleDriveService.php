@@ -35,7 +35,7 @@ class GoogleDriveService
             //     header('Location: http://localhost:8000/get-google-token.php');
             //     exit;
             // }
-            $accessToken = $this->client->fetchAccessTokenWithRefreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+            $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
             if (isset($accessToken['error'])) {
                 throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
             }
