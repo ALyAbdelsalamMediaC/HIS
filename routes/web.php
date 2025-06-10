@@ -58,14 +58,13 @@ Route::middleware('auth')->group(function () {
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::get('/users/add', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
+    Route::post('register', [AdminAuthController::class, 'register']);
 });
 
 
 Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('login');
 Route::post('admin/login', [AdminAuthController::class, 'login']);
-
-Route::get('register', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
-Route::post('register', [AdminAuthController::class, 'register']);
 
 // Password Reset Routes
 Route::get('password/reset', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');

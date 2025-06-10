@@ -87,7 +87,7 @@ class AdminAuthController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('pages.auth.admin-register');
+        return view('pages.users.add');
     }
 
     public function register(Request $request)
@@ -136,9 +136,9 @@ class AdminAuthController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        
+
         $user = User::where('email', $request->email)->first();
-        
+
         if (!$user || !($user->role === 'admin' || $user->role === 'reviewer')) {
             Log::create([
                 'user_id' => $user ? $user->id : null,
@@ -147,7 +147,7 @@ class AdminAuthController extends Controller
             ]);
             return back()->withErrors(['email' => 'We can\'t find an admin user with that email address.']);
         }
-        
+
         $status = Password::sendResetLink(
             $request->only('email')
         );

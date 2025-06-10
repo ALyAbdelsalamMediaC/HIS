@@ -2,7 +2,6 @@
 @section('title', 'HIS | Dashboard')
 @section('content')
     <section>
-
         <div class="dashboard-num-cards">
             <div class="dashboard-num-cards-container">
                 <div class="card-icon1">

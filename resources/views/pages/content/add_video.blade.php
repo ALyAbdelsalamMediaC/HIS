@@ -39,9 +39,9 @@
             <div class="form-infield">
                 <x-text_label for="image">Image</x-text_label>
                 <div style="position: relative;">
-                    <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
-                        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-                        onchange=" updateFileName(this)" />
+                    <x-text_input type="file" id="image_path" name="image_path"
+                        placeholder="Choose an image from your gallery" accept="image/jpeg,image/jpg,image/png"
+                        style="color: transparent; cursor: pointer;" onchange=" updateFileName(this)" />
                     <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
                         <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
                             file</x-button>
@@ -146,28 +146,28 @@
 
             const style = document.createElement('style');
             style.textContent = `
-                                                                                                                                                                                    input[type="file"]::-webkit-file-upload-button,
-                                                                                                                                                                                    input[type="file"]::file-selector-button {
-                                                                                                                                                                                        display: none;
-                                                                                                                                                                                    }
-                                                                                                                                                                                    input[type="file"] {
-                                                                                                                                                                                        color: transparent;
-                                                                                                                                                                                    }
-                                                                                                                                                                                    input[type="file"]::before {
-                                                                                                                                                                                        content: attr(data-placeholder);
-                                                                                                                                                                                        color: #6c757d;
-                                                                                                                                                                                        position: absolute;
-                                                                                                                                                                                        padding-left:11px;
-                                                                                                                                                                                        left: 12px;
-                                                                                                                                                                                        top: 50%;
-                                                                                                                                                                                        transform: translateY(-50%);
-                                                                                                                                                                                        pointer-events: none;
-                                                                                                                                                                                        white-space: nowrap;
-                                                                                                                                                                                        overflow: hidden;
-                                                                                                                                                                                        text-overflow: ellipsis;
-                                                                                                                                                                                        max-width: calc(100% - 130px);
-                                                                                                                                                                                    }
-                                                                                                                                                                                `;
+                                                                                                                                                                                        input[type="file"]::-webkit-file-upload-button,
+                                                                                                                                                                                        input[type="file"]::file-selector-button {
+                                                                                                                                                                                            display: none;
+                                                                                                                                                                                        }
+                                                                                                                                                                                        input[type="file"] {
+                                                                                                                                                                                            color: transparent;
+                                                                                                                                                                                        }
+                                                                                                                                                                                        input[type="file"]::before {
+                                                                                                                                                                                            content: attr(data-placeholder);
+                                                                                                                                                                                            color: #6c757d;
+                                                                                                                                                                                            position: absolute;
+                                                                                                                                                                                            padding-left:11px;
+                                                                                                                                                                                            left: 12px;
+                                                                                                                                                                                            top: 50%;
+                                                                                                                                                                                            transform: translateY(-50%);
+                                                                                                                                                                                            pointer-events: none;
+                                                                                                                                                                                            white-space: nowrap;
+                                                                                                                                                                                            overflow: hidden;
+                                                                                                                                                                                            text-overflow: ellipsis;
+                                                                                                                                                                                            max-width: calc(100% - 130px);
+                                                                                                                                                                                        }
+                                                                                                                                                                                    `;
             document.head.appendChild(style);
         });
     </script>

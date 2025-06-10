@@ -3,6 +3,18 @@
 @section('content')
     <section>
 
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="h2-semibold" style="color:#35758C;">User Management</h2>
+                <p class="h5-ragular" style="color:#ADADAD;">Manage user accounts, block users, and view user details.</p>
+            </div>
+
+            <x-link_btn href="{{  route('admin.register') }}">
+                <x-svg-icon name="plus3" size="20" />
+                <span>Add new user</span>
+            </x-link_btn>
+        </div>
+
         <table class="table">
             <thead>
                 <tr>
