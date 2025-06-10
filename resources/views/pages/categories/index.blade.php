@@ -4,7 +4,6 @@
 <div class="container mt-4">
     <h2>All Categories</h2>
 
-    @include('partials.flash')
 
     <a href="{{ route('categories.create') }}" class="btn btn-primary mb-3">Add New Category</a>
 

@@ -21,7 +21,7 @@ class CategoryController extends Controller
     {
         try {
             $categories = Category::all();
-            return view('categories.index', compact('categories'));
+            return view('pages.categories.index', compact('categories'));
         } catch (Exception $e) {
             $this->logError('Failed to load categories: ' . $e->getMessage());
             return back()->with('error', 'Something went wrong while loading categories.');
@@ -31,7 +31,7 @@ class CategoryController extends Controller
     // Show form to create a new category
     public function create()
     {
-        return view('categories.create');
+        return view('pages.categories.create');
     }
 
     // Store new category
@@ -52,7 +52,7 @@ class CategoryController extends Controller
                 ]);
 
                 $this->logSuccess('Created a new category: ' . $request->name);
-                return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+                return redirect()->route('pages.categories.index')->with('success', 'Category created successfully.');
             }
         } catch (Exception $e) {
             $this->logError('Failed to create category: ' . $e->getMessage());
@@ -64,7 +64,7 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         try {
-            return view('categories.edit', compact('category'));
+            return view('pages.categories.edit', compact('category'));
         } catch (Exception $e) {
             $this->logError('Failed to load category for editing: ' . $e->getMessage());
             return back()->with('error', 'Something went wrong while loading the category.');
@@ -83,7 +83,7 @@ class CategoryController extends Controller
             $category->update($request->only('name', 'description'));
 
             $this->logSuccess('Updated category: ' . $category->name);
-            return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+            return redirect()->route('pages.categories.index')->with('success', 'Category updated successfully.');
         } catch (Exception $e) {
             $this->logError('Failed to update category: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Failed to update category.');
@@ -98,7 +98,7 @@ class CategoryController extends Controller
             $category->delete();
 
             $this->logSuccess("Deleted category: $name");
-            return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+            return redirect()->route('pages.categories.index')->with('success', 'Category deleted successfully.');
         } catch (Exception $e) {
             $this->logError('Failed to delete category: ' . $e->getMessage());
             return back()->with('error', 'Failed to delete category.');

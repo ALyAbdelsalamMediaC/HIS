@@ -4,7 +4,6 @@
 <div class="container mt-4">
     <h2>Create Category</h2>
 
-    @include('partials.flash')
 
     <form action="{{ route('categories.store') }}" method="POST">
         @csrf

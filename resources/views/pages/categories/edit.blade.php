@@ -4,7 +4,6 @@
 <div class="container mt-4">
     <h2>Edit Category</h2>
 
-    @include('partials.flash')
 
     <form action="{{ route('categories.update', $category) }}" method="POST">
         @csrf
