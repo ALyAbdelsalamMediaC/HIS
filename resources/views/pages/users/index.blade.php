@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Users</title>
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <h1>Users</h1>
-        
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+@extends('layouts.app')
+@section('title', 'HIS | Users')
+@section('content')
+    <section>
 
         <table class="table">
             <thead>
@@ -47,7 +36,8 @@
                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Block</button>
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Are you sure?')">Block</button>
                                 </form>
                             @else
                                 <form action="{{ route('users.restore', $user->id) }}" method="POST" style="display: inline;">
@@ -60,6 +50,9 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-</body>
-</html>
+    </section>
+
+@endsection
+
+@push('scripts')
+@endpush
