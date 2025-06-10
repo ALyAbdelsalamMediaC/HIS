@@ -94,7 +94,7 @@ class MediaController extends Controller
     public function getone($id)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
-        return view('pages.content.show', compact('media'));
+        return view('pages.content.sin', compact('media'));
     }
     public function validation()
     {
@@ -177,7 +177,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
-                'status' => 'approved',
+                'status' => 'published',
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),

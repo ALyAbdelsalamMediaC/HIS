@@ -43,7 +43,6 @@ class MediaController extends Controller
 
         // Get the original file name
         $originalName = $request->file('file')->getClientOriginalName();
-        var_dump($originalName);
 
         try {
             // Validate input
