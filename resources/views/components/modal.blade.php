@@ -11,7 +11,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <!-- Header with Custom Styling -->
-      <div class="modal-header h2-semibold">
+      <div class="modal-header h3-semibold">
         <h5 class="modal-title" id="{{ $id }}Label">{{ $title }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>

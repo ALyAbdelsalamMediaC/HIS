@@ -326,6 +326,18 @@ body {
 }
 
 /* ========================================================
+    Modal Styles
+   ======================================================== */
+.btn-close {
+    color: #adadad;
+    font-size: 20px;
+}
+
+.modal-title {
+    color: var(--primary-color);
+}
+
+/* ========================================================
     Global Forms & Inputs Styles
    ======================================================== */
 
@@ -1052,7 +1064,6 @@ body {
     border-spacing: 0;
     background-color: var(--white-color);
     color: #000;
-    border-radius: var(--main-border-radius-md);
     overflow: hidden; /* Ensures border-radius is applied correctly */
     font-size: 13px;
     font-weight: 400;
@@ -1235,9 +1246,17 @@ body {
     color: #3f8f43;
     background-color: #deffe0;
 }
+
 .card-status.pending {
     color: #e0b610;
     background-color: #fbfdd0;
+}
+
+.card-status.active {
+    color: #3f8f43;
+}
+.card-status.blocked {
+    color: #3f8f43;
 }
 
 .dashboard-video-card-content-content {
@@ -1379,6 +1398,26 @@ body {
     100% {
         transform: scale(1);
     }
+}
+
+/* ========================================================
+    Users Page
+   ======================================================== */
+
+.user-count {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+.table-u-container {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
 }
 
 /* ========================================================
