@@ -49,7 +49,7 @@
             </div>
 
             <div class="forget-pass">
-                <a href="{{ route('admin.password.request') }}" class="h4-semibold">Forgot Password?</a>
+                <a href="{{ route('admin.password.request') }}" class="h5-semibold">Forgot Password?</a>
             </div>
 
             <button type="submit" class="w-100 button-login">
@@ -58,25 +58,22 @@
             </button>
             </form>
 
-            <div class="mt-4">
-            <p class="text-sm text-center text-gray-600">Or login with</p>
-            <div class="flex justify-center mt-2 space-x-4">
-                <a href="{{ route('social.google.redirect') }}"
-                   class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700">
-                    Google
+            <div class="or-pass-g-a">
+                <div class="or-left"></div>
+                <h5 class="h6-ragular">Or</h5> 
+                <div class="or-right"></div>
+            </div>
+
+            <div class="google-apple">
+                <a href="{{ route('social.google.redirect') }}">
+                    <img src="/images/global/google.svg" alt="google">
+                    <span>Continue with Google</span>
                 </a>
-                <a href="{{ route('social.apple.redirect') }}"
-                   class="px-4 py-2 text-white bg-black rounded-md hover:bg-gray-800">
-                    Apple
+                <a href="{{ route('social.apple.redirect') }}">
+                <img src="/images/global/apple.svg" alt="apple">
+                <span>Continue with Apple</span>
                 </a>
             </div>
-        </div>
-
-            <!-- <div class="mt-3 text-center">
-                <span>Don't have an account?</span>
-                <a href="{{ route('admin.register') }}">Register</a>
-            </div> -->
-        </div>
         </div>
     </section>
 
