@@ -13,8 +13,10 @@ class Article extends Model
         'user_id',
         'title',
         'description',
+        'status',
         'image',
-        'hyperlink'
+        'hyperlink',
+        'pdf'
     ];
     public function category()
     {

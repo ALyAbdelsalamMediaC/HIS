@@ -121,8 +121,9 @@ class MediaController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'required|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
-                'pdf' => 'required|file|mimes:pdf|max:51200', // 50MB limit
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
             ]);
@@ -162,6 +163,11 @@ class MediaController extends Controller
             if ($request->hasFile('thumbnail')) {
                 $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
             }
+             $imagePath = null;
+            if ($request->hasFile('image_path')) {
+                $thumbnailPath = $request->file('image_path')->store('images', 'public');
+            }
+            
 
             // Save to database
             $media = Media::create([
@@ -173,6 +179,7 @@ class MediaController extends Controller
                 'pdf' => $pdf,
                 'status' => 'approved',
                 'thumbnail_path' => $thumbnailPath,
+                'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
                 'duration' => $duration, // Save duration
