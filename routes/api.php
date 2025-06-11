@@ -5,6 +5,7 @@ use App\Http\Controllers\API\CommentsController;
 use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\ArticleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Http\Request;
 
 
@@ -23,3 +24,7 @@ Route::get('/article/show', [ArticleController::class, 'show']);
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 
+Route::get('login/google', [SocialAuthController::class, 'redirectToGoogle']);
+Route::get('login/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+Route::get('login/apple', [SocialAuthController::class, 'redirectToApple']);
+Route::get('login/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);

@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
             'destroy' => 'users.destroy',
         ]
     ])->except(['create', 'store', 'show']);
+        Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
+
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');

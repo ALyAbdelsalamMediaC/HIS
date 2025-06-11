@@ -126,4 +126,32 @@ class UserController extends Controller
         $user->restore();
         return redirect()->route('users.index')->with('success', 'User restored successfully');
     }
+
+    public function blocked(Request $request)
+    {
+        try {
+            $query = User::onlyTrashed();
+
+            // Apply search filter if provided
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%"); // Optional: Add email search
+            }
+
+            // Retrieve soft-deleted users
+            $users = $query->select('id', 'name', 'email', 'username', 'phone', 'deleted_at')
+                ->paginate(10); // Use pagination for better performance
+
+
+        return view('pages.users.blocked_users', compact('users'));
+        } catch (\Exception $e) {
+             Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'user_blocked_error',
+                'description' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'An error occurred while loading blocked users.');
+        }
+    }
 }

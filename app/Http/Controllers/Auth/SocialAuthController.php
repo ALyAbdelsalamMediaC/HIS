@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -51,11 +49,13 @@ class SocialAuthController extends Controller
     {
         try {
             $socialUser = Socialite::driver('google')->user();
-
             // Check if user exists by google_id or email
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
                 ->first();
+            if ($user == null) {
+                return redirect()->route('login')->withErrors(['login' => 'Your account has been blocked.']);
+            }
 
             if ($user) {
                 // Update google_id if not set
