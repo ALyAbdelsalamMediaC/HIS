@@ -18,7 +18,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = User::withTrashed();
+            $query = User::withoutTrashed();
 
             if ($request->filled('search')) {
                 $search = $request->input('search');
@@ -26,8 +26,8 @@ class UserController extends Controller
             }
 
             $users = $query->get();
-
-            return view('pages.users.index', compact('users'));
+            $total_users = $query->count();
+            return view('pages.users.index', compact('users', 'total_users'));
         } catch (\Exception $e) {
             Log::create([
                 'user_id' => Auth::id(),
