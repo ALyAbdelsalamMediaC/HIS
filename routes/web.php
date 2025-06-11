@@ -6,6 +6,7 @@ use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\MediaController;
+use App\Http\Controllers\WEB\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Web\UserController;
@@ -62,6 +63,9 @@ Route::middleware('auth')->group(function () {
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::get('/users/add', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
     Route::post('/users/add', [AdminAuthController::class, 'register'])->name('admin.register');
+    Route::get('/settings/profile', [SettingsController::class, 'edit'])->name('users.profile');
+    Route::get('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('users.changePassword');
+
     // Route::post('register', [AdminAuthController::class, 'register']);
 });
 
