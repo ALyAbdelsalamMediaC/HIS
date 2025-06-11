@@ -18,7 +18,7 @@
 
         <div class="gap-4 d-flex align-items-center">
           <div class="notification-bell-btn">
-            <x-svg-icon name="bell" size="19" color="#ADADAD" />
+            <x-notifications-dropdown :unreadNotifications="collect([])" />
           </div>
           <a href="" class="gap-3 d-flex align-items-center">
             <span class="h6-semibold" style="color:#fff;">{{ auth()->user()->name }}</span>

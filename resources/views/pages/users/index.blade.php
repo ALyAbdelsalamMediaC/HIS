@@ -10,7 +10,8 @@
             </div>
 
             <div class="gap-3 d-flex align-items-center">
-                <x-link_btn href="" style="background-color: transparent; color: #BB1313; border: 1px solid #BB1313;">
+                <x-link_btn href="{{ route('users.blocked') }}"
+                    style="background-color: transparent; color: #BB1313; border: 1px solid #BB1313;">
                     <x-svg-icon name="shield-block" size="20" />
                     <span>Blocked Users</span>
                 </x-link_btn>

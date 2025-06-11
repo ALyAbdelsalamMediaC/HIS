@@ -9,9 +9,8 @@
     </div>
 
     <div class="gap-3 d-flex align-items-center">
-      <x-link_btn href="{{ route('users.index') }}"
-      style="background-color: transparent; color: #35758C; border: 1px solid #35758C;">
-      <x-svg-icon name="users" size="20" />
+      <x-link_btn href="{{ route('users.index') }}">
+      <x-svg-icon name="user" size="18" />
       <span>All Users</span>
       </x-link_btn>
     </div>

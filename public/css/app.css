@@ -915,7 +915,6 @@ body {
     Navbar Home Style
    ======================================================== 
 */
-
 .navbar-home-container {
     height: 161px;
     padding: 32px 24px 26px 45px;
@@ -967,6 +966,30 @@ body {
 .notification-bell-btn {
     padding: 0px 12px;
     border-right: 1px solid var(--border-color);
+}
+
+.dropdown-menu {
+    min-width: 499px; /* Consistent width for notifications */
+    padding: 0px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: var(--main-border-radius-md);
+    transform: translate(0px, 60px) !important;
+    padding: 24px 16px !important;
+}
+
+.dropdown-item {
+    padding: 12px 0px !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    color: var(--text-color) !important;
+    background-color: var(--border-color) !important;
 }
 
 /* ========================================================
