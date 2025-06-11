@@ -19,7 +19,7 @@
           <div class="modal-body">
               <!-- Image Section -->
               @if($image)
-              <div class="text-center mb-4">
+              <div class="mb-4 text-center">
                   <img src="{{ $image }}" alt="User Image" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
               </div>
               @endif

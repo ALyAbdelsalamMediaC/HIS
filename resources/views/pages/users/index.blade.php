@@ -78,16 +78,17 @@
                             <!-- Block Modal for User -->
                             <x-modal id="deleteUserModal{{ $user->id }}" title="Block User">
                                 <div class="my-3">
-                                    <p class="h4-semibold">Are you sure you want to block the user
+                                    <p class="h4-ragular" style="color:#000;">Are you sure you want to block the user
                                         "{{ $user->name }}"?</p>
                                 </div>
                                 <div class="modal-footer">
-                                    <x-button type="button" style="color:#ADADAD;" class="btn-nothing"
+                                    <x-button type="button"
+                                        style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;"
                                         data-bs-dismiss="modal">Cancel</x-button>
                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <x-button type="submit" class="px-4 btn-danger">Block</x-button>
+                                        <x-button type="submit" style="background-color:#BB1313; color:#fff;">Block</x-button>
                                     </form>
                                 </div>
                             </x-modal>

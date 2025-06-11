@@ -330,11 +330,44 @@ body {
    ======================================================== */
 .btn-close {
     color: #adadad;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .modal-title {
-    color: var(--primary-color);
+    color: var(--text-color);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.modal-dialog {
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-footer {
+    padding: 0px;
+    background-color: transparent;
+    border-top: none;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.modal-content {
+    padding: 32px;
+    width: 85%;
+}
+
+.modal-body {
+    padding: 0px;
+}
+
+.modal-header {
+    padding: 0px;
+    border-bottom: none;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
 
 /* ========================================================
