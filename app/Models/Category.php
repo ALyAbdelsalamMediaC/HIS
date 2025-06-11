@@ -9,7 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'image_path', 'video_path', 'description'];
+    protected $fillable = ['user_id', 'name', 'description'];
 
     public function media()
     {
@@ -18,5 +18,9 @@ class Category extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
     }
 }

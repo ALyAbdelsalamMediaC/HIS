@@ -32,6 +32,7 @@ class MediaController extends Controller
     public function getall(Request $request)
     {
         try {
+            
             $categories = Category::all();
 
             if ($this->client->isAccessTokenExpired()) {

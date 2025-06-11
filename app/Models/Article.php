@@ -13,10 +13,10 @@ class Article extends Model
         'user_id',
         'title',
         'description',
-        'status',
         'image',
         'hyperlink',
-        'pdf'
+        'pdf',
+        'is_featured'
     ];
     public function category()
     {
@@ -26,8 +26,10 @@ class Article extends Model
     {
         return $this->belongsTo(User::class);
     }
-     public function comments()
+     public function CommentArticle()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(CommentArticle::class);
     }
+
+    
 }

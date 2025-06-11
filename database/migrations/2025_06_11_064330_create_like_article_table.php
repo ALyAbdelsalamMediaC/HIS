@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('favorite_article', function (Blueprint $table) {
+        Schema::create('like_article', function (Blueprint $table) {
             $table->id();
+             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('article_id');
-            $table->unsignedBigInteger('user_id');
-
-            $table->foreign('article_id')->references('id')->on('article')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('article_id')->references('id')->on('articles')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorite_article');
+        Schema::dropIfExists('like_article');
     }
 };

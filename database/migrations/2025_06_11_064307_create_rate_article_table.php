@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('like_article', function (Blueprint $table) {
+         Schema::create('rate_article', function (Blueprint $table) {
             $table->id();
-             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('article_id');
-            $table->foreign('article_id')->references('id')->on('article')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;
+            $table->unsignedBigInteger('user_id');
+            $table->string('rate');
             $table->timestamps();
+
+            $table->foreign('article_id')->references('id')->on('articles')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('like_article');
+        Schema::dropIfExists('rate_article');
     }
 };

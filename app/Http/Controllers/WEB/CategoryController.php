@@ -35,30 +35,32 @@ class CategoryController extends Controller
     }
 
     // Store new category
-    public function store(Request $request)
-    {
-        $user = Auth::user();
-        try {
-            if (!$user || !$user->hasRole('admin')) {
-                $request->validate([
-                    'name' => 'required|string|max:255',
-                    'description' => 'nullable|string',
-                ]);
+public function store(Request $request)
+{
+    $user = Auth::user();
 
-                Category::create([
-                    'name' => $request->name,
-                    'description' => $request->description,
-                    'user_id' => $user->id,
-                ]);
+    try {
+        if ($user->role === 'admin') {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+            ]);
 
-                $this->logSuccess('Created a new category: ' . $request->name);
-                return redirect()->route('pages.categories.index')->with('success', 'Category created successfully.');
-            }
-        } catch (Exception $e) {
-            $this->logError('Failed to create category: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Failed to create category.');
+            Category::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'user_id' => $user->id,
+            ]);
+
+            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        } else {
+            return back()->with('error', 'You do not have permission to create a category.');
         }
+    } catch (Exception $e) {
+        \Log::error('Failed to create category: ' . $e->getMessage() . ' in ' . $e->getFile() . ' at line ' . $e->getLine());
+        return back()->withInput()->with('error', 'Failed to create category: ' . $e->getMessage());
     }
+}
 
     // Show form to edit an existing category
     public function edit(Category $category)
@@ -83,7 +85,7 @@ class CategoryController extends Controller
             $category->update($request->only('name', 'description'));
 
             $this->logSuccess('Updated category: ' . $category->name);
-            return redirect()->route('pages.categories.index')->with('success', 'Category updated successfully.');
+            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
         } catch (Exception $e) {
             $this->logError('Failed to update category: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Failed to update category.');
@@ -98,7 +100,7 @@ class CategoryController extends Controller
             $category->delete();
 
             $this->logSuccess("Deleted category: $name");
-            return redirect()->route('pages.categories.index')->with('success', 'Category deleted successfully.');
+            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
         } catch (Exception $e) {
             $this->logError('Failed to delete category: ' . $e->getMessage());
             return back()->with('error', 'Failed to delete category.');

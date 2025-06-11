@@ -11,9 +11,21 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
+use App\Services\GoogleDriveService; // Make sure this service is built
+
+
 class ArticleController extends Controller
 {
-    public function getall(Request $request)
+      protected $client;
+    protected $driveService;
+
+    public function __construct(GoogleDriveService $driveService)
+    {
+        $this->driveService = $driveService;
+        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+    }
+
+   public function getall(Request $request)
     {
         try {
             $categories = Category::all();
@@ -76,12 +88,11 @@ class ArticleController extends Controller
             $validated = $request->validate([
                 'category_id' => 'required|exists:categories,id',
                 'title' => 'required|string|max:255',
-                'name' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
                 'iamge_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
-                'is_recommended' => 'nullable|boolean',
             ]);
 
 
@@ -92,17 +103,26 @@ class ArticleController extends Controller
                 $iamge_path = $request->file('iamge_path')->store('iamge_path', 'public');
             }
 
+              $pdf = null;
+            if ($request->hasFile('pdf')) {
+                $driveService = new GoogleDriveService();
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
+            }
+
             // Save to database
             $Article = Article::create([
                 'category_id' => $validated['category_id'],
+                'user_id' => Auth::id(),
                 'title' => $validated['title'],
-                'name' => $validated['name'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'status' => 'approved',
                 'iamge_path' => $iamge_path,
+                'pdf'=> $pdf,
                 'is_featured' => $request->boolean('is_featured'),
-                'is_recommended' => $request->boolean('is_recommended'),
             ]);
 
             // Log success
@@ -112,10 +132,9 @@ class ArticleController extends Controller
                 'description' => 'Uploaded article: ' . $Article->title,
             ]);
 
-            return response()->json([
-                'message' => 'Article uploaded successfully.',
-                'article' => $Article
-            ], 201);
+            
+                        return redirect()->route('content.articles')->with('success', 'Article uploaded successfully.');
+
         } catch (Exception $e) {
             LaravelLog::error('Article upload error: ' . $e->getMessage());
 
@@ -124,11 +143,8 @@ class ArticleController extends Controller
                 'type' => 'article_upload_error',
                 'description' => $e->getMessage(),
             ]);
+            return back()->withInput()->with('error', 'Article upload failed. ' . $e->getMessage());
 
-            return response()->json([
-                'error' => 'Article upload failed.',
-                'message' => $e->getMessage()
-            ], 500);
         }
     }
 }

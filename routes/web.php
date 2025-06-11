@@ -39,11 +39,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
 
+    Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
     Route::get('/content/articles/add', [ArticleController::class, 'create']);
     Route::post('/content/articles/add', [ArticleController::class, 'store'])->name('articles.store');
     ;
-    Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
     Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
