@@ -135,18 +135,22 @@ class UserController extends Controller
             // Apply search filter if provided
             if ($request->filled('search')) {
                 $search = $request->input('search');
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%"); // Optional: Add email search
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             }
 
-            // Retrieve soft-deleted users
+            // Retrieve soft-deleted users with pagination
             $users = $query->select('id', 'name', 'email', 'username', 'phone', 'deleted_at')
-                ->paginate(10); // Use pagination for better performance
+                ->paginate(10);
 
+            // Get total number of deleted users (ignoring search filter)
+            $totalDeleted = User::onlyTrashed()->count();
 
-        return view('pages.users.blocked_users', compact('users'));
+            return view('pages.users.blocked_users', compact('users', 'totalDeleted'));
         } catch (\Exception $e) {
-             Log::create([
+            Log::create([
                 'user_id' => Auth::id(),
                 'type' => 'user_blocked_error',
                 'description' => $e->getMessage(),
