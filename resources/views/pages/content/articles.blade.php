@@ -138,13 +138,13 @@
     @endforelse
     </div>
 
-    <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
-      <!-- Table Info and Pagination -->
-      @if($article->count())
-      <x-table-info :paginator="$article" />
-      <x-pagination :paginator="$article" :appends="request()->query()" />
-    @endif
     </div>
+    <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
+    <!-- Table Info and Pagination -->
+    @if($article->count())
+    <x-table-info :paginator="$article" />
+    <x-pagination :paginator="$article" :appends="request()->query()" />
+    @endif
     </div>
   </section>
 
