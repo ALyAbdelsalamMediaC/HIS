@@ -24,7 +24,4 @@ Route::get('/article/show', [ArticleController::class, 'show']);
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 
-Route::get('login/google', [SocialAuthController::class, 'redirectToGoogle']);
-Route::get('login/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
-Route::get('login/apple', [SocialAuthController::class, 'redirectToApple']);
-Route::get('login/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
+Route::post('login/google', [SocialAuthController::class, 'handleGoogleLoginApi'])->name('api.social.google.login');

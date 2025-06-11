@@ -173,4 +173,90 @@ class SocialAuthController extends Controller
             return redirect()->route('login')->withErrors(['login' => 'Apple authentication failed. Please try again.']);
         }
     }
+    public function handleGoogleLoginApi(Request $request)
+    {
+        $request->validate([
+            'id_token' => 'required|string', // Google ID token from mobile app
+        ]);
+
+        try {
+            // Verify the Google ID token
+            $socialUser = Socialite::driver('google')->stateless()->userFromToken($request->id_token);
+
+            // Check if user exists by google_id or email
+            $user = User::where('google_id', $socialUser->id)
+                ->orWhere('email', $socialUser->email)
+                ->first();
+
+            if ($user == null) {
+                return response()->json([
+                    'error' => 'Your account has been blocked.',
+                ], 403);
+            }
+
+            if ($user) {
+                // Update google_id if not set
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $socialUser->id]);
+                }
+
+                // Check if user has admin or reviewer role
+                if (!in_array($user->role, ['admin', 'reviewer'])) {
+                    Log::create([
+                        'user_id' => $user->id,
+                        'type' => 'login_error',
+                        'description' => "Google API login failed: user is not admin or reviewer (Email: {$socialUser->email})",
+                    ]);
+                    return response()->json([
+                        'error' => 'Access denied. Admins or reviewers only.',
+                    ], 403);
+                }
+
+                // Log successful login
+                Log::create([
+                    'user_id' => $user->id,
+                    'type' => 'login_success',
+                    'description' => "Google API login successful for {$socialUser->email}",
+                ]);
+            } else {
+                // Create new user with a unique username
+                $username = $this->generateUniqueUsername($socialUser->name, $socialUser->email);
+
+                $user = User::create([
+                    'name' => $socialUser->name,
+                    'email' => $socialUser->email,
+                    'google_id' => $socialUser->id,
+                    'username' => $username,
+                    'role' => 'admin', // Adjust as needed
+                    'password' => Hash::make(Str::random(16)),
+                    'email_verified_at' => now(),
+                ]);
+
+                Log::create([
+                    'user_id' => $user->id,
+                    'type' => 'registration',
+                    'description' => "New admin registered via Google API ({$socialUser->email})",
+                ]);
+            }
+
+            // Generate Sanctum token
+            $token = $user->createToken('mobile-app')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ],
+                'token' => $token,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Google API login error: " . $e->getMessage());
+            return response()->json([
+                'error' => 'Google authentication failed. Please try again.',
+            ], 401);
+        }
+    }
 }
