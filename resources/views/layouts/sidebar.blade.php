@@ -43,12 +43,12 @@
             <span class="sidebar-menu-text">Content</span>
           </a>
         </li>
-        <li class="sidebar-menu-li">
+        <!-- <li class="sidebar-menu-li">
           <a href="{{ route('categories.index') }}" class="h6-semibold">
             <x-svg-icon name="article" size="18" />
             <span class="sidebar-menu-text">Categories</span>
           </a>
-        </li>
+        </li> -->
 
         <li class="sidebar-menu-li">
           <a href="" class="h6-semibold">
