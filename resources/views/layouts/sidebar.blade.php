@@ -51,7 +51,7 @@
         </li> -->
 
         <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
+          <a href="{{ route('settings.index') }}" class="h6-semibold">
             <x-svg-icon name="setting" size="18" />
             <span class="sidebar-menu-text">Settings</span>
           </a>

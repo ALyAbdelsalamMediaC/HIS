@@ -11,10 +11,11 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('pages.settings.index');
     }
-      public function profile()
+    public function profile()
     {
         try {
             $user = Auth::user();

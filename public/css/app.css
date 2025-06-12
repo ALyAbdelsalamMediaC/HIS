@@ -1550,6 +1550,31 @@ body {
 /* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
+.settings-links-content {
+    width: 100%;
+}
+.settings-links-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 20px 24px;
+    border-radius: var(--main-border-radius-md);
+    background: var(--white-color);
+}
+.setting-icon {
+    border-radius: 8px;
+    background: #f1f9fa;
+    width: 48px;
+    height: 48px;
+    line-height: 45px;
+    text-align: center;
+}
+
+/* ========================================================
+    Media Queries and Responsive Styles
+   ======================================================== */
 
 @media only screen and (max-width: 992px) {
     .auth-flex {
