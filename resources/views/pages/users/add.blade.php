@@ -13,7 +13,7 @@
     </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.register') }}" novalidate>
+    <form method="POST" action="{{ route('admin.register') }}" class="mt-4" novalidate>
     @csrf
 
     <div class="form-infield">

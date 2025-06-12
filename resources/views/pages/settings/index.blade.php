@@ -11,7 +11,7 @@
     <h2 class="mt-4 mb-3 h3-semibold">Account Details:</h2>
 
     <div class="settings-links-content">
-    <a href="" class="settings-links-container">
+    <a href="{{ route('settings.profile') }}" class="settings-links-container">
       <span class="gap-2 d-flex align-items-center">
       <span class="setting-icon">
         <x-svg-icon name="user" size="18" color="#35758C" />
@@ -26,7 +26,7 @@
       <x-svg-icon name="arrow-right" size="24" color="#000" />
     </a>
 
-    <a href="" class="settings-links-container">
+    <a href="{{ route('settings.changePassword') }}" class="settings-links-container">
       <span class="gap-2 d-flex align-items-center">
       <span class="setting-icon">
         <x-svg-icon name="lock" size="18" color="#35758C" />
@@ -56,7 +56,7 @@
       <x-svg-icon name="arrow-right" size="24" color="#000" />
     </a>
 
-    <a href="" class="settings-links-container">
+    <a href="{{ route('settings.help') }}" class="settings-links-container">
       <span class="gap-2 d-flex align-items-center">
       <span class="setting-icon">
         <x-svg-icon name="info" size="18" color="#35758C" />

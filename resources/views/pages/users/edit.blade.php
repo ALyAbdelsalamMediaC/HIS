@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('users.update', $user->id) }}" novalidate>
+        <form method="POST" action="{{ route('users.update', $user->id) }}" class="mt-4" novalidate>
             @csrf
             @method('PUT')
 
