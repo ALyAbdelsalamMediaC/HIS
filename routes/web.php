@@ -6,6 +6,7 @@ use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\MediaController;
+use App\Http\Controllers\WEB\PolicyController;
 use App\Http\Controllers\WEB\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -66,9 +67,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
     Route::get('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
+    Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
     Route::get('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
+    
 
-    // Route::post('register', [AdminAuthController::class, 'register']);
+    Route::prefix('policies')->name('policies.')->group(function () {
+        Route::get('/', [PolicyController::class, 'index'])->name('index');
+        Route::get('/create', [PolicyController::class, 'create'])->name('create');
+        Route::post('/create', [PolicyController::class, 'store'])->name('store');
+        Route::get('/{policy}', [PolicyController::class, 'show'])->name('show');
+        Route::get('/{policy}/edit', [PolicyController::class, 'edit'])->name('edit');
+        Route::put('/{policy}', [PolicyController::class, 'update'])->name('update');
+        Route::delete('/{policy}', [PolicyController::class, 'destroy'])->name('destroy');
+        Route::prefix('categories')->name('categories.')->group(function () {
+            Route::post('/', [PolicyController::class, 'storeCategory'])->name('store');
+            Route::get('/{category}', [PolicyController::class, 'showCategory'])->name('show');
+            Route::put('/{category}', [PolicyController::class, 'updateCategory'])->name('update');
+            Route::delete('/{category}', [PolicyController::class, 'destroyCategory'])->name('destroy');
+        });
+    });
+    
 });
 
 

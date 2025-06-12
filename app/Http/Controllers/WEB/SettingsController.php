@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
 use App\Models\Log;
 use App\Models\Media;
@@ -11,15 +12,16 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('pages.settings.index');
     }
-      public function profile()
+    public function profile()
     {
         try {
             $user = Auth::user();
             $content = Media::where('user_id', $user->id)->get();
-            return view('pages.users.profile', compact('user', 'content'));
+            return view('pages.settings.profile', compact('user', 'content'));
         } catch (\Exception $e) {
             // Assuming you have a Log model and logs table
             Log::create([
@@ -60,6 +62,23 @@ class SettingsController extends Controller
                 'description' => $e->getMessage(),
             ]);
             return back()->with('error', 'An error occurred while updating the profile.');
+        }
+    }
+    public function showChangePasswordForm()
+    {
+        try {
+            $user = Auth::user();
+            if (!empty($user->google_id) || !empty($user->apple_id)) {
+                return back()->with('error', 'You cannot change the password for accounts registered with Google or Apple.');
+            }
+            return view('pages.settings.changePassword.index');
+        } catch (\Exception $e) {
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'show_change_password_form_error',
+                'description' => $e->getMessage(),
+            ]);
+            return back()->with('error', 'An error occurred while loading the change password form.');
         }
     }
     public function changePassword(Request $request)

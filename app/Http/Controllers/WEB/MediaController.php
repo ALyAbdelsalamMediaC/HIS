@@ -184,8 +184,8 @@ class MediaController extends Controller
                 'file_path' => $video,
                 'pdf' => $pdf,
                 'status' => 'published',
-                'thumbnail_path' => $thumbnailPath,
-                'image_path' => $imagePath,
+                'thumbnail_path' => 'http://127.0.0.1:8000/'.$thumbnailPath,
+                'image_path' => 'http://127.0.0.1:8000/'.$imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
                 'duration' => $duration, // Save duration
