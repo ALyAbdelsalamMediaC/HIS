@@ -26,7 +26,7 @@
 
         <div class="user-count">
             <h3 class="h5-ragular">Total Users</h3>
-            <h2 class="h3-semibold">1,234</h2>
+            <h2 class="h3-semibold">{{ $total_users }}</h2>
         </div>
 
         <div class="table-u-container">

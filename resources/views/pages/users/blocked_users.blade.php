@@ -18,7 +18,7 @@
 
     <div class="user-count">
     <h3 class="h5-ragular">Total Blocked Users</h3>
-    <h2 class="h3-semibold">{{ $users->count() }}</h2>
+    <h2 class="h3-semibold">{{ $totalDeleted }}</h2>
     </div>
 
     <div class="table-u-container">
@@ -56,7 +56,7 @@
       <td>
         <div class="gap-3 d-flex align-items-center">
         <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#unblockUserModal{{ $user->id }}">
-        <x-svg-icon name="unblock" size="18" color="#35758C" />
+        <x-svg-icon name="unblock" size="18" color="#3F8F43" />
         </button>
         </div>
       </td>
@@ -69,11 +69,11 @@
         "{{ $user->name }}"?</p>
       </div>
       <div class="modal-footer">
-        <x-button type="button" style="color:#35758C; background-color:transparent; border:1px solid #35758C;"
+        <x-button type="button" style="color:#3F8F43; background-color:transparent; border:1px solid #3F8F43;"
         data-bs-dismiss="modal">Cancel</x-button>
         <form action="{{ route('users.restore', $user->id) }}" method="POST">
         @csrf
-        <x-button type="submit" style="background-color:#35758C; color:#fff;">Unblock</x-button>
+        <x-button type="submit" style="background-color:#3F8F43; color:#fff;">Unblock</x-button>
         </form>
       </div>
       </x-modal>
