@@ -53,9 +53,7 @@ class SocialAuthController extends Controller
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
                 ->first();
-            if ($user == null) {
-                return redirect()->route('login')->withErrors(['login' => 'Your account has been blocked.']);
-            }
+            
 
             if ($user) {
                 // Update google_id if not set
@@ -188,11 +186,7 @@ class SocialAuthController extends Controller
                 ->orWhere('email', $socialUser->email)
                 ->first();
 
-            if ($user == null) {
-                return response()->json([
-                    'error' => 'Your account has been blocked.',
-                ], 403);
-            }
+           
 
             if ($user) {
                 // Update google_id if not set
@@ -227,7 +221,7 @@ class SocialAuthController extends Controller
                     'email' => $socialUser->email,
                     'google_id' => $socialUser->id,
                     'username' => $username,
-                    'role' => 'admin', // Adjust as needed
+                    'role' => 'user', // Adjust as needed
                     'password' => Hash::make(Str::random(16)),
                     'email_verified_at' => now(),
                 ]);

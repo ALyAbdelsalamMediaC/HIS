@@ -63,8 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::get('/users/add', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
     Route::post('/users/add', [AdminAuthController::class, 'register'])->name('admin.register');
-    Route::get('/settings/profile', [SettingsController::class, 'edit'])->name('users.profile');
-    Route::get('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('users.changePassword');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+    Route::get('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
+    Route::get('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
 
     // Route::post('register', [AdminAuthController::class, 'register']);
 });
