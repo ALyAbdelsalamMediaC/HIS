@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Policy;
-use App\Models\Category;
+use App\Models\PolicyCategory;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +18,7 @@ class PolicyController extends Controller
      */
     public function index()
     {
-        $categories = Category::with([
+        $categories = PolicyCategory::with([
             'policies' => function ($query) {
                 $query->with('addedBy:id,name,username')->orderBy('id');
             }
@@ -34,7 +34,7 @@ class PolicyController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
+        $categories = PolicyCategory::all();
 
         return view('pages.policies.create', compact('categories'));
     }
@@ -92,9 +92,9 @@ class PolicyController extends Controller
      */
     public function edit(Policy $policy)
     {
-        $categories = Category::all();
+        $categories = PolicyCategory::all();
         if (empty($policy->body)) {
-            // Log::info('Policy body is empty for policy ID: ' . $policy->id);
+            // \Log::info('Policy body is empty for policy ID: ' . $policy->id);
         }
         return view('pages.policies.edit', compact('policy', 'categories'));
     }
@@ -170,7 +170,7 @@ class PolicyController extends Controller
         ]);
 
         try {
-            Category::create([
+            PolicyCategory::create([
                 'title' => $validatedData['category_title'],
             ]);
 
@@ -186,10 +186,10 @@ class PolicyController extends Controller
     /**
      * Display the specified policy category.
      *
-     * @param Category $category
+     * @param PolicyCategory $category
      * @return \Illuminate\View\View
      */
-    public function showCategory(Category $category)
+    public function showCategory(PolicyCategory $category)
     {
         return view('pages.policies.show_category', compact('category'));
     }
@@ -198,10 +198,10 @@ class PolicyController extends Controller
      * Update the specified policy category in storage.
      *
      * @param HttpRequest $request
-     * @param Category $category
+     * @param PolicyCategory $category
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function updateCategory(HttpRequest $request, Category $category)
+    public function updateCategory(HttpRequest $request, PolicyCategory $category)
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255|unique:policy_categories,title,' . $category->id,
@@ -228,10 +228,10 @@ class PolicyController extends Controller
     /**
      * Remove the specified policy category from storage.
      *
-     * @param Category $category
+     * @param PolicyCategory $category
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroyCategory(Category $category)
+    public function destroyCategory(PolicyCategory $category)
     {
         try {
             DB::beginTransaction();
