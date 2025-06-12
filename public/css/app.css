@@ -1551,6 +1551,12 @@ body {
     Media Queries and Responsive Styles
    ======================================================== */
 .settings-links-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-links-content {
     width: 100%;
 }
 .settings-links-container {
