@@ -17,6 +17,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Services\GoogleDriveService; // Make sure this service is built
 use getID3;
+use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
 {
@@ -208,6 +209,134 @@ class MediaController extends Controller
             ]);
             return back()->withInput()->with('error', 'Media upload failed. ' . $e->getMessage());
 
+        }
+    }
+
+      public function edit($id)
+    {
+        try {
+            $media = Media::with('category')->findOrFail($id);
+            $categories = Category::all();
+
+            return view('pages.content.edit_video', compact('media', 'categories'));
+        } catch (Exception $e) {
+            LaravelLog::error('Media edit error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to load media for editing.');
+        }
+    }
+
+     public function update(Request $request, $id)
+    {
+        try {
+            $media = Media::findOrFail($id);
+
+            // Validate input
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'is_featured' => 'nullable|boolean',
+                'is_recommended' => 'nullable|boolean',
+            ]);
+
+            $getID3 = new getID3();
+            $duration = $media->duration;
+
+            // Update video duration if new file is uploaded
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $videoPath = $request->file('file')->getRealPath();
+                $fileInfo = $getID3->analyze($videoPath);
+                $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+            }
+
+            // Update video file on Google Drive
+            $video = $media->file_path;
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                // Delete old file from Google Drive if exists
+                if ($media->file_path) {
+                    $fileId = $this->driveService->getFileIdFromUrl($media->file_path);
+                    if ($fileId) {
+                        $this->driveService->deleteFile($fileId);
+                    }
+                }
+                // Upload new file
+                $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                $video = $this->driveService->uploadFile($request->file('file'), $filename);
+            }
+
+            // Update PDF file on Google Drive
+            $pdf = $media->pdf;
+            if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
+                // Delete old PDF from Google Drive if exists
+                if ($media->pdf) {
+                    $fileId = $this->driveService->getFileIdFromUrl($media->pdf);
+                    if ($fileId) {
+                        $this->driveService->deleteFile($fileId);
+                    }
+                }
+                // Upload new PDF
+                $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                $pdf = $this->driveService->uploadFile($request->file('pdf'), $filename);
+            }
+
+            // Update thumbnail if exists
+            $thumbnailPath = $media->thumbnail_path;
+            if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
+                // Delete old thumbnail from storage if exists
+                if ($media->thumbnail_path) {
+                    $oldPath = str_replace('http://127.0.0.1:8000/', '', $media->thumbnail_path);
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $thumbnailPath = 'http://127.0.0.1:8000/' . $request->file('thumbnail_path')->store('thumbnails', 'public');
+            }
+
+            // Update image if exists
+            $imagePath = $media->image_path;
+            if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
+                // Delete old image from storage if exists
+                if ($media->image_path) {
+                    $oldPath = str_replace('http://127.0.0.1:8000/', '', $media->image_path);
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $imagePath = 'http://127.0.0.1:8000/' . $request->file('image_path')->store('images', 'public');
+            }
+
+            // Update database
+            $media->update([
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'file_path' => $video,
+                'pdf' => $pdf,
+                'thumbnail_path' => $thumbnailPath,
+                'image_path' => $imagePath,
+                'is_featured' => $request->boolean('is_featured'),
+                'is_recommended' => $request->boolean('is_recommended'),
+                'duration' => $duration,
+            ]);
+
+            // Log success
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_update_success',
+                'description' => 'Updated media: ' . $media->title,
+            ]);
+
+            return redirect()->route('content.videos')->with('success', 'Media updated successfully.');
+        } catch (Exception $e) {
+            LaravelLog::error('Media update error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_update_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()->with('error', 'Media update failed: ' . $e->getMessage());
         }
     }
 }

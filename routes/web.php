@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/video/{id}', [MediaController::class, 'getone'])->name('content.video');
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
 
+    Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
+    Route::put('content/{id}', [MediaController::class, 'update'])->name('content.update');
 
     Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
@@ -45,7 +47,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/content/articles/add', [ArticleController::class, 'create']);
     Route::post('/content/articles/add', [ArticleController::class, 'store'])->name('articles.store');
-    ;
+    Route::get('content/articles/{id}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('content/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
     Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
@@ -86,7 +89,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{category}', [PolicyController::class, 'destroyCategory'])->name('destroy');
         });
     });
-
 });
 
 

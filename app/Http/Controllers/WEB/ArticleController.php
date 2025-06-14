@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Services\GoogleDriveService; // Make sure this service is built
+use Illuminate\Support\Facades\Storage;
 
 
 class ArticleController extends Controller
@@ -145,6 +146,93 @@ class ArticleController extends Controller
             ]);
             return back()->withInput()->with('error', 'Article upload failed. ' . $e->getMessage());
 
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            $article = Article::with('category')->findOrFail($id);
+            $categories = Category::all();
+
+
+            return view('pages.content.edit_article', compact('article', 'categories'));
+        } catch (Exception $e) {
+            LaravelLog::error('Article edit error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to load article for editing.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $article = Article::findOrFail($id);
+
+            // Validate input
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'title' => 'required|string|max:255',
+                'hyperlink' => 'nullable|url|max:2048',
+                'description' => 'nullable|string',
+                'iamge_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'is_featured' => 'nullable|boolean',
+            ]);
+
+            // Update PDF file on Google Drive
+            $pdf = $article->pdf;
+            if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
+                // Delete old PDF from Google Drive if exists
+                if ($article->pdf) {
+                    $fileId = $this->driveService->getFileIdFromUrl($article->pdf);
+                    if ($fileId) {
+                        $this->driveService->deleteFile($fileId);
+                    }
+                }
+                // Upload new PDF
+                $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                $pdf = $this->driveService->uploadFile($request->file('pdf'), $filename);
+            }
+
+            // Update image if exists
+            $iamge_path = $article->iamge_path;
+            if ($request->hasFile('iamge_path') && $request->file('iamge_path')->isValid()) {
+                // Delete old image from storage if exists
+                if ($article->iamge_path) {
+                    Storage::disk('public')->delete($article->iamge_path);
+                }
+                $iamge_path = $request->file('iamge_path')->store('iamge_path', 'public');
+            }
+
+            // Update database
+            $article->update([
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'hyperlink' => $validated['hyperlink'],
+                'description' => $validated['description'] ?? null,
+                'iamge_path' => $iamge_path,
+                'pdf' => $pdf,
+                'is_featured' => $request->boolean('is_featured'),
+            ]);
+
+            // Log success
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'article_update_success',
+                'description' => 'Updated article: ' . $article->title,
+            ]);
+
+            return redirect()->route('content.articles')->with('success', 'Article updated successfully.');
+        } catch (Exception $e) {
+            LaravelLog::error('Article update error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'article_update_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()->with('error', 'Article update failed: ' . $e->getMessage());
         }
     }
 }
