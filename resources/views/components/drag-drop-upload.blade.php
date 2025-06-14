@@ -74,24 +74,19 @@
 
         <!-- Upload Progress -->
         <div x-show="isUploading" class="mt-2">
-            <p class="h5-ragular" style="color:#35758C;" x-text="`Uploading... ${Math.round(uploadProgress)}%`"></p>
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
 
         <!-- Success Message -->
         <div x-show="uploadComplete" class="mt-2">
-            <p class="h5-ragular" style="color:#28a745;">✓ Upload completed successfully!</p>
+            <p class="h5-ragular" style="color:#28a745;">✓ completed successfully!</p>
         </div>
 
         <!-- Error Message -->
         <div x-show="hasError" class="mt-2">
             <p class="h5-ragular" style="color:#dc3545;" x-text="errorMessage"></p>
-            <button 
-                type="button" 
-                class="mt-2 btn btn-sm btn-outline-primary"
-                @click="retry"
-            >
-                Try Again
-            </button>
         </div>
     </div>
 
@@ -220,12 +215,6 @@ function dragDropUpload(config) {
 
         simulateUpload() {
             this.uploadInterval = setInterval(() => {
-                // Simulate network issues randomly (1% chance)
-                if (Math.random() < 0.01 && this.uploadProgress < 90) {
-                    this.handleUploadError('Network connection lost. Please try again.');
-                    return;
-                }
-
                 this.uploadProgress += Math.random() * 10 + 5;
                 
                 if (this.uploadProgress >= 100) {
@@ -239,11 +228,6 @@ function dragDropUpload(config) {
             clearInterval(this.uploadInterval);
             this.isUploading = false;
             this.uploadComplete = true;
-            
-            const message = this.multiple 
-                ? `${this.selectedFiles.length} files uploaded successfully!`
-                : 'File uploaded successfully!';
-            showToast(message, 'success');
 
             // Auto-hide success message after 3 seconds but keep file info
             setTimeout(() => {
@@ -260,14 +244,9 @@ function dragDropUpload(config) {
         },
 
         retry() {
-            if (this.retryAttempts < this.maxRetries) {
-                this.retryAttempts++;
-                this.hasError = false;
-                this.uploadProgress = 0;
-                this.startUpload();
-            } else {
-                this.errorMessage = 'Maximum retry attempts reached. Please refresh and try again.';
-            }
+            this.hasError = false;
+            this.uploadProgress = 0;
+            this.startUpload();
         },
 
         removeFile(index) {

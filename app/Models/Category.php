@@ -23,4 +23,8 @@ class Category extends Model
     {
         return $this->hasMany(Article::class);
     }
+    public function policies()
+    {
+        return $this->hasMany(Policy::class, 'category_id');
+    }
 }

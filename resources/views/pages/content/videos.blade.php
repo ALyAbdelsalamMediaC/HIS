@@ -54,7 +54,8 @@
                                     'options' => [
                                         'published' => 'Published',
                                         'pending' => 'Pending',
-                                        'declined' => 'Declined'
+                                        'declined' => 'Declined',
+                                        'in_review' => 'In review',
                                     ]
                                 ],
                             ];

@@ -21,7 +21,7 @@ class SettingsController extends Controller
         try {
             $user = Auth::user();
             $content = Media::where('user_id', $user->id)->get();
-            return view('pages.settings.profile', compact('user', 'content'));
+            return view('pages.settings.profile.index', compact('user', 'content'));
         } catch (\Exception $e) {
             // Assuming you have a Log model and logs table
             Log::create([
