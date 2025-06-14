@@ -16,6 +16,7 @@ use Exception;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\GoogleDriveService; // Make sure this service is built
+use App\Services\GoogleDriveServicePDF; // Make sure this service is built
 use getID3;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,11 +24,16 @@ class MediaController extends Controller
 {
     protected $client;
     protected $driveService;
-
-    public function __construct(GoogleDriveService $driveService)
+    protected $driveServicePDF;
+    
+    public function __construct(GoogleDriveService $driveService, GoogleDriveServicePDF $driveServicePDF)
     {
+
         $this->driveService = $driveService;
         $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+        
+         $this->driveServicePDF = $driveServicePDF;
+        $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
     }
 
     public function getall(Request $request)
@@ -157,10 +163,10 @@ class MediaController extends Controller
 
             $pdf = null;
             if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
+                $driveServicePDF = new GoogleDriveServicePDF();
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
                     $pdf = $url;
                 }
             }
