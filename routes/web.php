@@ -71,7 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
     
 
-    Route::prefix('policies')->name('policies.')->group(function () {
+    Route::prefix('settings/policies')->name('policies.')->group(function () {
         Route::get('/', [PolicyController::class, 'index'])->name('index');
         Route::get('/create', [PolicyController::class, 'create'])->name('create');
         Route::post('/create', [PolicyController::class, 'store'])->name('store');

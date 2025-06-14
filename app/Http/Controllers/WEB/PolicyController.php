@@ -22,9 +22,9 @@ class PolicyController extends Controller
             'policies' => function ($query) {
                 $query->with('addedBy:id,name,username')->orderBy('id');
             }
-        ])->get();
+            ])->get();
 
-        return view('pages.policies.index', compact('categories'));
+        return view('pages.settings.helpCenter.index', compact('categories'));
     }
 
     /**
@@ -36,7 +36,7 @@ class PolicyController extends Controller
     {
         $categories = PolicyCategory::all();
 
-        return view('pages.policies.create', compact('categories'));
+        return view('pages.settings.helpCenter.create', compact('categories'));
     }
 
     /**
@@ -81,7 +81,7 @@ class PolicyController extends Controller
      */
     public function show(Policy $policy)
     {
-        return view('pages.policies.show', compact('policy'));
+        return view('pages.settings.helpCenter.show', compact('policy'));
     }
 
     /**
@@ -96,7 +96,7 @@ class PolicyController extends Controller
         if (empty($policy->body)) {
             // \Log::info('Policy body is empty for policy ID: ' . $policy->id);
         }
-        return view('pages.policies.edit', compact('policy', 'categories'));
+        return view('pages.settings.helpCenter.edit', compact('policy', 'categories'));
     }
 
     /**
@@ -191,7 +191,7 @@ class PolicyController extends Controller
      */
     public function showCategory(PolicyCategory $category)
     {
-        return view('pages.policies.show_category', compact('category'));
+        return view('pages.settings.helpCenter.show_category', compact('category'));
     }
 
     /**
