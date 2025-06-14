@@ -91,7 +91,7 @@ class ArticleController extends Controller
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'iamge_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
@@ -99,9 +99,9 @@ class ArticleController extends Controller
 
 
             // Store thumbnail if exists
-            $iamge_path = null;
-            if ($request->hasFile('iamge_path')) {
-                $iamge_path = $request->file('iamge_path')->store('iamge_path', 'public');
+            $image_path = null;
+            if ($request->hasFile('image_path')) {
+                $image_path = $request->file('image_path')->store('image_path', 'public');
             }
 
               $pdf = null;
@@ -121,7 +121,7 @@ class ArticleController extends Controller
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'iamge_path' => $iamge_path,
+                'image_path' => $image_path,
                 'pdf'=> $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);
@@ -174,7 +174,7 @@ class ArticleController extends Controller
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'iamge_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
@@ -195,13 +195,13 @@ class ArticleController extends Controller
             }
 
             // Update image if exists
-            $iamge_path = $article->iamge_path;
-            if ($request->hasFile('iamge_path') && $request->file('iamge_path')->isValid()) {
+            $image_path = $article->image_path;
+            if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
                 // Delete old image from storage if exists
-                if ($article->iamge_path) {
-                    Storage::disk('public')->delete($article->iamge_path);
+                if ($article->image_path) {
+                    Storage::disk('public')->delete($article->image_path);
                 }
-                $iamge_path = $request->file('iamge_path')->store('iamge_path', 'public');
+                $image_path = $request->file('image_path')->store('image_path', 'public');
             }
 
             // Update database
@@ -210,7 +210,7 @@ class ArticleController extends Controller
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'iamge_path' => $iamge_path,
+                'image_path' => $image_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);

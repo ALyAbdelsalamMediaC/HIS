@@ -167,12 +167,12 @@ class MediaController extends Controller
 
             // Store thumbnail if exists
             $thumbnailPath = null;
-            if ($request->hasFile('thumbnail')) {
-                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+            if ($request->hasFile('thumbnail_path')) {
+                $thumbnailPath = $request->file('thumbnail_path')->store('thumbnail_path', 'public');
             }
              $imagePath = null;
             if ($request->hasFile('image_path')) {
-                $thumbnailPath = $request->file('image_path')->store('images', 'public');
+                $imagePath = $request->file('image_path')->store('image_path', 'public');
             }
             
 
@@ -185,8 +185,8 @@ class MediaController extends Controller
                 'file_path' => $video,
                 'pdf' => $pdf,
                 'status' => 'published',
-                'thumbnail_path' => 'http://127.0.0.1:8000/'.$thumbnailPath,
-                'image_path' => 'http://127.0.0.1:8000/'.$imagePath,
+                'thumbnail_path' => $thumbnailPath,
+                'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
                 'duration' => $duration, // Save duration

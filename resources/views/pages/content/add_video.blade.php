@@ -37,7 +37,7 @@
             </div>
 
             <div class="form-infield">
-                <x-text_label for="image">Image</x-text_label>
+                <x-text_label for="image_path">Image</x-text_label>
                 <div style="position: relative;">
                     <x-text_input type="file" id="image_path" name="image_path"
                         placeholder="Choose an image from your gallery" accept="image/jpeg,image/jpg,image/png"
@@ -107,7 +107,7 @@
             if (file) {
                 const validTypes = expectedType.split(',');
                 if (!validTypes.includes(file.type)) {
-                    showToast(`Please select a valid ${expectedType.includes('image') ? 'image (JPEG, JPG, PNG)' : 'PDF'} file`, 'danger');
+                    showToast(`Please select a valid ${expectedType.includes('image_path') ? 'image (JPEG, JPG, PNG)' : 'PDF'} file`, 'danger');
                     input.value = '';
                     input.setAttribute('data-placeholder', defaultPlaceholder);
                     return;

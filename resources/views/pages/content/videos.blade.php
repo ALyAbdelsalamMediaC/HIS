@@ -91,7 +91,7 @@
                             </div>
 
                             <div class="mt-3 content-container-card-img">
-                                <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
+                                <img src="{{ $item->thumbnail_path ? Storage::url($item->thumbnail_path) : asset('images/placeholder.jpg') }}" alt="{{ $item->title }}">
 
                                 <span class="c-v-span">Video</span>
                                 <x-format-duration :seconds="$item->duration" class="c-d-span" />
