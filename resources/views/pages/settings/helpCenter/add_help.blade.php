@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'HIS | Help Center')
+@section('title', 'HIS | Add Help')
 @section('content')
 
   <section></section>

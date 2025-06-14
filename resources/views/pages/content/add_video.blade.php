@@ -146,28 +146,28 @@
 
             const style = document.createElement('style');
             style.textContent = `
-                                                                                                                                                                                        input[type="file"]::-webkit-file-upload-button,
-                                                                                                                                                                                        input[type="file"]::file-selector-button {
-                                                                                                                                                                                            display: none;
-                                                                                                                                                                                        }
-                                                                                                                                                                                        input[type="file"] {
-                                                                                                                                                                                            color: transparent;
-                                                                                                                                                                                        }
-                                                                                                                                                                                        input[type="file"]::before {
-                                                                                                                                                                                            content: attr(data-placeholder);
-                                                                                                                                                                                            color: #6c757d;
-                                                                                                                                                                                            position: absolute;
-                                                                                                                                                                                            padding-left:11px;
-                                                                                                                                                                                            left: 12px;
-                                                                                                                                                                                            top: 50%;
-                                                                                                                                                                                            transform: translateY(-50%);
-                                                                                                                                                                                            pointer-events: none;
-                                                                                                                                                                                            white-space: nowrap;
-                                                                                                                                                                                            overflow: hidden;
-                                                                                                                                                                                            text-overflow: ellipsis;
-                                                                                                                                                                                            max-width: calc(100% - 130px);
-                                                                                                                                                                                        }
-                                                                                                                                                                                    `;
+                                                                                                                                                                                            input[type="file"]::-webkit-file-upload-button,
+                                                                                                                                                                                            input[type="file"]::file-selector-button {
+                                                                                                                                                                                                display: none;
+                                                                                                                                                                                            }
+                                                                                                                                                                                            input[type="file"] {
+                                                                                                                                                                                                color: transparent;
+                                                                                                                                                                                            }
+                                                                                                                                                                                            input[type="file"]::before {
+                                                                                                                                                                                                content: attr(data-placeholder);
+                                                                                                                                                                                                color: #6c757d;
+                                                                                                                                                                                                position: absolute;
+                                                                                                                                                                                                padding-left:11px;
+                                                                                                                                                                                                left: 12px;
+                                                                                                                                                                                                top: 50%;
+                                                                                                                                                                                                transform: translateY(-50%);
+                                                                                                                                                                                                pointer-events: none;
+                                                                                                                                                                                                white-space: nowrap;
+                                                                                                                                                                                                overflow: hidden;
+                                                                                                                                                                                                text-overflow: ellipsis;
+                                                                                                                                                                                                max-width: calc(100% - 130px);
+                                                                                                                                                                                            }
+                                                                                                                                                                                        `;
             document.head.appendChild(style);
         });
     </script>
