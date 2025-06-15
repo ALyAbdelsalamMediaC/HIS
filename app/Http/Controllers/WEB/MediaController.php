@@ -15,31 +15,46 @@ use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
 use App\Models\User;
-use App\Services\GoogleDriveService; // Make sure this service is built
-use App\Services\GoogleDriveServicePDF; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use getID3;
 use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
 {
     protected $client;
-    protected $driveService;
+    protected $driveServiceVideo;
     protected $driveServicePDF;
-    
-    public function __construct(GoogleDriveService $driveService, GoogleDriveServicePDF $driveServicePDF)
-    {
+    protected $driveServiceImage;
+    protected $driveServiceThumbnail;
 
-        $this->driveService = $driveService;
-        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
-        
-         $this->driveServicePDF = $driveServicePDF;
+    public function __construct(
+        GoogleDriveServiceVideo $driveServiceVideo,
+        GoogleDriveServicePDF $driveServicePDF,
+        GoogleDriveServiceImage $driveServiceImage,
+        GoogleDriveServiceThumbnail $driveServiceThumbnail
+    ) {
+
+
+        $this->driveServiceVideo = $driveServiceVideo;
+        $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
+
+        $this->driveServicePDF = $driveServicePDF;
         $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
+
+         $this->driveServiceImage = $driveServiceImage;
+        $this->client = $this->driveServiceImage->getClient(); // Ensure this method exists in the service
+
+         $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
 
     public function getall(Request $request)
     {
         try {
-            
+
             $categories = Category::all();
 
             if ($this->client->isAccessTokenExpired()) {
@@ -153,7 +168,7 @@ class MediaController extends Controller
 
             $video = null;
             if ($request->hasFile('file')) {
-                $driveService = new GoogleDriveService();
+                $driveService = new GoogleDriveServiceVideo();
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
@@ -173,14 +188,26 @@ class MediaController extends Controller
 
             // Store thumbnail if exists
             $thumbnailPath = null;
-            if ($request->hasFile('thumbnail_path')) {
-                $thumbnailPath = $request->file('thumbnail_path')->store('thumbnail_path', 'public');
+
+              if ($request->hasFile('thumbnail_path')) {
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                if ($request->file('thumbnail_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                    $thumbnailPath = $url;
+                }
             }
-             $imagePath = null;
-            if ($request->hasFile('image_path')) {
-                $imagePath = $request->file('image_path')->store('image_path', 'public');
+
+            $imagePath = null;
+
+              if ($request->hasFile('image_path')) {
+                $driveServiceImage = new GoogleDriveServiceImage();
+                if ($request->file('image_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                    $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
+                    $imagePath = $url;
+                }
             }
-            
 
             // Save to database
             $media = Media::create([
@@ -214,11 +241,10 @@ class MediaController extends Controller
                 'description' => $e->getMessage(),
             ]);
             return back()->withInput()->with('error', 'Media upload failed. ' . $e->getMessage());
-
         }
     }
 
-      public function edit($id)
+    public function edit($id)
     {
         try {
             $media = Media::with('category')->findOrFail($id);
@@ -231,7 +257,7 @@ class MediaController extends Controller
         }
     }
 
-     public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $media = Media::findOrFail($id);
@@ -264,14 +290,14 @@ class MediaController extends Controller
             if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 // Delete old file from Google Drive if exists
                 if ($media->file_path) {
-                    $fileId = $this->driveService->getFileIdFromUrl($media->file_path);
+                    $fileId = $this->driveServiceVideo->getFileIdFromUrl($media->file_path);
                     if ($fileId) {
-                        $this->driveService->deleteFile($fileId);
+                        $this->driveServiceVideo->deleteFile($fileId);
                     }
                 }
                 // Upload new file
                 $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                $video = $this->driveService->uploadFile($request->file('file'), $filename);
+                $video = $this->driveServiceVideo->uploadFile($request->file('file'), $filename);
             }
 
             // Update PDF file on Google Drive
@@ -279,14 +305,14 @@ class MediaController extends Controller
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
                 // Delete old PDF from Google Drive if exists
                 if ($media->pdf) {
-                    $fileId = $this->driveService->getFileIdFromUrl($media->pdf);
+                    $fileId = $this->driveServicePDF->getFileIdFromUrl($media->pdf);
                     if ($fileId) {
-                        $this->driveService->deleteFile($fileId);
+                        $this->driveServicePDF->deleteFile($fileId);
                     }
                 }
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                $pdf = $this->driveService->uploadFile($request->file('pdf'), $filename);
+                $pdf = $this->driveServicePDF->uploadFile($request->file('pdf'), $filename);
             }
 
             // Update thumbnail if exists

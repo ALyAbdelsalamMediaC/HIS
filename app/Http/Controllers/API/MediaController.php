@@ -11,17 +11,37 @@ use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
 use getID3;
-use App\Services\GoogleDriveService; // Make sure this service is built
-
+use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is built
+use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 class MediaController extends Controller
 {
-     protected $client;
-    protected $driveService;
+    protected $client;
+    protected $driveServiceVideo;
+    protected $driveServicePDF;
+    protected $driveServiceImage;
+    protected $driveServiceThumbnail;
 
-    public function __construct(GoogleDriveService $driveService)
-    {
-        $this->driveService = $driveService;
-        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+    public function __construct(
+        GoogleDriveServiceVideo $driveServiceVideo,
+        GoogleDriveServicePDF $driveServicePDF,
+        GoogleDriveServiceImage $driveServiceImage,
+        GoogleDriveServiceThumbnail $driveServiceThumbnail
+    ) {
+
+
+        $this->driveServiceVideo = $driveServiceVideo;
+        $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
+
+        $this->driveServicePDF = $driveServicePDF;
+        $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
+
+         $this->driveServiceImage = $driveServiceImage;
+        $this->client = $this->driveServiceImage->getClient(); // Ensure this method exists in the service
+
+         $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
     public function show()
     {
@@ -70,19 +90,9 @@ class MediaController extends Controller
             }
 
 
-            // Store thumbnail if exists
-            $thumbnailPath = null;
-            if ($request->hasFile('thumbnail_path')) {
-                $thumbnailPath = $request->file('thumbnail_path')->store('thumbnails', 'public');
-            }
-             $imagePath = null;
-            if ($request->hasFile('image_path')) {
-                $imagePath = $request->file('image_path')->store('images', 'public');
-            }
-
-             $video = null;
+              $video = null;
             if ($request->hasFile('file')) {
-                $driveService = new GoogleDriveService();
+                $driveService = new GoogleDriveServiceVideo();
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
@@ -92,11 +102,34 @@ class MediaController extends Controller
 
             $pdf = null;
             if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
+                $driveServicePDF = new GoogleDriveServicePDF();
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
                     $pdf = $url;
+                }
+            }
+
+            // Store thumbnail if exists
+            $thumbnailPath = null;
+
+              if ($request->hasFile('thumbnail_path')) {
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                if ($request->file('thumbnail_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                    $thumbnailPath = $url;
+                }
+            }
+
+            $imagePath = null;
+
+              if ($request->hasFile('image_path')) {
+                $driveServiceImage = new GoogleDriveServiceImage();
+                if ($request->file('image_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                    $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
+                    $imagePath = $url;
                 }
             }
 
