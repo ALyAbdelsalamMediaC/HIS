@@ -111,7 +111,7 @@ class GoogleDriveServiceVideo
 
         $this->service->permissions->create($uploadedFile->id, $permission);
 
-        return "https://drive.google.com/file/d/{$uploadedFile->id}/preview";
+        return "https://lh3.googleusercontent.com/d/{$uploadedFile->id}/=w1000?authuser=0";
 
     }
     
