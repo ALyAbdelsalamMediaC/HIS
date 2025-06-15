@@ -312,7 +312,7 @@ class MediaController extends Controller
                 }
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                $pdf = $this->driveServicePDF->uploadFile($request->file('pdf'), $filename);
+                $pdf = $this->driveServicePDF->uploadPdf($request->file('pdf'), $filename);
             }
 
             // Update thumbnail if exists

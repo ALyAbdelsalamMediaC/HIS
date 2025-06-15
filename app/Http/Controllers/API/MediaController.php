@@ -19,8 +19,8 @@ class MediaController extends Controller
 {
     protected $client;
     protected $driveServiceVideo;
-    protected $driveServicePDF;
     protected $driveServiceImage;
+    protected $driveServicePDF;
     protected $driveServiceThumbnail;
 
     public function __construct(

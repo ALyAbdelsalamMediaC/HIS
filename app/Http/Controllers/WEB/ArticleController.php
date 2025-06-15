@@ -11,28 +11,33 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
-use App\Services\GoogleDriveService; // Make sure this service is built
+use App\Services\Article\GoogleDriveServicePDF; // Make sure this service is built
+use App\Services\Article\GoogleDriveServiceThumbnail; // Make sure this service is built
 use Illuminate\Support\Facades\Storage;
 
 
 class ArticleController extends Controller
 {
-      protected $client;
-    protected $driveService;
+    protected $client;
+    protected $driveServicePDF;
+    protected $driveServiceThumbnail;
+    public function __construct(
+        GoogleDriveServicePDF $driveServicePDF,
+        GoogleDriveServiceThumbnail $driveServiceThumbnail
+    ) {
+        $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->driveServiceThumbnail = $this->driveServiceThumbnail->getClient();
 
-    public function __construct(GoogleDriveService $driveService)
-    {
-        $this->driveService = $driveService;
-        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+        $this->driveServicePDF = $driveServicePDF;
+        $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
     }
 
-   public function getall(Request $request)
+    public function getall(Request $request)
     {
         try {
             $categories = Category::all();
 
-            $article = Article::with('category')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
-            ;
+            $article = Article::with('category')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();;
 
             // Search by title
             if ($request->filled('title')) {
@@ -96,21 +101,25 @@ class ArticleController extends Controller
                 'is_featured' => 'nullable|boolean',
             ]);
 
-
+            $pdf = null;
+            if ($request->hasFile('pdf')) {
+                $driveServicePDF = new GoogleDriveServicePDF();
+                if ($request->file('pdf')->isValid()) {
+                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                    $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                    $pdf = $url;
+                }
+            }
 
             // Store thumbnail if exists
             $image_path = null;
-            if ($request->hasFile('image_path')) {
-                $image_path = $request->file('image_path')->store('image_path', 'public');
-            }
 
-              $pdf = null;
-            if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
-                if ($request->file('pdf')->isValid()) {
-                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
-                    $pdf = $url;
+            if ($request->hasFile('image_path')) {
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                if ($request->file('image_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
+                    $image_path = $url;
                 }
             }
 
@@ -122,7 +131,7 @@ class ArticleController extends Controller
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
                 'image_path' => $image_path,
-                'pdf'=> $pdf,
+                'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);
 
@@ -133,9 +142,8 @@ class ArticleController extends Controller
                 'description' => 'Uploaded article: ' . $Article->title,
             ]);
 
-            
-                        return redirect()->route('content.articles')->with('success', 'Article uploaded successfully.');
 
+            return redirect()->route('content.articles')->with('success', 'Article uploaded successfully.');
         } catch (Exception $e) {
             LaravelLog::error('Article upload error: ' . $e->getMessage());
 
@@ -145,7 +153,6 @@ class ArticleController extends Controller
                 'description' => $e->getMessage(),
             ]);
             return back()->withInput()->with('error', 'Article upload failed. ' . $e->getMessage());
-
         }
     }
 
@@ -184,24 +191,29 @@ class ArticleController extends Controller
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
                 // Delete old PDF from Google Drive if exists
                 if ($article->pdf) {
-                    $fileId = $this->driveService->getFileIdFromUrl($article->pdf);
+                    $fileId = $this->driveServicePDF->getFileIdFromUrl($article->pdf);
                     if ($fileId) {
-                        $this->driveService->deleteFile($fileId);
+                        $this->driveServicePDF->deleteFile($fileId);
                     }
                 }
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                $pdf = $this->driveService->uploadFile($request->file('pdf'), $filename);
+                $pdf = $this->driveServicePDF->uploadPdf($request->file('pdf'), $filename);
             }
 
-            // Update image if exists
-            $image_path = $article->image_path;
+
+            $image_path = $article->pdf;
             if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
-                // Delete old image from storage if exists
+                // Delete old PDF from Google Drive if exists
                 if ($article->image_path) {
-                    Storage::disk('public')->delete($article->image_path);
+                    $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->image_path);
+                    if ($fileId) {
+                        $this->driveServiceThumbnail->deleteFile($fileId);
+                    }
                 }
-                $image_path = $request->file('image_path')->store('image_path', 'public');
+                // Upload new PDF
+                $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                $image_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
             }
 
             // Update database

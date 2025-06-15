@@ -9,17 +9,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use Illuminate\Http\Request;
-use App\Services\GoogleDriveService; // Make sure this service is built
-
+use App\Services\Article\GoogleDriveServicePDF; // Make sure this service is built
+use App\Services\Article\GoogleDriveServiceThumbnail; // Make sure this service is built
 class ArticleController extends Controller
 {
       protected $client;
-    protected $driveService;
+    protected $driveServicePDF;
+    protected $driveServiceThumbnail;
+    public function __construct(
+        GoogleDriveServicePDF $driveServicePDF,
+        GoogleDriveServiceThumbnail $driveServiceThumbnail
+    ) {
+        $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->driveServiceThumbnail = $this->driveServiceThumbnail->getClient();
 
-    public function __construct(GoogleDriveService $driveService)
-    {
-        $this->driveService = $driveService;
-        $this->client = $this->driveService->getClient(); // Ensure this method exists in the service
+        $this->driveServicePDF = $driveServicePDF;
+        $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
     }
     public function show()
     {
@@ -56,17 +61,25 @@ class ArticleController extends Controller
 
 
             // Store thumbnail if exists
-            $image_path = null;
-            if ($request->hasFile('image_path')) {
-                $image_path = $request->file('image_path')->store('image_path', 'public');
-            }
-            $pdf = null;
+           $pdf = null;
             if ($request->hasFile('pdf')) {
-                $driveService = new GoogleDriveService();
+                $driveServicePDF = new GoogleDriveServicePDF();
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveService->uploadFile($request->file('pdf'), $filename);
+                    $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
                     $pdf = $url;
+                }
+            }
+
+            // Store thumbnail if exists
+            $image_path = null;
+
+            if ($request->hasFile('image_path')) {
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                if ($request->file('image_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
+                    $image_path = $url;
                 }
             }
 

@@ -180,7 +180,6 @@ class SocialAuthController extends Controller
         try {
             // Verify the Google ID token
             $socialUser = Socialite::driver('google')->stateless()->userFromToken($request->id_token);
-
             // Check if user exists by google_id or email
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
@@ -247,7 +246,7 @@ class SocialAuthController extends Controller
                 'token' => $token,
             ], 200);
         } catch (\Exception $e) {
-            Log::error("Google API login error: " . $e->getMessage());
+            // Log::error("Google API login error: " . $e->getMessage());
             return response()->json([
                 'error' => 'Google authentication failed. Please try again.',
             ], 401);
