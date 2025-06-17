@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\CommentArticle;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -145,7 +146,7 @@ class CommentsController extends Controller
             }
 
             // Fetch parent comments with their replies
-            $comments = Comment::where('media_id', $validator['media_id'])
+            $comments = Comment::where('media_id', $request->media_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'asc');
@@ -184,7 +185,7 @@ class CommentsController extends Controller
             }
 
             // Fetch parent comments with their replies
-            $comments = Comment::where('article_id', $validator['article_id'])
+            $comments = CommentArticle::where('article_id', $request->article_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'asc');
