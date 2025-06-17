@@ -129,4 +129,81 @@ class CommentsController extends Controller
             ], 500);
         }
     }
+    public function getCommentsByMediaId(Request $request)
+    {
+        try {
+            // Validate the media_id
+            $validator = Validator::make(['media_id' => $request->media_id], [
+                'media_id' => 'required|exists:media,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Fetch parent comments with their replies
+            $comments = Comment::where('media_id', $validator['media_id'])
+                ->whereNull('parent_id')
+                ->with(['replies' => function ($query) {
+                    $query->orderBy('created_at', 'asc');
+                }])
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Comments retrieved successfully.',
+                'data' => $comments,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while retrieving comments.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getCommentsByArticleId(Request $request)
+    {
+        try {
+            // Validate the article_id
+            $validator = Validator::make(['article_id' => $request->article_id], [
+                'article_id' => 'required|exists:articles,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Fetch parent comments with their replies
+            $comments = Comment::where('article_id', $validator['article_id'])
+                ->whereNull('parent_id')
+                ->with(['replies' => function ($query) {
+                    $query->orderBy('created_at', 'asc');
+                }])
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Comments retrieved successfully.',
+                'data' => $comments,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while retrieving comments.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
