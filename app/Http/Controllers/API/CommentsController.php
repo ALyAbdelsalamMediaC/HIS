@@ -130,7 +130,7 @@ class CommentsController extends Controller
             ], 500);
         }
     }
-    public function getCommentsByMediaId(Request $request)
+   public function getCommentsByMediaId(Request $request)
     {
         try {
             // Validate the media_id
@@ -145,14 +145,36 @@ class CommentsController extends Controller
                 ], 422);
             }
 
-            // Fetch parent comments with their replies
-            $comments = Comment::where('media_id', $request->media_id)
+            // Validate the user_id if provided
+            $user_id = $request->user_id;
+            if ($user_id) {
+                $userValidator = Validator::make(['user_id' => $user_id], [
+                    'user_id' => 'exists:users,id',
+                ]);
+
+                if ($userValidator->fails()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'errors' => $userValidator->errors(),
+                    ], 422);
+                }
+            }
+
+            // Fetch parent comments with their replies and user data
+            $query = Comment::where('media_id', $request->media_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'asc');
-                }])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                    $query->orderBy('created_at', 'asc')
+                          ->with('user');
+                }, 'user'])
+                ->orderBy('created_at', 'asc');
+
+            // Filter by user_id if provided
+            if ($user_id) {
+                $query->where('user_id', $user_id);
+            }
+
+            $comments = $query->get();
 
             return response()->json([
                 'status' => 'success',
@@ -184,14 +206,36 @@ class CommentsController extends Controller
                 ], 422);
             }
 
-            // Fetch parent comments with their replies
-            $comments = CommentArticle::where('article_id', $request->article_id)
+            // Validate the user_id if provided
+            $user_id = $request->user_id;
+            if ($user_id) {
+                $userValidator = Validator::make(['user_id' => $user_id], [
+                    'user_id' => 'exists:users,id',
+                ]);
+
+                if ($userValidator->fails()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'errors' => $userValidator->errors(),
+                    ], 422);
+                }
+            }
+
+            // Fetch parent comments with their replies and user data
+            $query = Comment::where('article_id', $request->article_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'asc');
-                }])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                    $query->orderBy('created_at', 'asc')
+                          ->with('user');
+                }, 'user'])
+                ->orderBy('created_at', 'asc');
+
+            // Filter by user_id if provided
+            if ($user_id) {
+                $query->where('user_id', $user_id);
+            }
+
+            $comments = $query->get();
 
             return response()->json([
                 'status' => 'success',

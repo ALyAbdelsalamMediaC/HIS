@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('article_id');
-            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('comments_article')->onDelete('cascade');
             $table->text('content');
             $table->timestamps();
             $table->foreign('article_id')->references('id')->on('articles')->onDelete('cascade');
