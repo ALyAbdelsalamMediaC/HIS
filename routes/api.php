@@ -26,3 +26,4 @@ Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 
 Route::post('login/google', [SocialAuthController::class, 'handleGoogleLoginApi'])->name('api.social.google.login');
+Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
