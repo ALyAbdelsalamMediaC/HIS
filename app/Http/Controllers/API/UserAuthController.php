@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+
 
 class UserAuthController extends Controller
 {
@@ -118,4 +123,57 @@ class UserAuthController extends Controller
             ], 500);
         }
     }
+
+public function resetPassword(Request $request)
+    {
+        $request->validate([
+            // 'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !($user->role === 'admin' || $user->role === 'reviewer')) {
+            Log::create([
+                'user_id' => $user ? $user->id : null,
+                'type' => 'password_reset_error',
+                'description' => "Password reset failed: no admin user with email {$request->email}",
+            ]);
+
+            return response()->json([
+                'errors' => ['email' => 'We can\'t find an admin user with that email address.'],
+            ], 422);
+        }
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+
+                Log::create([
+                    'user_id' => $user->id,
+                    'type' => 'password_reset_success',
+                    'description' => "Password reset successful for {$user->email}",
+                ]);
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Password reset successfully.',
+            ], 200);
+        }
+
+        return response()->json([
+            'errors' => ['email' => __($status)],
+        ], 422);
+    }
+    
 }
