@@ -14,6 +14,8 @@ class Policy extends Model
         'body',
         'added_by',
         'category_id',
+        'body',
+        'added_by',
     ];
 
     /**
