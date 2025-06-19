@@ -22,7 +22,7 @@ class PolicyController extends Controller
             'policies' => function ($query) {
                 $query->with('addedBy:id,name,username')->orderBy('id');
             }
-            ])->get();
+        ])->get();
 
         return view('pages.settings.helpCenter.index', compact('categories'));
     }
@@ -36,7 +36,7 @@ class PolicyController extends Controller
     {
         $categories = PolicyCategory::all();
 
-        return view('pages.settings.helpCenter.create', compact('categories'));
+        return view('pages.settings.helpCenter.add_help', compact('categories'));
     }
 
     /**
@@ -96,7 +96,7 @@ class PolicyController extends Controller
         if (empty($policy->body)) {
             // \Log::info('Policy body is empty for policy ID: ' . $policy->id);
         }
-        return view('pages.settings.helpCenter.edit', compact('policy', 'categories'));
+        return view('pages.settings.helpCenter.edit_help', compact('policy', 'categories'));
     }
 
     /**

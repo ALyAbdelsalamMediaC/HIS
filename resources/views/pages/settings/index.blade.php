@@ -56,7 +56,7 @@
       <x-svg-icon name="arrow-right" size="24" color="#000" />
     </a>
 
-    <a href="{{ route('settings.help') }}" class="settings-links-container">
+    <a href="{{ route('policies.index') }}" class="settings-links-container">
       <span class="gap-2 d-flex align-items-center">
       <span class="setting-icon">
         <x-svg-icon name="info" size="18" color="#35758C" />
