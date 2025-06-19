@@ -13,7 +13,7 @@
   </div>
 
   <div class="head">
-    <a href="{{ route('pages.admin.dashboard') }}" class="side-logo">
+    <a href="{{ route('dashboard.index') }}" class="side-logo">
       <img src="{{ asset('images/logo/logo-dashboard.svg') }}" alt="logo">
     </a>
   </div>
@@ -24,7 +24,7 @@
     <nav class="sidebar-menu">
       <ul>
         <li class="sidebar-menu-li">
-          <a href="{{ route('pages.admin.dashboard') }}" class="h6-semibold">
+          <a href="{{ route('dashboard.index') }}" class="h6-semibold">
             <x-svg-icon name="dashboard" size="18" />
             <span class="sidebar-menu-text">Dashboard</span>
           </a>

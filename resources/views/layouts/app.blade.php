@@ -43,7 +43,7 @@
         @include('layouts.sidebar')
         <div class="main-content w-100 min-vh-100 d-flex justify-content-between flex-column position-relative">
             <div>
-                @if(Route::is('pages.admin.dashboard'))
+                @if(Route::is('dashboard.index'))
                     @include('layouts.navbarHome')
                 @else
                     @include('layouts.navbar')

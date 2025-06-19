@@ -9,7 +9,7 @@
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Total Users</h4>
-                    <h3 class="h3-semibold">8,492</h3>
+                    <h3 class="h3-semibold">{{ number_format($usersCount) }}</h3>
                 </div>
             </div>
             <div class="dashboard-num-cards-container">
@@ -18,7 +18,7 @@
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Active Videos</h4>
-                    <h3 class="h3-semibold">8,492</h3>
+                    <h3 class="h3-semibold">{{ number_format($mediaCountPublished) }}</h3>
                 </div>
             </div>
             <div class="dashboard-num-cards-container">
@@ -27,7 +27,7 @@
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Total Comments</h4>
-                    <h3 class="h3-semibold">8,492</h3>
+                    <h3 class="h3-semibold">{{ number_format($commentsCount) }}</h3>
                 </div>
             </div>
             <div class="dashboard-num-cards-container">
@@ -36,7 +36,7 @@
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Pending Requests</h4>
-                    <h3 class="h3-semibold">8,492</h3>
+                    <h3 class="h3-semibold">{{ number_format($mediaCountPending) }}</h3>
                 </div>
             </div>
         </div>

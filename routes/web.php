@@ -18,15 +18,12 @@ use App\Http\Controllers\Web\UserController;
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/', function () {
-        return view('pages.admin.dashboard');
-    })->name('pages.admin.dashboard');
-    // Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
-
     // Route::middleware(['auth', 'session.expired'])->group(function () {
     // Route::get('/', function () {
     //     return view('pages.admin.dashboard');
     // })->name('pages.admin.dashboard');
+
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::resource('categories', CategoryController::class);
 
@@ -39,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
     Route::put('content/{id}', [MediaController::class, 'update'])->name('content.update');
     Route::get('/content/assigned/{id}/{reviewers}', [MediaController::class, 'assignTo'])->name('content.assignTo');
-    
+
     Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');

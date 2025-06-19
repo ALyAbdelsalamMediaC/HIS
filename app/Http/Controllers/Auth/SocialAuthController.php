@@ -53,7 +53,7 @@ class SocialAuthController extends Controller
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
                 ->first();
-            
+
 
             if ($user) {
                 // Update google_id if not set
@@ -99,7 +99,7 @@ class SocialAuthController extends Controller
                 ]);
             }
 
-            return redirect()->intended(route('pages.admin.dashboard'));
+            return redirect()->intended(route('dashboard.index'));
         } catch (\Exception $e) {
             Log::error("Google login error: " . $e->getMessage());
             return redirect()->route('login')->withErrors(['login' => 'Google authentication failed. Please try again.']);
@@ -165,7 +165,7 @@ class SocialAuthController extends Controller
                 ]);
             }
 
-            return redirect()->intended(route('pages.admin.dashboard'));
+            return redirect()->intended(route('dashboard.index'));
         } catch (\Exception $e) {
             Log::error("Apple login error: " . $e->getMessage());
             return redirect()->route('login')->withErrors(['login' => 'Apple authentication failed. Please try again.']);
@@ -185,7 +185,7 @@ class SocialAuthController extends Controller
                 ->orWhere('email', $socialUser->email)
                 ->first();
 
-           
+
 
             if ($user) {
                 // Update google_id if not set

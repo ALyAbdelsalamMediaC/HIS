@@ -68,7 +68,7 @@ class AdminAuthController extends Controller
                     'description' => "Admin login successful for {$loginInput}",
                 ]);
 
-                return redirect()->intended(route('pages.admin.dashboard'));
+                return redirect()->intended(route('dashboard.index'));
             } else {
                 Log::create([
                     'user_id' => $user->id,
@@ -120,7 +120,7 @@ class AdminAuthController extends Controller
 
             // Auto‐login and redirect with success message
             Auth::login($user);
-            return redirect()->route('pages.admin.dashboard')
+            return redirect()->route('dashboard.index')
                 ->with('success', 'Registration successful! Welcome, ' . $user->name . '.');
 
         } catch (\Exception $e) {
