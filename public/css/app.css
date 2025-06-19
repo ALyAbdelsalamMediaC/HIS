@@ -1579,6 +1579,53 @@ body {
 }
 
 /* ========================================================
+    Help Center Styles
+   ======================================================== */
+.accordion-item {
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--main-border-radius-lg) !important;
+    box-shadow: none;
+}
+.accordion-item:last-of-type > .accordion-header .accordion-button.collapsed {
+    border: 0px solid var(--border-color) !important;
+    border-radius: var(--main-border-radius-lg) !important;
+}
+.accordion-button {
+    color: var(--primary-color);
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--primary-color);
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+.second-acc .accordion-item {
+    border: 0px solid var(--border-color) !important;
+}
+.second-acc .accordion-button {
+    color: var(--text-color) !important;
+    background-color: transparent;
+    box-shadow: none !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--main-border-radius-lg) !important;
+}
+
+.second-acc
+    .accordion-item:last-of-type
+    > .accordion-header
+    .accordion-button.collapsed {
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--main-border-radius-lg) !important;
+}
+.second-acc .accordion-button:not(.collapsed) {
+    background-color: transparent;
+    box-shadow: none !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--main-border-radius-lg) !important;
+}
+
+/* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
 

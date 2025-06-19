@@ -125,11 +125,12 @@
       "{{ $category->title }}"?</p>
     </div>
     <div class="modal-footer">
-      <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+      <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;"
+      data-bs-dismiss="modal">Cancel</x-button>
       <form action="{{ route('policies.categories.destroy', $category) }}" method="POST">
       @csrf
       @method('DELETE')
-      <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
+      <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
       </form>
     </div>
     </x-modal>
