@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return view('pages.admin.dashboard');
     })->name('pages.admin.dashboard');
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    // Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // Route::middleware(['auth', 'session.expired'])->group(function () {
     // Route::get('/', function () {
