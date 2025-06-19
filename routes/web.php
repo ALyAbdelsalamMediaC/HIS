@@ -5,6 +5,7 @@ use App\Http\Controllers\WEB\CommentController;
 use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
+use App\Http\Controllers\WEB\DashboardController;
 use App\Http\Controllers\WEB\MediaController;
 use App\Http\Controllers\WEB\PolicyController;
 use App\Http\Controllers\WEB\SettingsController;
@@ -20,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return view('pages.admin.dashboard');
     })->name('pages.admin.dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // Route::middleware(['auth', 'session.expired'])->group(function () {
     // Route::get('/', function () {
@@ -32,12 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/videos/add', [MediaController::class, 'create']);
     Route::post('/content/videos/add', [MediaController::class, 'store'])->name('content.store');
-    Route::get('/content/video/{id}', [MediaController::class, 'getone'])->name('content.video');
+    Route::get('/content/video/{id}/{status}', [MediaController::class, 'getone'])->name('content.video');
     Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
-
     Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
     Route::put('content/{id}', [MediaController::class, 'update'])->name('content.update');
-
+    Route::get('/content/assigned/{id}/{reviewers}', [MediaController::class, 'assignTo'])->name('content.assignTo');
+    
     Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');

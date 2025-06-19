@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('views')->default(0);
             $table->text('description')->nullable();
             $table->string('file_path');
+            $table->json('assigned_to')->nullable();
             $table->text('duration')->nullable();
             $table->string('pdf')->nullable();
             $table->string('thumbnail_path');

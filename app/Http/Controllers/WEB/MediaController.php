@@ -101,6 +101,28 @@ class MediaController extends Controller
             return back()->with('error', 'Failed to fetch media.');
         }
     }
+    public function assignTo($id, $reviewers)
+{
+    try {
+        // Convert reviewers string to array
+        $reviewersArray = explode(',', $reviewers);
+        // Clean up any whitespace and filter out empty values
+        $reviewersArray = array_filter(array_map('trim', $reviewersArray));
+        
+        // Convert to JSON
+        $reviewersJson = json_encode($reviewersArray);
+        
+        // Update media table using Eloquent
+        Media::where('media_id', $id)
+            ->update(['assigned_to' => $reviewersJson]);
+            
+        return back()->with('success', 'Reviewers assigned successfully.');
+        
+    } catch (Exception $e) {
+        LaravelLog::error('Assign to error: ' . $e->getMessage());
+        return back()->with('error', 'Failed to assign reviewers.');
+    }
+}
     public function recently_Added()
     {
         try {
@@ -119,10 +141,23 @@ class MediaController extends Controller
         }
     }
 
-    public function getone($id)
+    public function getone($id, $status)
     {
         $media = Media::with(['category', 'comments'])->findOrFail($id);
-        return view('pages.content.single_video', compact('media'));
+        $user = Auth::user();
+
+        if ($status === 'pending') {
+            if ($user && $user->role === 'admin') {
+                return view('pages.content.video.single_video_pending_admin', compact('media'));
+            } elseif ($user && $user->role === 'reviewer') {
+                return view('pages.content.video.single_video_pending_reviewer', compact('media'));
+            }
+        } elseif ($status === 'published') {
+            return view('pages.content.video.single_video_published_admin', compact('media'));
+        }
+
+        // Default fallback
+        return back()->with('error', 'Invalid status or permissions.');
     }
     public function validation()
     {

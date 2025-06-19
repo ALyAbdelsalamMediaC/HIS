@@ -128,4 +128,116 @@ class CommentController extends Controller
                 ->withInput();
         }
     }
+
+    public function showMediaComments(Request $request, $media_id)
+    {
+        try {
+            // Validate the media_id
+            $validator = Validator::make(['media_id' => $media_id], [
+                'media_id' => 'required|exists:media,id',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Validate the user_id if provided
+            $user_id = $request->query('user_id');
+            if ($user_id) {
+                $userValidator = Validator::make(['user_id' => $user_id], [
+                    'user_id' => 'exists:users,id',
+                ]);
+
+                if ($userValidator->fails()) {
+                    return redirect()->back()
+                        ->withErrors($userValidator)
+                        ->withInput();
+                }
+            }
+
+            // Fetch parent comments with their replies and user data
+            $query = Comment::where('media_id', $media_id)
+                ->whereNull('parent_id')
+                ->with(['replies' => function ($query) {
+                    $query->orderBy('created_at', 'asc')
+                          ->with('user');
+                }, 'user'])
+                ->orderBy('created_at', 'asc');
+
+            // Filter by user_id if provided
+            if ($user_id) {
+                $query->where('user_id', $user_id);
+            }
+
+            $comments = $query->get();
+
+            return view('comments.media', [
+                'comments' => $comments,
+                'media_id' => $media_id,
+                'user_id' => $user_id
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
+        }
+    }
+
+    public function showArticleComments(Request $request, $article_id)
+    {
+        try {
+            // Validate the article_id
+            $validator = Validator::make(['article_id' => $article_id], [
+                'article_id' => 'required|exists:articles,id',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Validate the user_id if provided
+            $user_id = $request->query('user_id');
+            if ($user_id) {
+                $userValidator = Validator::make(['user_id' => $user_id], [
+                    'user_id' => 'exists:users,id',
+                ]);
+
+                if ($userValidator->fails()) {
+                    return redirect()->back()
+                        ->withErrors($userValidator)
+                        ->withInput();
+                }
+            }
+
+            // Fetch parent comments with their replies and user data
+            $query = Comment::where('article_id', $article_id)
+                ->whereNull('parent_id')
+                ->with(['replies' => function ($query) {
+                    $query->orderBy('created_at', 'asc')
+                          ->with('user');
+                }, 'user'])
+                ->orderBy('created_at', 'asc');
+
+            // Filter by user_id if provided
+            if ($user_id) {
+                $query->where('user_id', $user_id);
+            }
+
+            $comments = $query->get();
+
+            return view('comments.article', [
+                'comments' => $comments,
+                'article_id' => $article_id,
+                'user_id' => $user_id
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
+        }
+    }
 }

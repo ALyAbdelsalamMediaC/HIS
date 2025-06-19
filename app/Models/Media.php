@@ -11,7 +11,7 @@ class Media extends Model
 
     protected $fillable = [
         'category_id','user_id', 'title','views', 'description','pdf','status',
-        'file_path', 'duration','thumbnail_path','image_path', 'is_featured'
+        'file_path', 'duration','thumbnail_path','image_path', 'is_featured','assigned_to'
     ];
 
     public function category()
