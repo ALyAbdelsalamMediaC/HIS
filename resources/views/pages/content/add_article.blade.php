@@ -95,7 +95,7 @@
     </div>
 
     <div class="mt-3 d-flex justify-content-end">
-      <x-button type="submit">Upload Article</x-button>
+      <x-button type="submit">Add Article</x-button>
     </div>
     </form>
   </section>

@@ -86,7 +86,7 @@
       </div>
 
       <div class="mt-3 content-container-card-img">
-      <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
+      <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}">
       <span class="c-v-span">Article</span>
       </div>
 
