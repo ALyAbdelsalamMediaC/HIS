@@ -26,7 +26,7 @@ class ArticleController extends Controller
         GoogleDriveServiceThumbnail $driveServiceThumbnail
     ) {
         $this->driveServiceThumbnail = $driveServiceThumbnail;
-        $this->driveServiceThumbnail = $this->driveServiceThumbnail->getClient();
+        // $this->driveServiceThumbnail = $this->driveServiceThumbnail->getClient();
 
         $this->driveServicePDF = $driveServicePDF;
         $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
