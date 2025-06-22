@@ -13,7 +13,8 @@ class Article extends Model
         'user_id',
         'title',
         'description',
-        'image',
+        'image_path',
+        'thumbnail_path',
         'hyperlink',
         'pdf',
         'is_featured'

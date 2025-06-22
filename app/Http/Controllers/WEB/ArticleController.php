@@ -97,6 +97,7 @@ class ArticleController extends Controller
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
@@ -123,6 +124,18 @@ class ArticleController extends Controller
                 }
             }
 
+
+            $thumbnail_path = null;
+
+            if ($request->hasFile('thumbnail_path')) {
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                if ($request->file('thumbnail_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                    $thumbnail_path = $url;
+                }
+            }
+
             // Save to database
             $Article = Article::create([
                 'category_id' => $validated['category_id'],
@@ -131,6 +144,7 @@ class ArticleController extends Controller
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
                 'image_path' => $image_path,
+                'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);
@@ -182,6 +196,7 @@ class ArticleController extends Controller
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
@@ -202,9 +217,10 @@ class ArticleController extends Controller
             }
 
 
-            $image_path = $article->pdf;
+            $image_path = $article->image_path;
             if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
                 // Delete old PDF from Google Drive if exists
+
                 if ($article->image_path) {
                     $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->image_path);
                     if ($fileId) {
@@ -216,6 +232,24 @@ class ArticleController extends Controller
                 $image_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
             }
 
+
+            $thumbnail_path = $article->thumbnail_path;
+            if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
+                // Delete old PDF from Google Drive if exists
+
+                if ($article->thumbnail_path) {
+                    $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->thumbnail_path);
+                    if ($fileId) {
+                        $this->driveServiceThumbnail->deleteFile($fileId);
+                    }
+                }
+                // Upload new PDF
+                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                $thumbnail_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+            }
+
+
+
             // Update database
             $article->update([
                 'category_id' => $validated['category_id'],
@@ -223,6 +257,7 @@ class ArticleController extends Controller
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
                 'image_path' => $image_path,
+                'image_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);
@@ -245,6 +280,59 @@ class ArticleController extends Controller
             ]);
 
             return back()->withInput()->with('error', 'Article update failed: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $article = Article::findOrFail($id);
+
+            // Delete PDF from Google Drive if exists
+            if ($article->pdf) {
+                $fileId = $this->driveServicePDF->getFileIdFromUrl($article->pdf);
+                if ($fileId && !$this->driveServicePDF->deleteFile($fileId)) {
+                    throw new Exception('Failed to delete PDF from Google Drive.');
+                }
+            }
+
+            // Delete image from Google Drive if exists
+            if ($article->image_path) {
+                $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->image_path);
+                if ($fileId && !$this->driveServiceThumbnail->deleteFile($fileId)) {
+                    throw new Exception('Failed to delete image from Google Drive.');
+                }
+            }
+
+            // Delete thumbnail from Google Drive if exists
+            if ($article->thumbnail_path) {
+                $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->thumbnail_path);
+                if ($fileId && !$this->driveServiceThumbnail->deleteFile($fileId)) {
+                    throw new Exception('Failed to delete thumbnail from Google Drive.');
+                }
+            }
+
+            // Delete article from database
+            $article->delete();
+
+            // Log success
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'article_delete_success',
+                'description' => 'Deleted article: ' . $article->title,
+            ]);
+
+            return redirect()->route('content.articles')->with('success', 'Article deleted successfully.');
+        } catch (Exception $e) {
+            LaravelLog::error('Article delete error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'article_delete_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to delete article: ' . $e->getMessage());
         }
     }
 }

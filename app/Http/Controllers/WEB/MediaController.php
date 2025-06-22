@@ -418,4 +418,65 @@ class MediaController extends Controller
             return back()->withInput()->with('error', 'Media update failed: ' . $e->getMessage());
         }
     }
+
+     public function destroy($id)
+    {
+        try {
+            $media = Media::findOrFail($id);
+
+            // Delete video file from Google Drive if exists
+            if ($media->file_path) {
+                $fileId = $this->driveServiceVideo->getFileIdFromUrl($media->file_path);
+                if ($fileId) {
+                    $this->driveServiceVideo->deleteFile($fileId);
+                }
+            }
+
+            // Delete PDF file from Google Drive if exists
+            if ($media->pdf) {
+                $fileId = $this->driveServicePDF->getFileIdFromUrl($media->pdf);
+                if ($fileId) {
+                    $this->driveServicePDF->deleteFile($fileId);
+                }
+            }
+
+            // Delete thumbnail from Google Drive if exists
+            if ($media->thumbnail_path) {
+                $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($media->thumbnail_path);
+                if ($fileId) {
+                    $this->driveServiceThumbnail->deleteFile($fileId);
+                }
+            }
+
+            // Delete image from Google Drive if exists
+            if ($media->image_path) {
+                $fileId = $this->driveServiceImage->getFileIdFromUrl($media->image_path);
+                if ($fileId) {
+                    $this->driveServiceImage->deleteFile($fileId);
+                }
+            }
+
+            // Log the deletion
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_delete_success',
+                'description' => 'Deleted media: ' . $media->title,
+            ]);
+
+            // Delete the media record from the database
+            $media->delete();
+
+            return redirect()->route('content.videos')->with('success', 'Media deleted successfully.');
+        } catch (Exception $e) {
+            LaravelLog::error('Media delete error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'media_delete_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to delete media: ' . $e->getMessage());
+        }
+    }
 }
