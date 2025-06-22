@@ -21,16 +21,16 @@
     <div class="form-infield">
       <x-text_label for="thumbnail_path">Upload Thumbnail</x-text_label>
       <div style="position: relative;">
-      <x-text_input type="file" id="thumbnail_path" name="image_path"
+      <x-text_input type="file" id="thumbnail_path" name="thumbnail_path"
         placeholder="Choose an thumbnail from your gallery" accept="image/jpeg,image/jpg,image/png"
         style="color: transparent; cursor: pointer;" onchange="updateFileName(this)" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
         <x-button type="button" onclick="document.getElementById('thumbnail_path').click()">Choose file</x-button>
       </div>
       </div>
-      @if($article->image_path)
+      @if($article->thumbnail_path)
       <div class="mt-2">
-      <img src="{{ asset($article->image_path) }}" alt="Current thumbnail" style="max-width: 200px;">
+      <img src="{{ $article->thumbnail_path }}" alt="Current thumbnail" style="max-width: 200px;">
       </div>
     @endif
     </div>
@@ -48,7 +48,7 @@
       </div>
       @if($article->image_path)
       <div class="mt-2">
-      <img src="{{ asset($article->image_path) }}" alt="Current image" style="max-width: 200px;">
+      <img src="{{ $article->image_path }}" alt="Current image" style="max-width: 200px;">
       </div>
     @endif
     </div>

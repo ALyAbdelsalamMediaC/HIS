@@ -2,32 +2,6 @@
 @section('title', 'HIS | Edit Video')
 @section('content')
   <section>
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-
-    @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <ul class="mb-0">
-      @foreach($errors->all() as $error)
-      <li>{{ $error }}</li>
-    @endforeach
-    </ul>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-
     <div class="gap-3 d-flex align-items-center">
     <div class="arrow-back-btn" onclick="window.history.back()">
       <x-svg-icon name="arrow-left2" size="16" color="#35758C" />

@@ -1369,7 +1369,7 @@ body {
     color: #bb1313;
     background-color: #fff3f3;
 }
-.card-status.in_review {
+.card-status.inreview {
     color: #3f8f43;
     background-color: #deffe0;
 }

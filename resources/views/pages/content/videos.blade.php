@@ -209,14 +209,14 @@
                 if (!reviewer.id) return reviewer.text;
                 return $(
                     `<div class="gap-3 py-2 d-flex align-items-center">
-                                                                    <div class="reviewer-avatar">
-                                                                        <img src="/images/global/avatar.svg" class="rounded-circle" width="40" height="40" alt="${reviewer.text}">
-                                                                    </div>
-                                                                    <div>
-                                                                        <div class="mb-0 h5-ragular">${reviewer.text}</div>
-                                                                        <div class="h6-ragular">Reviewer</div>
-                                                                    </div>
-                                                                </div>`
+                                                                                <div class="reviewer-avatar">
+                                                                                    <img src="/images/global/avatar.svg" class="rounded-circle" width="40" height="40" alt="${reviewer.text}">
+                                                                                </div>
+                                                                                <div>
+                                                                                    <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                                                                                    <div class="h6-ragular">Reviewer</div>
+                                                                                </div>
+                                                                            </div>`
                 );
             }
 
