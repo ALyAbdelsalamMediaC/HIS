@@ -98,7 +98,7 @@ class MediaController extends Controller
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = $url;
+                    $video = 'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
                 }
             }
 
@@ -108,7 +108,7 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = $url;
+                    $pdf = 'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
                 }
             }
 
@@ -120,7 +120,7 @@ class MediaController extends Controller
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnailPath = $url;
+                    $thumbnailPath =  'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
                 }
             }
 
@@ -131,7 +131,7 @@ class MediaController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                    $imagePath = $url;
+                    $imagePath =  'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
                 }
             }
 

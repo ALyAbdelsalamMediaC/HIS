@@ -85,7 +85,7 @@ class GoogleDriveServicePDF
 
         $this->service->permissions->create($uploadedFile->id, $permission);
 
-        return "https://lh3.googleusercontent.com/d/{$uploadedFile->id}=w1000?authuser=0";
+        return $uploadedFile->id;
 
     }
 

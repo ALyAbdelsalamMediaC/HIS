@@ -117,7 +117,6 @@ class MediaController extends Controller
                 ->update(['assigned_to' => $reviewersJson]);
 
             return back()->with('success', 'Reviewers assigned successfully.');
-
         } catch (Exception $e) {
             LaravelLog::error('Assign to error: ' . $e->getMessage());
             return back()->with('error', 'Failed to assign reviewers.');
@@ -207,7 +206,7 @@ class MediaController extends Controller
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = $url;
+                    $video = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -217,7 +216,7 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = $url;
+                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -229,7 +228,7 @@ class MediaController extends Controller
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnailPath = $url;
+                    $thumbnailPath = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -240,7 +239,7 @@ class MediaController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                    $imagePath = $url;
+                    $imagePath = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -334,6 +333,7 @@ class MediaController extends Controller
                 // Upload new file
                 $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                 $video = $driveServiceVideo->uploadFile($request->file('file'), $filename);
+                $video = 'https://drive.google.com/file/d/' . $video . '/preview';
             }
 
             // Update PDF file on Google Drive
@@ -350,6 +350,7 @@ class MediaController extends Controller
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                 $pdf = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                $pdf = 'https://drive.google.com/file/d/' . $pdf . '/preview';
             }
 
             // Update thumbnail if exists
@@ -366,6 +367,7 @@ class MediaController extends Controller
                 // Upload new thumbnail
                 $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                 $thumbnailPath = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                $thumbnailPath = 'https://drive.google.com/file/d/' . $thumbnailPath . '/preview';
             }
 
             // Update image if exists
@@ -382,6 +384,7 @@ class MediaController extends Controller
                 // Upload new image
                 $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                 $imagePath = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
+                $imagePath = 'https://drive.google.com/file/d/' . $imagePath . '/preview';
             }
 
             // Update database
@@ -419,7 +422,7 @@ class MediaController extends Controller
         }
     }
 
-     public function destroy($id)
+    public function destroy($id)
     {
         try {
             $media = Media::findOrFail($id);
