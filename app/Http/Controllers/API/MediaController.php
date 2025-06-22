@@ -46,7 +46,9 @@ class MediaController extends Controller
     public function show()
     {
         try {
-            $categories = Category::with('media')->get();
+            $categories = Category::with(['media' => function($query) {
+                $query->withCount('comments', 'likes');
+            }])->get();
 
             return response()->json([
                 'success' => true,
@@ -221,7 +223,9 @@ class MediaController extends Controller
     public function recently_Added()
     {
         try {
-            $contents = Media::with('category')->orderBy('created_at', 'desc')->take(10)->get();
+            $contents = Category::with(['media' => function($query) {
+                $query->withCount('comments', 'likes');
+            }])->orderBy('created_at', 'desc')->take(10)->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Recently added media retrieved successfully.',
@@ -247,7 +251,8 @@ class MediaController extends Controller
     public function featured()
     {
         try {
-            $contents = Media::with('category')
+            $contents = Media::with(['category'])
+                ->withCount(['comments', 'likes'])
                 ->where('is_featured', true)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
