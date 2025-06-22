@@ -86,7 +86,7 @@
       </div>
 
       <div class="mt-3 content-container-card-img">
-      <img src="{{ asset($item->thumbnail_path) }}" alt="{{ $item->title }}">
+      <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}">
       <span class="c-v-span">Article</span>
       </div>
 
@@ -99,7 +99,7 @@
 
       <div class="gap-2 d-flex align-items-center">
         <x-svg-icon name="link" size="12" color="Black" />
-        <a href="{{ $item->hyperlink }}" class="h6-ragular"
+        <a href="{{ $item->hyperlink }}" target="_blank" class="h6-ragular"
         style="color:#2463B6; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;"
         title="{{ $item->hyperlink }}">
         {{ Str::limit($item->hyperlink, 40) }}
@@ -109,7 +109,7 @@
 
       <div class="dashboard-video-card-content-content-down">
       <div class="gap-2 d-flex align-items-center">
-        <a href="">
+        <a href="{{ route('articles.edit', $item->id) }}">
         <x-svg-icon name="edit-pen2" size="12" color="Black" />
         </a>
 

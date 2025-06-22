@@ -17,11 +17,24 @@
     @csrf
 
     <div class="form-infield">
-      <x-text_label for="image_path">Upload Thumbnail</x-text_label>
+      <x-text_label for="thumbnail_path">Upload Thumbnail</x-text_label>
       <div style="position: relative;">
-      <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an thumbnail from your gallery"
+      <x-text_input type="file" id="thumbnail_path" name="image_path"
+        placeholder="Choose an thumbnail from your gallery" accept="image/jpeg,image/jpg,image/png"
+        style="color: transparent; cursor: pointer;" onchange="updateFileName(this)" />
+      <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
+        <x-button type="button" onclick="document.getElementById('thumbnail_path').click()">Choose
+        file</x-button>
+      </div>
+      </div>
+    </div>
+
+    <div class="form-infield">
+      <x-text_label for="image_path">Image</x-text_label>
+      <div style="position: relative;">
+      <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
         accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-        onchange="updateFileName(this)" />
+        onchange=" updateFileName(this)" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
         <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
         file</x-button>
@@ -82,7 +95,7 @@
     </div>
 
     <div class="mt-3 d-flex justify-content-end">
-      <x-button type="submit">Upload Article</x-button>
+      <x-button type="submit">Add Article</x-button>
     </div>
     </form>
   </section>
@@ -120,7 +133,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
     const fileInputs = [
-      { id: 'image_path', placeholder: 'Choose an thumbnail from your gallery' },
+      { id: 'thumbnail_path', placeholder: 'Choose an thumbnail from your gallery' },
+      { id: 'image_path', placeholder: 'Choose an image from your gallery' },
       { id: 'pdf', placeholder: 'Choose a PDF file' }
     ];
 

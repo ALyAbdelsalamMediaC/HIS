@@ -1369,7 +1369,7 @@ body {
     color: #bb1313;
     background-color: #fff3f3;
 }
-.card-status.in_review {
+.card-status.inreview {
     color: #3f8f43;
     background-color: #deffe0;
 }
@@ -1415,6 +1415,45 @@ body {
     border: 1px solid var(--border-color);
     padding: 16px;
     border-radius: var(--main-border-radius-lg);
+}
+
+.video-preview-container video {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.video-info {
+    padding: 15px;
+}
+
+.video-info h5 {
+    color: #35758c;
+    margin-bottom: 15px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.upload-container .uploadBox {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.upload-container .uploadBox:hover {
+    border-color: #35758c;
+    background-color: #f8f9fa;
+}
+
+.upload-container .uploadBox.dragging {
+    border-color: #35758c;
+    background-color: #e3f2fd;
 }
 
 /* ========================================================
