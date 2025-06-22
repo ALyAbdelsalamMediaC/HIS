@@ -36,7 +36,6 @@ Route::middleware('auth')->group(function () {
     Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
     Route::put('content/{id}', [MediaController::class, 'update'])->name('content.update');
     Route::get('/content/assigned/{id}/{reviewers}', [MediaController::class, 'assignTo'])->name('content.assignTo');
-    Route::post('/content/assign-reviewer/{id}', [MediaController::class, 'assignReviewer'])->name('content.assignReviewer');
 
     Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
