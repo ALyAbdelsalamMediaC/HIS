@@ -44,10 +44,10 @@ class MediaController extends Controller
         $this->driveServicePDF = $driveServicePDF;
         $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
 
-         $this->driveServiceImage = $driveServiceImage;
+        $this->driveServiceImage = $driveServiceImage;
         $this->client = $this->driveServiceImage->getClient(); // Ensure this method exists in the service
 
-         $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->driveServiceThumbnail = $driveServiceThumbnail;
         $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
 
@@ -102,27 +102,27 @@ class MediaController extends Controller
         }
     }
     public function assignTo($id, $reviewers)
-{
-    try {
-        // Convert reviewers string to array
-        $reviewersArray = explode(',', $reviewers);
-        // Clean up any whitespace and filter out empty values
-        $reviewersArray = array_filter(array_map('trim', $reviewersArray));
-        
-        // Convert to JSON
-        $reviewersJson = json_encode($reviewersArray);
-        
-        // Update media table using Eloquent
-        Media::where('media_id', $id)
-            ->update(['assigned_to' => $reviewersJson]);
-            
-        return back()->with('success', 'Reviewers assigned successfully.');
-        
-    } catch (Exception $e) {
-        LaravelLog::error('Assign to error: ' . $e->getMessage());
-        return back()->with('error', 'Failed to assign reviewers.');
+    {
+        try {
+            // Convert reviewers string to array
+            $reviewersArray = explode(',', $reviewers);
+            // Clean up any whitespace and filter out empty values
+            $reviewersArray = array_filter(array_map('trim', $reviewersArray));
+
+            // Convert to JSON
+            $reviewersJson = json_encode($reviewersArray);
+
+            // Update media table using Eloquent
+            Media::where('media_id', $id)
+                ->update(['assigned_to' => $reviewersJson]);
+
+            return back()->with('success', 'Reviewers assigned successfully.');
+
+        } catch (Exception $e) {
+            LaravelLog::error('Assign to error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to assign reviewers.');
+        }
     }
-}
     public function recently_Added()
     {
         try {
@@ -224,7 +224,7 @@ class MediaController extends Controller
             // Store thumbnail if exists
             $thumbnailPath = null;
 
-              if ($request->hasFile('thumbnail_path')) {
+            if ($request->hasFile('thumbnail_path')) {
                 $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
@@ -235,7 +235,7 @@ class MediaController extends Controller
 
             $imagePath = null;
 
-              if ($request->hasFile('image_path')) {
+            if ($request->hasFile('image_path')) {
                 $driveServiceImage = new GoogleDriveServiceImage();
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
@@ -323,53 +323,65 @@ class MediaController extends Controller
             // Update video file on Google Drive
             $video = $media->file_path;
             if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $driveServiceVideo = new GoogleDriveServiceVideo();
                 // Delete old file from Google Drive if exists
                 if ($media->file_path) {
-                    $fileId = $this->driveServiceVideo->getFileIdFromUrl($media->file_path);
+                    $fileId = $driveServiceVideo->getFileIdFromUrl($media->file_path);
                     if ($fileId) {
-                        $this->driveServiceVideo->deleteFile($fileId);
+                        $driveServiceVideo->deleteFile($fileId);
                     }
                 }
                 // Upload new file
                 $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                $video = $this->driveServiceVideo->uploadFile($request->file('file'), $filename);
+                $video = $driveServiceVideo->uploadFile($request->file('file'), $filename);
             }
 
             // Update PDF file on Google Drive
             $pdf = $media->pdf;
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
+                $driveServicePDF = new GoogleDriveServicePDF();
                 // Delete old PDF from Google Drive if exists
                 if ($media->pdf) {
-                    $fileId = $this->driveServicePDF->getFileIdFromUrl($media->pdf);
+                    $fileId = $driveServicePDF->getFileIdFromUrl($media->pdf);
                     if ($fileId) {
-                        $this->driveServicePDF->deleteFile($fileId);
+                        $driveServicePDF->deleteFile($fileId);
                     }
                 }
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                $pdf = $this->driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                $pdf = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
             }
 
             // Update thumbnail if exists
             $thumbnailPath = $media->thumbnail_path;
             if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
-                // Delete old thumbnail from storage if exists
+                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
+                // Delete old thumbnail from Google Drive if exists
                 if ($media->thumbnail_path) {
-                    $oldPath = str_replace('http://127.0.0.1:8000/', '', $media->thumbnail_path);
-                    Storage::disk('public')->delete($oldPath);
+                    $fileId = $driveServiceThumbnail->getFileIdFromUrl($media->thumbnail_path);
+                    if ($fileId) {
+                        $driveServiceThumbnail->deleteFile($fileId);
+                    }
                 }
-                $thumbnailPath = 'http://127.0.0.1:8000/' . $request->file('thumbnail_path')->store('thumbnails', 'public');
+                // Upload new thumbnail
+                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                $thumbnailPath = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
             }
 
             // Update image if exists
             $imagePath = $media->image_path;
             if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
-                // Delete old image from storage if exists
+                $driveServiceImage = new GoogleDriveServiceImage();
+                // Delete old image from Google Drive if exists
                 if ($media->image_path) {
-                    $oldPath = str_replace('http://127.0.0.1:8000/', '', $media->image_path);
-                    Storage::disk('public')->delete($oldPath);
+                    $fileId = $driveServiceImage->getFileIdFromUrl($media->image_path);
+                    if ($fileId) {
+                        $driveServiceImage->deleteFile($fileId);
+                    }
                 }
-                $imagePath = 'http://127.0.0.1:8000/' . $request->file('image_path')->store('images', 'public');
+                // Upload new image
+                $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                $imagePath = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
             }
 
             // Update database

@@ -1411,6 +1411,12 @@ body {
     cursor: pointer;
 }
 
+.assignment-select {
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    border-radius: var(--main-border-radius-lg);
+}
+
 /* ========================================================
    Pagination Styles
    ======================================================== */

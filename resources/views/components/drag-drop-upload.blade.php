@@ -4,7 +4,8 @@
     'maxSize' => '1GB',
     'supportedFormats' => 'mp4',
     'multiple' => false,
-    'required' => false
+    'required' => false,
+    'currentFile' => null
 ])
 
 <div class="upload-container" x-data="dragDropUpload({
@@ -12,14 +13,15 @@
     accept: '{{ $accept }}',
     maxSize: '{{ $maxSize }}',
     multiple: {{ $multiple ? 'true' : 'false' }},
-    required: {{ $required ? 'true' : 'false' }}
+    required: {{ $required ? 'true' : 'false' }},
+    currentFile: {{ $currentFile ? json_encode($currentFile) : 'null' }}
 })">
     <!-- Hidden file input -->
     <input 
         type="file" 
         name="{{ $name }}" 
-        :accept="accept"
-        :multiple="multiple"
+        accept="{{ $accept }}"
+        {{ $multiple ? 'multiple' : '' }}
         {{ $required ? 'required' : '' }}
         class="d-none" 
         x-ref="fileInput"
@@ -29,7 +31,12 @@
     <!-- Upload Box -->
     <div 
         class="uploadBox"
-        :class="{ 'dragging': isDragging, 'uploading': isUploading, 'success': uploadComplete, 'error': hasError }"
+        :class="{
+            'dragging': isDragging, 
+            'uploading': isUploading, 
+            'success': uploadComplete, 
+            'error': hasError 
+        }"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="handleDrop"
@@ -44,11 +51,27 @@
         <!-- Upload Text -->
         <div>
             <h3 class="mt-3 h2-semibold">
-                <span x-show="!isDragging">Drag & drop files or <span style="color:#35758C;">Browse</span></span>
+                <span x-show="!isDragging && currentFile === null">Drag & drop files or <span style="color:#35758C;">Browse</span></span>
+                <span x-show="!isDragging && currentFile !== null">Drag & drop new file or <span style="color:#35758C;">Browse</span></span>
                 <span x-show="isDragging">Drop files here</span>
             </h3>
             <p class="mt-1 h4-ragular" style="color:#676767;">Supported formats: {{ $supportedFormats }}</p>
             <p class="h4-ragular" style="color:#676767;">Maximum file size: {{ $maxSize }}</p>
+        </div>
+
+        <!-- Current File Info (for edit mode) -->
+        <div x-show="currentFile !== null && !selectedFile && !(multiple && selectedFiles.length > 0)" class="mt-3">
+            <div class="p-3 rounded border" style="background-color: #e9ecef;">
+                <p class="mb-1 h5-ragular" style="color:#35758C;">
+                    <strong>Current File:</strong>
+                </p>
+                <p class="mb-1 h6-ragular" style="color:#676767;">
+                    <span x-text="currentFile && currentFile.name ? currentFile.name : 'Video file'"></span>
+                </p>
+                <p class="mb-0 h6-ragular" style="color:#676767;">
+                    <small>Upload a new file to replace the current one</small>
+                </p>
+            </div>
         </div>
 
         <!-- Selected File Info -->
@@ -124,6 +147,7 @@ function dragDropUpload(config) {
         maxSizeBytes: parseFileSize(config.maxSize),
         multiple: config.multiple,
         required: config.required,
+        currentFile: config.currentFile,
 
         // State
         isDragging: false,

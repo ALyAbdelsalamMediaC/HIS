@@ -87,7 +87,7 @@ class GoogleDriveServiceThumbnail
 
     }
 
-     public function uploadThumbnail($file, $name)
+    public function uploadThumbnail($file, $name)
     {
         $fileMetadata = new DriveFile([
             'name' => $name,
@@ -114,5 +114,23 @@ class GoogleDriveServiceThumbnail
         return "https://lh3.googleusercontent.com/d/{$uploadedFile->id}=w1000?authuser=0";
 
     }
-    
+
+    public function getFileIdFromUrl($url)
+    {
+        // Extract file ID from Google Drive URL
+        if (preg_match('/\/d\/([a-zA-Z0-9-_]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        return null;
+    }
+
+    public function deleteFile($fileId)
+    {
+        try {
+            $this->service->files->delete($fileId);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

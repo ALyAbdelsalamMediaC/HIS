@@ -91,7 +91,7 @@
                             </div>
 
                             <div class="mt-3 content-container-card-img">
-                                <img src="{{ $item->thumbnail_path ? Storage::url($item->thumbnail_path) : asset('images/placeholder.jpg') }}" alt="{{ $item->title }}">
+                                <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}" />
 
                                 <span class="c-v-span">Video</span>
                                 <x-format-duration :seconds="$item->duration" class="c-d-span" />
@@ -108,7 +108,7 @@
                                 @if($item->status !== 'pending')
                                         <div class="dashboard-video-card-content-content-down">
                                             <div class="gap-2 d-flex align-items-center">
-                                                <a href="">
+                                                <a href="{{ route('content.edit', $item->id) }}">
                                                     <x-svg-icon name="edit-pen2" size="12" color="Black" />
                                                 </a>
 
@@ -133,7 +133,8 @@
                                 @else
                                 <div class="gap-3 mt-3 d-flex align-items-center">
                                     <h3 class="h5-semibold">Assigned to :</h3>
-                                    <div class="assign-to-btn">
+                                    <div class="assign-to-btn" data-bs-toggle="modal"
+                                        data-bs-target="#assignReviewerModal{{ $item->id }}">
                                         <x-svg-icon name="plus" size="12" color="#35758C" />
                                     </div>
                                 </div>
@@ -154,10 +155,92 @@
                 <x-pagination :paginator="$media" :appends="request()->query()" />
             @endif
         </div>
-    </section>
 
+        <!-- Assign Reviewer Modals -->
+        @foreach($media as $item)
+            @if($item->status === 'pending')
+                <x-modal id="assignReviewerModal{{ $item->id }}" title="Assign Reviewers">
+                    <form action="{{ route('content.assignReviewer', $item->id) }}" method="POST" class="mt-3" novalidate>
+                        @csrf
+                        <div class="mb-4 form-infield assignment-select">
+                            <x-text_label for="reviewer_ids_{{ $item->id }}" :required="true">Assign to Reviewers</x-text_label>
+                            <p class="mb-1 h5-ragular" style="color:#adadad; margin-top:-6px;">You can select multiple reviewers</p>
+                            <select class="select2-reviewers form-control" name="reviewer_ids[]" multiple="multiple"
+                                id="reviewer_ids_{{ $item->id }}" required>
+                                @foreach($reviewers as $reviewer)
+                                    <option value="{{ $reviewer->id }}">{{ $reviewer->name }}</option>
+                                @endforeach
+                            </select>
+                            <div id="reviewer_ids-error-container_{{ $item->id }}">
+                                <x-input-error :messages="$errors->get('reviewer_ids')" class="mt-2" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+                            <x-button type="submit" class="px-4">Assign Reviewers</x-button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endif
+        @endforeach
+    </section>
 @endsection
 
 @push('scripts')
     <script src="{{ asset('js/filters.js') }}"></script>
+    <script src="{{ asset('js/validations.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 for reviewer assignment with better modal handling
+            function initializeReviewerSelect2(modalId) {
+                $(`#${modalId} .select2-reviewers`).select2({
+                    placeholder: 'Select reviewers',
+                    dropdownParent: $(`#${modalId}`),
+                    width: '100%',
+                    closeOnSelect: false,
+                    allowClear: true,
+                    templateResult: formatReviewer,
+                    templateSelection: formatReviewerSelection
+                });
+            }
+
+            // Format reviewer display in dropdown
+            function formatReviewer(reviewer) {
+                if (!reviewer.id) return reviewer.text;
+                return $(
+                    `<div class="gap-3 py-2 d-flex align-items-center">
+                                                                    <div class="reviewer-avatar">
+                                                                        <img src="/images/global/avatar.svg" class="rounded-circle" width="40" height="40" alt="${reviewer.text}">
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                                                                        <div class="h6-ragular">Reviewer</div>
+                                                                    </div>
+                                                                </div>`
+                );
+            }
+
+            // Format reviewer selection display
+            function formatReviewerSelection(reviewer) {
+                if (!reviewer.id) return reviewer.text;
+                return reviewer.text;
+            }
+
+            // Initialize Select2 when modal is shown
+            $('.modal').on('shown.bs.modal', function () {
+                const modalId = $(this).attr('id');
+                if (modalId.startsWith('assignReviewerModal')) {
+                    initializeReviewerSelect2(modalId);
+                }
+            });
+
+            // Reset Select2 when modal is hidden
+            $('.modal').on('hidden.bs.modal', function () {
+                const modalId = $(this).attr('id');
+                if (modalId.startsWith('assignReviewerModal')) {
+                    $(`#${modalId} .select2-reviewers`).select2('destroy');
+                }
+            });
+        });
+    </script>
 @endpush

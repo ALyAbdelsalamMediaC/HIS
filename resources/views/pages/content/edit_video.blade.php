@@ -2,6 +2,32 @@
 @section('title', 'HIS | Edit Video')
 @section('content')
   <section>
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <ul class="mb-0">
+      @foreach($errors->all() as $error)
+      <li>{{ $error }}</li>
+    @endforeach
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <div class="gap-3 d-flex align-items-center">
     <div class="arrow-back-btn" onclick="window.history.back()">
       <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
@@ -13,27 +39,99 @@
     </div>
     </div>
 
-    <form method="POST" action="{{ route('content.update', $video->id) }}" enctype="multipart/form-data" novalidate>
+    <!-- Current Video Preview Section -->
+    <div class="p-4 mt-4 mb-4 rounded border" style="background-color: #f8f9fa;">
+    <h4 class="mb-3 h4-semibold" style="color:#35758C;">Current Video</h4>
+
+    @if($media->file_path)
+    <div class="row">
+      <div class="col-md-6">
+      <div class="video-preview-container">
+      <video controls style="width: 100%; max-width: 400px; border-radius: 8px;">
+      <source src="{{ $media->file_path }}" type="video/mp4">
+      Your browser does not support the video tag.
+      </video>
+      </div>
+      </div>
+      <div class="col-md-6">
+      <div class="video-info">
+      <h5 class="mb-2 h5-semibold">{{ $media->title }}</h5>
+      <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Duration:</strong>
+      @if($media->duration)
+      @php
+      $hours = floor($media->duration / 3600);
+      $minutes = floor(($media->duration % 3600) / 60);
+      $seconds = floor($media->duration % 60);
+      $duration = '';
+      if ($hours > 0) {
+      $duration .= $hours . 'h ';
+      }
+      if ($minutes > 0 || $hours > 0) {
+      $duration .= $minutes . 'm ';
+      }
+      $duration .= $seconds . 's';
+      @endphp
+      {{ $duration }}
+      @else
+      N/A
+      @endif
+      </p>
+      <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Category:</strong> {{ $media->category->name ?? 'N/A' }}
+      </p>
+      <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Status:</strong>
+      <span
+        class="badge bg-{{ $media->status === 'published' ? 'success' : ($media->status === 'pending' ? 'warning' : 'danger') }}">
+        {{ ucfirst($media->status) }}
+      </span>
+      </p>
+      <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Uploaded:</strong> {{ $media->created_at->format('M d, Y \a\t g:i A') }}
+      </p>
+      @if($media->description)
+      <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Description:</strong> {{ Str::limit($media->description, 100) }}
+      </p>
+      @endif
+      </div>
+      </div>
+    </div>
+    @else
+    <p class="h6-ragular" style="color:#dc3545;">No video file found.</p>
+    @endif
+    </div>
+
+    <form method="POST" action="{{ route('content.update', $media->id) }}" enctype="multipart/form-data" novalidate>
     @csrf
     @method('PUT')
 
-    <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="false" />
+    <!-- Video Upload Section -->
+    <div class="mt-4 mb-4">
+      <h4 class="mb-3 h4-semibold" style="color:#35758C;">Update Video File (Optional)</h4>
+      <p class="mb-3 h6-ragular" style="color:#676767;">Leave empty to keep the current video file.</p>
+      <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="false"
+      :current-file="$media->file_path ? [
+      'name' => basename(parse_url($media->file_path, PHP_URL_PATH)) ?: 'Current Video',
+      'url' => $media->file_path
+      ] : null" />
+    </div>
 
     <div class="mt-3 form-infield">
-      <x-text_label for="thumbnail_path" :required="true">Upload Thumbnail</x-text_label>
+      <x-text_label for="thumbnail_path">Upload Thumbnail (Optional)</x-text_label>
       <div style="position: relative;">
       <x-text_input type="file" id="thumbnail_path" name="thumbnail_path"
-        placeholder="Choose an thumbnail from your gallery" data-required="true" data-name="Upload Thumbnail"
-        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-        onchange="updateFileName(this)" />
+        placeholder="Choose an thumbnail from your gallery" accept="image/jpeg,image/jpg,image/png"
+        style="color: transparent; cursor: pointer;" onchange="updateFileName(this)" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
         <x-button type="button" onclick="document.getElementById('thumbnail_path').click()">Choose
         file</x-button>
       </div>
       </div>
-      @if($video->thumbnail_path)
+      @if($media->thumbnail_path)
       <div class="mt-2">
-      <img src="{{ asset($video->thumbnail_path) }}" alt="Current thumbnail" style="max-width: 200px;">
+      <img src="{{ asset($media->thumbnail_path) }}" alt="Current thumbnail" style="max-width: 200px;">
       </div>
     @endif
       <div id="thumbnail-error-container">
@@ -52,9 +150,9 @@
         file</x-button>
       </div>
       </div>
-      @if($video->image_path)
+      @if($media->image_path)
       <div class="mt-2">
-      <img src="{{ asset($video->image_path) }}" alt="Current image" style="max-width: 200px;">
+      <img src="{{ asset($media->image_path) }}" alt="Current image" style="max-width: 200px;">
       </div>
     @endif
     </div>
@@ -69,9 +167,9 @@
         <x-button type="button" onclick="document.getElementById('pdf').click()">Choose file</x-button>
       </div>
       </div>
-      @if($video->pdf)
+      @if($media->pdf)
       <div class="mt-2">
-      <a href="{{ asset($video->pdf) }}" target="_blank">View Current PDF</a>
+      <a href="{{ asset($media->pdf) }}" target="_blank">View Current PDF</a>
       </div>
     @endif
     </div>
@@ -80,7 +178,7 @@
       <x-text_label for="category_id" :required="true">Category</x-text_label>
       <x-select id="category_id" name="category_id" :options="$categories->mapWithKeys(function ($category) {
     return [$category->id => $category->name];
-    })->all()" :selected="$video->category_id" placeholder="Select Category"
+    })->all()" :selected="$media->category_id" placeholder="Select Category"
       data-required="true" data-name="Category" />
       <div id="category_id-error-container">
       <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
@@ -90,7 +188,7 @@
     <div class="form-infield">
       <x-text_label for="title" :required="true">Title</x-text_label>
       <x-text_input type="text" id="title" name="title" placeholder="Title" data-required="true" data-name="Title"
-      value="{{ $video->title }}" />
+      value="{{ $media->title }}" />
       <div id="title-error-container">
       <x-input-error :messages="$errors->get('title')" />
       </div>
@@ -98,12 +196,12 @@
 
     <div class="form-infield">
       <x-text_label for="description">Description (optional)</x-text_label>
-      <x-textarea name="description" id="description" placeholder="Enter Description"
-      rows="3">{{ $video->description }}</x-textarea>
+      <x-textarea name="description" id="description" placeholder="Enter Description" rows="3"
+      value="{{ $media->description }}" />
     </div>
 
     <div class="mb-2 form-check">
-      <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ $video->is_featured ? 'checked' : '' }}>
+      <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ $media->is_featured ? 'checked' : '' }}>
       <label class="form-check-label" for="is_featured">Featured</label>
     </div>
 
@@ -117,6 +215,46 @@
 @push('scripts')
   <script src="{{ asset('js/validations.js') }}"></script>
   <script src="{{ asset('js/showToast.js') }}"></script>
+  <style>
+    .video-preview-container video {
+    display: block;
+    width: 100%;
+    height: auto;
+    }
+
+    .video-info {
+    padding: 15px;
+    }
+
+    .video-info h5 {
+    color: #35758C;
+    margin-bottom: 15px;
+    }
+
+    .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    }
+
+    .upload-container .uploadBox {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    }
+
+    .upload-container .uploadBox:hover {
+    border-color: #35758C;
+    background-color: #f8f9fa;
+    }
+
+    .upload-container .uploadBox.dragging {
+    border-color: #35758C;
+    background-color: #e3f2fd;
+    }
+  </style>
   <script>
     function validateFile(input, expectedType, maxSizeBytes, errorMessage, defaultPlaceholder) {
     const file = input.files[0];
@@ -162,28 +300,28 @@
 
     const style = document.createElement('style');
     style.textContent = `
-          input[type="file"]::-webkit-file-upload-button,
-          input[type="file"]::file-selector-button {
-            display: none;
-          }
-          input[type="file"] {
-            color: transparent;
-          }
-          input[type="file"]::before {
-            content: attr(data-placeholder);
-            color: #6c757d;
-            position: absolute;
-            padding-left:11px;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: calc(100% - 130px);
-          }
-        `;
+      input[type="file"]::-webkit-file-upload-button,
+      input[type="file"]::file-selector-button {
+      display: none;
+      }
+      input[type="file"] {
+      color: transparent;
+      }
+      input[type="file"]::before {
+      content: attr(data-placeholder);
+      color: #6c757d;
+      position: absolute;
+      padding-left:11px;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - 130px);
+      }
+      `;
     document.head.appendChild(style);
     });
   </script>
