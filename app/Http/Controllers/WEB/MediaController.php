@@ -21,6 +21,7 @@ use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is bu
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use getID3;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaController extends Controller
 {
@@ -101,11 +102,23 @@ class MediaController extends Controller
             return back()->with('error', 'Failed to fetch media.');
         }
     }
-    public function assignTo($id, $reviewers)
+    public function assignTo(Request $request, $id)
     {
         try {
-            // Convert reviewers string to array
-            $reviewersArray = explode(',', $reviewers);
+            // Validate the request
+            $request->validate([
+                'reviewer_ids' => 'required|array|min:1',
+                'reviewer_ids.*' => 'exists:users,id'
+            ]);
+
+            // Get reviewers from request body
+            $reviewersArray = $request->input('reviewer_ids', []);
+
+            // If it's a string, convert to array
+            if (is_string($reviewersArray)) {
+                $reviewersArray = explode(',', $reviewersArray);
+            }
+
             // Clean up any whitespace and filter out empty values
             $reviewersArray = array_filter(array_map('trim', $reviewersArray));
 
@@ -113,7 +126,7 @@ class MediaController extends Controller
             $reviewersJson = json_encode($reviewersArray);
 
             // Update media table using Eloquent
-            Media::where('media_id', $id)
+            Media::where('id', $id)
                 ->update(['assigned_to' => $reviewersJson]);
 
             return back()->with('success', 'Reviewers assigned successfully.');
@@ -152,7 +165,7 @@ class MediaController extends Controller
                 return view('pages.content.video.single_video_pending_reviewer', compact('media'));
             }
         } elseif ($status === 'published') {
-            return view('pages.content.video.single_video_published_admin', compact('media'));
+            return view('pages.content.video.single_video', compact('media'));
         }
 
         // Default fallback
@@ -480,6 +493,46 @@ class MediaController extends Controller
             ]);
 
             return back()->with('error', 'Failed to delete media: ' . $e->getMessage());
+        }
+    }
+
+    public function stream($id)
+    {
+        try {
+            $media = Media::findOrFail($id);
+            $filePath = $media->file_path;
+
+            // Extract Google Drive file ID from the URL
+            $fileId = null;
+            if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $filePath, $matches)) {
+                $fileId = $matches[1];
+            }
+
+            if (!$fileId) {
+                abort(404, 'Google Drive file ID not found.');
+            }
+
+            $driveService = new \Google\Service\Drive($this->client);
+            $file = $driveService->files->get($fileId, ['alt' => 'media']);
+
+            $response = new StreamedResponse(function () use ($file) {
+                $chunkSize = 1024 * 1024; // 1MB chunks
+                $stream = $file->getBody();
+                while (!$stream->eof()) {
+                    echo $stream->read($chunkSize);
+                    flush();
+                }
+            });
+
+            $response->headers->set('Content-Type', 'video/mp4');
+            $response->headers->set('Content-Length', $file->getHeaderLine('Content-Length'));
+            $response->headers->set('Accept-Ranges', 'bytes');
+
+            return $response;
+
+        } catch (Exception $e) {
+            LaravelLog::error('Media streaming error: ' . $e->getMessage());
+            abort(500, 'Error streaming video.');
         }
     }
 }

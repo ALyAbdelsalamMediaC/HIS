@@ -113,7 +113,8 @@
         <x-svg-icon name="edit-pen2" size="12" color="Black" />
         </a>
 
-        <button class="btn-nothing">
+        <button class="btn-nothing delete-article-btn" data-bs-toggle="modal"
+        data-bs-target="#deleteArticleModal{{ $item->id }}">
         <x-svg-icon name="trash" size="12" color="Black" />
         </button>
       </div>
@@ -146,6 +147,23 @@
     <x-pagination :paginator="$article" :appends="request()->query()" />
     @endif
     </div>
+
+    <!-- Delete Article Modals -->
+    @foreach($article as $item)
+    <x-modal id="deleteArticleModal{{ $item->id }}" title="Delete Article">
+    <div class="my-3">
+      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the article "{{ $item->title }}"?</p>
+    </div>
+    <div class="modal-footer">
+      <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+      <form action="{{ route('article.destroy', $item->id) }}" method="POST">
+      @csrf
+      @method('DELETE')
+      <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
+      </form>
+    </div>
+    </x-modal>
+    @endforeach
   </section>
 
 @endsection

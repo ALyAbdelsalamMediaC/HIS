@@ -24,7 +24,6 @@
         </div>
 
         <!-- Articles & Videos -->
-
         <div class="mt-4">
             <!-- Tabs using the component -->
             <x-tabs_pages :tabs="[
@@ -76,113 +75,158 @@
 
             <div class="content-container-cards">
                 @forelse ($media as $item)
-                        <div class="content-container-card">
-                            <div class="d-flex justify-content-between align-items-end w-100">
-                                <div>
-                                    <h2 class="h4-semibold">{{ $item->user->name }}</h2>
-                                    <span class="h6-ragular" style="color:#ADADAD;">Uploaded
-                                        {{ $item->created_at->diffForHumans() }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h4 class="h6-ragular card-status {{ $item->status }}">
-                                        {{ ucfirst($item->status) }}
-                                    </h4>
-                                </div>
+                    <div class="content-container-card">
+                        <div class="d-flex justify-content-between align-items-end w-100">
+                            <div>
+                                <h2 class="h4-semibold" style="color:black;">{{ $item->user->name }}</h2>
+                                <span class="h6-ragular" style="color:#ADADAD;">Uploaded
+                                    {{ $item->created_at->diffForHumans() }}</span>
                             </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="h6-ragular card-status {{ $item->status }}">
+                                    {{ ucfirst($item->status) }}
+                                </h4>
+                            </div>
+                        </div>
 
+                        <a href="{{ route('content.video', ['id' => $item->id, 'status' => $item->status]) }}" class="w-100">
                             <div class="mt-3 content-container-card-img">
                                 <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}" />
 
                                 <span class="c-v-span">Video</span>
                                 <x-format-duration :seconds="$item->duration" class="c-d-span" />
                             </div>
+                        </a>
 
-                            <div class="video-card-content-content">
-                                <div class="dashboard-video-card-content-content-top">
-                                    <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em;">
-                                        {{ $item->title }}
-                                    </h3>
-                                    <p class="h6-ragular">{{ Str::words($item->description, 15, '...') }}</p>
-                                </div>
+                        <div class="video-card-content-content">
+                            <div class="dashboard-video-card-content-content-top">
+                                <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em; color:black;">
+                                    {{ $item->title }}
+                                </h3>
+                                <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}
+                                </p>
+                            </div>
 
-                                @if($item->status !== 'pending')
-                                        <div class="dashboard-video-card-content-content-down">
-                                            <div class="gap-2 d-flex align-items-center">
-                                                <a href="{{ route('content.edit', $item->id) }}">
-                                                    <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                                </a>
+                            @if($item->status !== 'pending')
+                                    <div class="dashboard-video-card-content-content-down">
+                                        <div class="gap-2 d-flex align-items-center">
+                                            <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
+                                                <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                            </a>
 
-                                                <button class="btn-nothing">
-                                                    <x-svg-icon name="trash" size="12" color="Black" />
-                                                </button>
+                                            <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
+                                                data-bs-target="#deleteVideoModal{{ $item->id }}">
+                                                <x-svg-icon name="trash" size="12" color="Black" />
+                                            </button>
+                                        </div>
+
+
+                                        <div class="gap-3 d-flex align-items-center">
+                                            <div>
+                                                <x-svg-icon name="eye" size="12" color="Black" />
+                                                <span class="h6-ragular">{{ $item->views}}</span>
                                             </div>
-
-
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div>
-                                                    <x-svg-icon name="eye" size="12" color="Black" />
-                                                    <span class="h6-ragular">{{ $item->views}}</span>
-                                                </div>
-                                                <div>
-                                                    <x-svg-icon name="message" size="12" color="Black" />
-                                                    <span class="h6-ragular">{{ $item->comments }}</span>
-                                                </div>
+                                            <div>
+                                                <x-svg-icon name="message" size="12" color="Black" />
+                                                <span class="h6-ragular">{{ $item->comments }}</span>
                                             </div>
                                         </div>
                                     </div>
-                                @else
-                                <div class="gap-3 mt-3 d-flex align-items-center">
-                                    <h3 class="h5-semibold">Assigned to :</h3>
-                                    <div class="assign-to-btn" data-bs-toggle="modal"
-                                        data-bs-target="#assignReviewerModal{{ $item->id }}">
-                                        <x-svg-icon name="plus" size="12" color="#35758C" />
-                                    </div>
                                 </div>
-                            @endif
-                        </div>
+                            @else
+                            <div class="gap-3 mt-3 d-flex align-items-center">
+                                <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
+                                @if($item->assigned_reviewers->count() > 0)
+                                    @php
+                                        $reviewers_list = $item->assigned_reviewers;
+                                        $total_reviewers = $reviewers_list->count();
+                                        $visible_reviewers = $reviewers_list->take(2);
+                                        $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
+                                    @endphp
+                                    <div class="gap-2 d-flex align-items-center">
+                                        @foreach($visible_reviewers as $reviewer)
+                                            <span class="badge bg-primary">{{ $reviewer->name }}</span>
+                                        @endforeach
+                                        @if($hidden_reviewers_count > 0)
+                                            <span class="badge rounded-pill bg-secondary">+{{ $hidden_reviewers_count }} more</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-muted">No reviewers assigned</span>
+                                @endif
+                                <div class="assign-to-btn" data-bs-toggle="modal"
+                                    data-bs-target="#assignReviewerModal{{ $item->id }}" onclick="event.stopPropagation();">
+                                    <x-svg-icon name="plus" size="12" color="#35758C" />
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @empty
-                <div class="py-5 text-center" style="grid-column: 1 / -1;">
-                    <p class="h5-ragular" style="color:#ADADAD;">No videos found</p>
-                </div>
-            @endforelse
+                    <div class="py-5 text-center" style="grid-column: 1 / -1;">
+                        <p class="h5-ragular" style="color:#ADADAD;">No videos found</p>
+                    </div>
+                @endforelse
 
-        </div>
-        <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
-            <!-- Table Info and Pagination -->
-            @if($media->count())
-                <x-table-info :paginator="$media" />
-                <x-pagination :paginator="$media" :appends="request()->query()" />
-            @endif
-        </div>
+            </div>
+            <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
+                <!-- Table Info and Pagination -->
+                @if($media->count())
+                    <x-table-info :paginator="$media" />
+                    <x-pagination :paginator="$media" :appends="request()->query()" />
+                @endif
+            </div>
 
-        <!-- Assign Reviewer Modals -->
-        @foreach($media as $item)
-            @if($item->status === 'pending')
-                <x-modal id="assignReviewerModal{{ $item->id }}" title="Assign Reviewers">
-                    <form action="{{ route('content.assignReviewer', $item->id) }}" method="POST" class="mt-3" novalidate>
-                        @csrf
-                        <div class="mb-4 form-infield assignment-select">
-                            <x-text_label for="reviewer_ids_{{ $item->id }}" :required="true">Assign to Reviewers</x-text_label>
-                            <p class="mb-1 h5-ragular" style="color:#adadad; margin-top:-6px;">You can select multiple reviewers</p>
-                            <select class="select2-reviewers form-control" name="reviewer_ids[]" multiple="multiple"
-                                id="reviewer_ids_{{ $item->id }}" required>
-                                @foreach($reviewers as $reviewer)
-                                    <option value="{{ $reviewer->id }}">{{ $reviewer->name }}</option>
-                                @endforeach
-                            </select>
-                            <div id="reviewer_ids-error-container_{{ $item->id }}">
-                                <x-input-error :messages="$errors->get('reviewer_ids')" class="mt-2" />
+            <!-- Assign Reviewer Modals -->
+            @foreach($media as $item)
+                @if($item->status === 'pending')
+                    <x-modal id="assignReviewerModal{{ $item->id }}" title="Assign Reviewers">
+                        <form action="{{ route('content.assignTo', $item->id) }}" method="POST" class="mt-3" novalidate>
+                            @csrf
+                            <div class="mb-4 form-infield assignment-select">
+                                <x-text_label for="reviewer_ids_{{ $item->id }}" :required="true">Assign to Reviewers</x-text_label>
+                                <p class="mb-1 h5-ragular" style="color:#adadad; margin-top:-6px;">You can select multiple reviewers
+                                </p>
+                                <select class="select2-reviewers form-control" name="reviewer_ids[]" multiple="multiple"
+                                    id="reviewer_ids_{{ $item->id }}" required>
+                                    @foreach($reviewers as $reviewer)
+                                        <option value="{{ $reviewer->id }}" {{ $item->assigned_reviewers->contains($reviewer->id) ? 'selected' : '' }}>
+                                            {{ $reviewer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div id="reviewer_ids-error-container_{{ $item->id }}">
+                                    <x-input-error :messages="$errors->get('reviewer_ids')" class="mt-2" />
+                                </div>
                             </div>
+                            <div class="modal-footer">
+                                <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+                                <x-button type="submit" class="px-4">Assign Reviewers</x-button>
+                            </div>
+                        </form>
+                    </x-modal>
+                @endif
+            @endforeach
+
+            <!-- Delete Video Modals -->
+            @foreach($media as $item)
+                @if($item->status !== 'pending')
+                    <x-modal id="deleteVideoModal{{ $item->id }}" title="Delete Video">
+                        <div class="my-3">
+                            <p class="h3-semibold" style="color:black;">Are you sure you want to delete the video
+                                "{{ $item->title }}"?
+                            </p>
                         </div>
                         <div class="modal-footer">
                             <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
-                            <x-button type="submit" class="px-4">Assign Reviewers</x-button>
+                            <form action="{{ route('content.destroy', $item->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
+                            </form>
                         </div>
-                    </form>
-                </x-modal>
-            @endif
-        @endforeach
+                    </x-modal>
+                @endif
+            @endforeach
     </section>
 @endsection
 
@@ -208,15 +252,10 @@
             function formatReviewer(reviewer) {
                 if (!reviewer.id) return reviewer.text;
                 return $(
-                    `<div class="gap-3 py-2 d-flex align-items-center">
-                                                                                <div class="reviewer-avatar">
-                                                                                    <img src="/images/global/avatar.svg" class="rounded-circle" width="40" height="40" alt="${reviewer.text}">
-                                                                                </div>
-                                                                                <div>
-                                                                                    <div class="mb-0 h5-ragular">${reviewer.text}</div>
-                                                                                    <div class="h6-ragular">Reviewer</div>
-                                                                                </div>
-                                                                            </div>`
+                    `<div class="py-2">
+                                                                                                                                            <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                                                                                                                                            <div class="h6-ragular">Reviewer</div>
+                                                                                                                                    </div>`
                 );
             }
 

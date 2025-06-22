@@ -7,11 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Media extends Model
 {
-  use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
-        'category_id','user_id', 'title','views', 'description','pdf','status',
-        'file_path', 'duration','thumbnail_path','image_path', 'is_featured','assigned_to'
+        'category_id',
+        'user_id',
+        'title',
+        'views',
+        'description',
+        'pdf',
+        'status',
+        'file_path',
+        'duration',
+        'thumbnail_path',
+        'image_path',
+        'is_featured',
+        'assigned_to'
     ];
 
     public function category()
@@ -37,7 +48,22 @@ class Media extends Model
     {
         return $this->belongsTo(User::class);
     }
-     public function getImageAttribute($value)
+
+    public function getAssignedReviewersAttribute()
+    {
+        if (!$this->assigned_to) {
+            return collect();
+        }
+
+        $reviewerIds = json_decode($this->assigned_to, true);
+        if (!is_array($reviewerIds)) {
+            return collect();
+        }
+
+        return User::whereIn('id', $reviewerIds)->get();
+    }
+
+    public function getImageAttribute($value)
     {
         return $value ? url('/storage/uploads/' . $value) : null;
     }

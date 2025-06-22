@@ -31,13 +31,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/videos/add', [MediaController::class, 'create']);
     Route::post('/content/videos/add', [MediaController::class, 'store'])->name('content.store');
-    Route::get('/content/video/{id}/{status}', [MediaController::class, 'getone'])->name('content.video');
-    Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
     Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
-    Route::put('content/{id}', [MediaController::class, 'update'])->name('content.update');
-    Route::put('content/{id}', [MediaController::class, 'destroy'])->name('content.destroy');
-    Route::put('content/{id}', [ArticleController::class, 'destroy'])->name('content.destroy');
-    Route::get('/content/assigned/{id}/{reviewers}', [MediaController::class, 'assignTo'])->name('content.assignTo');
+    Route::get('/content/videos/{id}/stream', [MediaController::class, 'stream'])->name('content.stream');
+    Route::get('/content/videos/{id}/{status}', [MediaController::class, 'getone'])->name('content.video');
+    Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
+    Route::put('content/videos/{id}', [MediaController::class, 'update'])->name('content.update');
+    Route::delete('content/videos/{id}', [MediaController::class, 'destroy'])->name('content.destroy');
+    Route::delete('content/articles/{id}', [ArticleController::class, 'destroy'])->name('article.destroy');
+    Route::post('/content/assigned/{id}', [MediaController::class, 'assignTo'])->name('content.assignTo');
 
     Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
