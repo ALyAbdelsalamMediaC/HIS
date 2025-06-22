@@ -36,6 +36,24 @@
     </div>
 
     <div class="form-infield">
+      <x-text_label for="image">Image</x-text_label>
+      <div style="position: relative;">
+      <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
+        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
+        onchange="updateFileName(this)" />
+      <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
+        <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
+        file</x-button>
+      </div>
+      </div>
+      @if($media->image_path)
+      <div class="mt-2">
+      <img src="{{ asset($media->image_path) }}" alt="Current image" style="max-width: 200px;">
+      </div>
+    @endif
+    </div>
+
+    <div class="form-infield">
       <x-text_label for="pdf">Media PDF</x-text_label>
       <div style="position: relative;">
       <x-text_input type="file" id="pdf" name="pdf" placeholder="Choose a PDF file" accept="application/pdf"

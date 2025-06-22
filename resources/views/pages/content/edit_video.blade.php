@@ -77,9 +77,9 @@
       N/A
       @endif
       </p>
-      <p class="mb-2 h6-ragular" style="color:#676767;">
-      <strong>Category:</strong> {{ $media->category->name ?? 'N/A' }}
-      </p>
+      <!-- <p class="mb-2 h6-ragular" style="color:#676767;">
+      <strong>Category:</strong> {{ $media->category->name ?? 'N/A' }}  
+      </p> -->
       <p class="mb-2 h6-ragular" style="color:#676767;">
       <strong>Status:</strong>
       <span
@@ -215,46 +215,6 @@
 @push('scripts')
   <script src="{{ asset('js/validations.js') }}"></script>
   <script src="{{ asset('js/showToast.js') }}"></script>
-  <style>
-    .video-preview-container video {
-    display: block;
-    width: 100%;
-    height: auto;
-    }
-
-    .video-info {
-    padding: 15px;
-    }
-
-    .video-info h5 {
-    color: #35758C;
-    margin-bottom: 15px;
-    }
-
-    .badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-    }
-
-    .upload-container .uploadBox {
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-    background-color: #fff;
-    transition: all 0.3s ease;
-    }
-
-    .upload-container .uploadBox:hover {
-    border-color: #35758C;
-    background-color: #f8f9fa;
-    }
-
-    .upload-container .uploadBox.dragging {
-    border-color: #35758C;
-    background-color: #e3f2fd;
-    }
-  </style>
   <script>
     function validateFile(input, expectedType, maxSizeBytes, errorMessage, defaultPlaceholder) {
     const file = input.files[0];
