@@ -13,7 +13,7 @@ use App\Services\Article\GoogleDriveServicePDF; // Make sure this service is bui
 use App\Services\Article\GoogleDriveServiceThumbnail; // Make sure this service is built
 class ArticleController extends Controller
 {
-      protected $client;
+    protected $client;
     protected $driveServicePDF;
     protected $driveServiceThumbnail;
     public function __construct(
@@ -36,7 +36,6 @@ class ArticleController extends Controller
                 'message' => 'get all Articles',
                 'data' => $Article
             ], 200);
-
         } catch (Exception $e) {
             LaravelLog::error('Media retrieval error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
@@ -61,12 +60,14 @@ class ArticleController extends Controller
 
 
             // Store thumbnail if exists
-           $pdf = null;
+            $pdf = null;
             if ($request->hasFile('pdf')) {
                 $driveServicePDF = new GoogleDriveServicePDF();
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                    $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+
                     $pdf = $url;
                 }
             }
@@ -79,6 +80,8 @@ class ArticleController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
+                    $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+
                     $image_path = $url;
                 }
             }
@@ -92,7 +95,7 @@ class ArticleController extends Controller
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
                 'image_path' => $image_path,
-                'pdf'=> $pdf,
+                'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
             ]);
 
@@ -103,12 +106,11 @@ class ArticleController extends Controller
                 'description' => 'Uploaded article: ' . $Article->title,
             ]);
 
-             return response()->json([
+            return response()->json([
                 'success' => true,
                 'message' => 'Article uploaded successfully.',
                 'data' => $Article
             ], 200);
-
         } catch (Exception $e) {
             LaravelLog::error('Article upload error: ' . $e->getMessage());
 

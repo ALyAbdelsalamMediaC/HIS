@@ -108,7 +108,7 @@ class ArticleController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = $url;
+                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -120,7 +120,7 @@ class ArticleController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
-                    $image_path = $url;
+                    $image_path = 'https://drive.google.com/file/d/' . $url . '/preview';;
                 }
             }
 
@@ -132,7 +132,7 @@ class ArticleController extends Controller
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnail_path = $url;
+                    $thumbnail_path = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -214,6 +214,7 @@ class ArticleController extends Controller
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                 $pdf = $this->driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                $pdf = 'https://drive.google.com/file/d/' . $pdf . '/preview';
             }
 
 
@@ -230,6 +231,7 @@ class ArticleController extends Controller
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                 $image_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
+                $image_path = 'https://drive.google.com/file/d/' . $image_path . '/preview';
             }
 
 
@@ -246,6 +248,7 @@ class ArticleController extends Controller
                 // Upload new PDF
                 $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                 $thumbnail_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                $thumbnail_path = 'https://drive.google.com/file/d/' . $thumbnail_path . '/preview';
             }
 
 
