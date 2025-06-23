@@ -1299,7 +1299,7 @@ body {
     margin-top: 24px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;
 }
 
 .content-container-card {
@@ -1671,8 +1671,50 @@ body {
 }
 
 /* ========================================================
-   Video Player
+   Video
    ======================================================== */
+.single-video-container {
+    padding: 24px;
+
+    border-radius: 12px;
+    background: #fff;
+}
+
+.input-icon-send {
+    position: absolute;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    transform: translate(-50%);
+    background: var(--primary-color);
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    border-radius: 50%;
+    text-align: center;
+}
+
+.comment-container {
+    border-radius: var(--main-border-radius-md);
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+    padding: 24px;
+    margin-top: 10px;
+    display: flex;
+    align-items: start;
+    gap: 12px;
+}
+
+.comment-container-user-icon {
+    background-color: #f1f9fa;
+    border-radius: 50%;
+    width: 51.103px;
+    height: 51.103px;
+    text-align: center;
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* ========================================================
     Media Queries and Responsive Styles

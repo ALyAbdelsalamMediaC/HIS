@@ -20,7 +20,7 @@
               <!-- Image Section -->
               @if($image)
               <div class="mb-4 text-center">
-                  <img src="{{ $image }}" alt="User Image" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                  <img src="{{ $image }}" alt="User Image" class="img-fluid" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
               </div>
               @endif
               

@@ -253,9 +253,9 @@
                 if (!reviewer.id) return reviewer.text;
                 return $(
                     `<div class="py-2">
-                                                                                                                                            <div class="mb-0 h5-ragular">${reviewer.text}</div>
-                                                                                                                                            <div class="h6-ragular">Reviewer</div>
-                                                                                                                                    </div>`
+                                                                                                                                                        <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                                                                                                                                                        <div class="h6-ragular">Reviewer</div>
+                                                                                                                                                </div>`
                 );
             }
 
