@@ -19,7 +19,7 @@
     <div class="notification-bell-btn">
       <x-notifications-dropdown :unreadNotifications="collect([])" />
     </div>
-    <a href="" class="nav-profile">
+    <a href="{{ route('settings.profile') }}" class="nav-profile">
       <x-svg-icon name="user" size="18" color="#fff" />
     </a>
   </div>

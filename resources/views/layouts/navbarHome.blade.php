@@ -20,7 +20,7 @@
           <div class="notification-bell-btn">
             <x-notifications-dropdown :unreadNotifications="collect([])" />
           </div>
-          <a href="" class="gap-3 d-flex align-items-center">
+          <a href="{{ route('settings.profile') }}" class="gap-3 d-flex align-items-center">
             <span class="h6-semibold" style="color:#fff;">{{ auth()->user()->name }}</span>
             <span class="nav-home-profile"><x-svg-icon name="user" size="19" color="#35758c" /></span>
           </a>
