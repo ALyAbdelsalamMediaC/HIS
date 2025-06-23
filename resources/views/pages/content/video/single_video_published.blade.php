@@ -103,7 +103,11 @@
     <h3 class="mb-2 h4-semibold">Comments</h3>
 
     <!-- Add Comment -->
-    <x-comment-input id="comment" name="comment" placeholder="Add new comment..." />
+    <form action="{{ route('comments.add', ['media_id' => $media->id]) }}" method="POST" class="mb-3">
+      @csrf
+      <x-comment-input id="comment" name="content" placeholder="Add new comment..." :value="old('content')" />
+      <button type="submit" class="mt-2 btn btn-primary" style="display:none"></button>
+    </form>
 
     <!-- Comments List -->
     <div class="comments-list-container">

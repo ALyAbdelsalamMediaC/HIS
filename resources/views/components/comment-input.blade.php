@@ -7,7 +7,7 @@
 ])
 <div class="input-icon">
     <x-text_input :type="'comment'" :id="$id" :name="$name" :placeholder="$placeholder" :style="$style" :value="$value" />
-    <div class="input-icon-send">
+    <div class="input-icon-send" style="cursor:pointer" onclick="this.closest('form').submit();">
         <x-svg-icon name="send" size="14" color="#fff" />
     </div>
 </div>
