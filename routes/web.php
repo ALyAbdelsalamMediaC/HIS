@@ -40,9 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('content/articles/{id}', [ArticleController::class, 'destroy'])->name('article.destroy');
     Route::post('/content/assigned/{id}', [MediaController::class, 'assignTo'])->name('content.assignTo');
 
-    Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
+    // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
-    Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
+    // Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');

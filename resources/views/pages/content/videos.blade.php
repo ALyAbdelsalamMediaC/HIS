@@ -168,6 +168,8 @@
                 @endforelse
 
             </div>
+            </div>
+            </div>
             <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
                 <!-- Table Info and Pagination -->
                 @if($media->count())
@@ -227,6 +229,8 @@
                     </x-modal>
                 @endif
             @endforeach
+
+
     </section>
 @endsection
 
@@ -253,9 +257,9 @@
                 if (!reviewer.id) return reviewer.text;
                 return $(
                     `<div class="py-2">
-                                                                                                                                                        <div class="mb-0 h5-ragular">${reviewer.text}</div>
-                                                                                                                                                        <div class="h6-ragular">Reviewer</div>
-                                                                                                                                                </div>`
+                                                                                                                                                                    <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                                                                                                                                                                    <div class="h6-ragular">Reviewer</div>
+                                                                                                                                                            </div>`
                 );
             }
 

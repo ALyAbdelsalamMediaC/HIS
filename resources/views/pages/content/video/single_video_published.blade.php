@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'HIS | Video - Pending')
+@section('title', 'HIS | Video - Published')
 @section('content')
 
   <div class="gap-3 mb-4 d-flex align-items-center">
@@ -15,7 +15,7 @@
   <section class="single-video-container">
 
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px;" preload="metadata">
+    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="metadata">
     <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
     Your browser does not support the video tag.
     </video>
@@ -103,55 +103,55 @@
     <h3 class="mb-2 h4-semibold">Comments</h3>
 
     <!-- Add Comment -->
-    <div class="input-icon">
-      <x-text_input type="comment" id="comment" name="comment" placeholder="Add a comment"
-      style="background-color: transparent; border-radius: 38px;" />
-
-      <div class="input-icon-send">
-      <x-svg-icon name="send" size="14" color="#fff" />
-      </div>
-    </div>
+    <x-comment-input id="comment" name="comment" placeholder="Add new comment..." />
 
     <!-- Comments List -->
-    <div class="comment-container">
-      <div class="comment-container-user-icon">
-      <x-svg-icon name="user" size="18" color="#35758c" />
+    <div class="comments-list-container">
+      <div class="comment-container">
+      <div class="gap-3 d-flex align-items-start">
+
+        <div class="comment-container-user-icon">
+        <x-svg-icon name="user" size="18" color="#35758c" />
+        </div>
+
+        <div>
+        <h4 class="h5-semibold">John Doe</h4>
+        <span class="h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
+        <p class="mt-2 h6-ragular">Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis nihil
+          inventore
+          ipsum necessitatibus
+          consectetur et. Enim culpa, accusantium magnam alias molestiae obcaecati sapiente dolore cum, architecto
+          dolores expedita nisi nulla.</p>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="gap-3 mt-3 d-flex align-items-center">
+          <div>
+            <x-svg-icon name="heart-empty" size="16" color="#ADADAD" />
+            <span class="h6-ragular">0 Likes</span>
+          </div>
+          <div>
+            <x-svg-icon name="message" size="16" color="#ADADAD" />
+            <span class="h6-ragular">0 Comments</span>
+          </div>
+          </div>
+
+          <div class="gap-2 mt-3 d-flex align-items-center">
+          <button class="btn-nothing reply-btn">
+            <x-svg-icon name="replay" size="20" color="#ADADAD" />
+          </button>
+          <button class="btn-nothing">
+            <x-svg-icon name="trash" size="20" color="#BB1313" />
+          </button>
+          </div>
+        </div>
+        </div>
       </div>
-
-      <div>
-      <h4 class="h5-semibold">John Doe</h4>
-      <span class="h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
-      <p class="mt-2 h6-ragular">Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis nihil inventore
-        ipsum necessitatibus
-        consectetur et. Enim culpa, accusantium magnam alias molestiae obcaecati sapiente dolore cum, architecto
-        dolores expedita nisi nulla.</p>
-
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="gap-3 mt-3 d-flex align-items-center">
-        <div>
-          <x-svg-icon name="heart-empty" size="16" color="#ADADAD" />
-          <span class="h6-ragular">0 Likes</span>
-        </div>
-        <div>
-          <x-svg-icon name="message" size="16" color="#ADADAD" />
-          <span class="h6-ragular">0 Comments</span>
-        </div>
-        </div>
-
-        <div class="gap-2 mt-3 d-flex align-items-center">
-        <button class="btn-nothing">
-          <x-svg-icon name="replay" size="20" color="#ADADAD" />
-        </button>
-        <button class="btn-nothing">
-          <x-svg-icon name="trash" size="20" color="#BB1313" />
-        </button>
-        </div>
+      <!-- Reply input, hidden by default -->
+      <div class="reply-input-container" style="display:none; margin-top:16px;">
+        <x-comment-input id="reply-comment" name="reply-comment" placeholder="Reply to this comment..." />
       </div>
       </div>
     </div>
-
-    </div>
-
 
   </section>
 
@@ -159,6 +159,15 @@
 
 @push('scripts')
   <script>
-
+    document.querySelectorAll('.reply-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var replyInput = this.closest('.comment-container').querySelector('.reply-input-container');
+      if (replyInput.style.display === 'none' || replyInput.style.display === '') {
+      replyInput.style.display = 'block';
+      } else {
+      replyInput.style.display = 'none';
+      }
+    });
+    });
   </script>
 @endpush

@@ -16,7 +16,6 @@
     <!-- Current Video Preview Section -->
     <div class="p-4 mt-4 mb-4 rounded border" style="background-color: #f8f9fa;">
     <h4 class="mb-3 h4-semibold" style="color:#35758C;">Current Video</h4>
-
     @if($media->file_path)
     <div class="row">
       <div class="col-md-6">

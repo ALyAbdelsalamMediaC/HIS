@@ -1694,14 +1694,31 @@ body {
     text-align: center;
 }
 
+.comments-list-container {
+    min-height: 600px; /* Adjust as needed for your layout */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #f1f9fa; /* thumb color, track color */
+    padding: 0 12px;
+}
+
+.comments-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+.comments-list-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+.comments-list-container::-webkit-scrollbar-track {
+    background: #f1f9fa;
+    border-radius: 4px;
+}
+
 .comment-container {
     border-radius: var(--main-border-radius-md);
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
     padding: 24px;
-    margin-top: 10px;
-    display: flex;
-    align-items: start;
-    gap: 12px;
+    margin-top: 12px;
 }
 
 .comment-container-user-icon {
@@ -1714,6 +1731,28 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.replay-list-container {
+    min-height: 600px; /* Adjust as needed for your layout */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #f1f9fa; /* thumb color, track color */
+    padding: 0 12px;
+    margin-top: 12px;
+}
+
+.replay-container {
+    padding: 0px 24px 12px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.past-reviwer-container {
+    padding: 12px 24px;
+    border: 1px solid var(--border-color);
+    margin-top: 10px;
+    border-radius: var(--main-border-radius-md);
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
 }
 
 /* ========================================================
