@@ -152,7 +152,15 @@
       </div>
       <!-- Reply input, hidden by default -->
       <div class="reply-input-container" style="display:none; margin-top:16px;">
-        <x-comment-input id="reply-comment" name="reply-comment" placeholder="Reply to this comment..." />
+        <form action="" method="POST" class="mb-2">
+        @csrf
+        <x-comment-input id="reply-comment" name="content" placeholder="Reply to this comment..."
+          :value="old('content')" />
+        @error('content')
+      <div class="mt-1 text-danger">{{ $message }}</div>
+      @enderror
+        <button type="submit" class="mt-2 btn btn-primary" style="display:none"></button>
+        </form>
       </div>
       </div>
     </div>
