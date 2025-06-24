@@ -47,6 +47,9 @@ class CommentsController extends Controller
                 'content' => $request->content,
             ]);
 
+            // Load user data
+            $comment->load('user');
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Comment created successfully.',
