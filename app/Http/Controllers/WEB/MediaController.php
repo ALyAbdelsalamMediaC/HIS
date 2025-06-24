@@ -155,7 +155,7 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
-        $media = Media::with(['category', 'comments'])->findOrFail($id);
+        $media = Media::with(['category', 'comments','likes'])->findOrFail($id);
         $user = Auth::user();
 
         if ($status === 'pending') {
