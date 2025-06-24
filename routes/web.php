@@ -1,0 +1,114 @@
+<?php
+
+use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\WEB\CommentController;
+use App\Http\Controllers\WEB\AdminAuthController;
+use App\Http\Controllers\WEB\ArticleController;
+use App\Http\Controllers\WEB\CategoryController;
+use App\Http\Controllers\WEB\DashboardController;
+use App\Http\Controllers\WEB\MediaController;
+use App\Http\Controllers\WEB\PolicyController;
+use App\Http\Controllers\WEB\SettingsController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Web\UserController;
+
+
+
+
+Route::middleware('auth')->group(function () {
+
+    // Route::middleware(['auth', 'session.expired'])->group(function () {
+    // Route::get('/', function () {
+    //     return view('pages.admin.dashboard');
+    // })->name('pages.admin.dashboard');
+
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+
+    Route::resource('categories', CategoryController::class);
+
+    Route::get('/content/videos', [MediaController::class, 'getall'])->name('content.videos');
+    Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');
+    Route::get('/content/videos/add', [MediaController::class, 'create']);
+    Route::post('/content/videos/add', [MediaController::class, 'store'])->name('content.store');
+    Route::get('content/videos/{id}/edit', [MediaController::class, 'edit'])->name('content.edit');
+    Route::get('/content/videos/{id}/stream', [MediaController::class, 'stream'])->name('content.stream');
+    Route::get('/content/videos/{id}/{status}', [MediaController::class, 'getone'])->name('content.video');
+    Route::get('/content/recently_Added', [MediaController::class, 'recently_Added']);
+    Route::put('content/videos/{id}', [MediaController::class, 'update'])->name('content.update');
+    Route::delete('content/videos/{id}', [MediaController::class, 'destroy'])->name('content.destroy');
+    Route::delete('content/articles/{id}', [ArticleController::class, 'destroy'])->name('article.destroy');
+    Route::post('/content/assigned/{id}', [MediaController::class, 'assignTo'])->name('content.assignTo');
+
+    // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
+    Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
+    // Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
+    Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
+
+    Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
+
+    Route::get('/content/articles/add', [ArticleController::class, 'create']);
+    Route::post('/content/articles/add', [ArticleController::class, 'store'])->name('articles.store');
+    Route::get('content/articles/{id}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('content/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
+    Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
+    Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
+
+    Route::resource('users', UserController::class, [
+        'names' => [
+            'index' => 'users.index',
+            'edit' => 'users.edit',
+            'update' => 'users.update',
+            'destroy' => 'users.destroy',
+        ]
+    ])->except(['create', 'store', 'show']);
+    Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
+
+    Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
+    Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::get('/users/add', [AdminAuthController::class, 'showRegistrationForm'])->name('admin.register');
+    Route::post('/users/add', [AdminAuthController::class, 'register'])->name('admin.register');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+    Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
+    Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
+    Route::post('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
+
+
+    Route::prefix('settings/policies')->name('policies.')->group(function () {
+        Route::get('/', [PolicyController::class, 'index'])->name('index');
+        Route::get('/create', [PolicyController::class, 'create'])->name('create');
+        Route::post('/create', [PolicyController::class, 'store'])->name('store');
+        Route::get('/{policy}', [PolicyController::class, 'show'])->name('show');
+        Route::get('/{policy}/edit', [PolicyController::class, 'edit'])->name('edit');
+        Route::put('/{policy}', [PolicyController::class, 'update'])->name('update');
+        Route::delete('/{policy}', [PolicyController::class, 'destroy'])->name('destroy');
+        Route::prefix('categories')->name('categories.')->group(function () {
+            Route::post('/', [PolicyController::class, 'storeCategory'])->name('store');
+            Route::get('/{category}', [PolicyController::class, 'showCategory'])->name('show');
+            Route::put('/{category}', [PolicyController::class, 'updateCategory'])->name('update');
+            Route::delete('/{category}', [PolicyController::class, 'destroyCategory'])->name('destroy');
+        });
+    });
+});
+
+
+Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+Route::post('admin/login', [AdminAuthController::class, 'login']);
+
+// Password Reset Routes
+Route::get('password/reset', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
+Route::post('password/email', [AdminAuthController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+Route::get('password/reset/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
+Route::post('password/reset', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
+
+Route::get('login/google', [SocialAuthController::class, 'redirectToGoogle'])->name('social.google.redirect');
+Route::get('login/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+Route::get('login/apple', [SocialAuthController::class, 'redirectToApple'])->name('social.apple.redirect');
+Route::get('login/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
+
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect()->route('login');
+})->name('logout');
