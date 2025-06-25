@@ -3,9 +3,9 @@
 @section('content')
 
   <div class="gap-3 mb-4 d-flex align-items-center">
-    <div class="arrow-back-btn" onclick="window.history.back()">
+    <a href="{{ url()->previous() }}" class="arrow-back-btn">
     <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
-    </div>
+    </a>
     <div>
     <h2 class="h2-semibold" style="color:#35758C;">Video Details</h2>
     <p class="h5-ragular" style="color:#ADADAD;">View video information and details</p>
@@ -58,7 +58,7 @@
 
     <!-- Video Mentions  -->
      <div class="gap-4 mt-3 d-flex align-items-center">
-      <h3 class="h4-semibold">Mentioned to :</h3>
+      <h3 class="h5-semibold">Mentioned to :</h3>
 
       <div class="flex-wrap gap-3 d-flex align-items-center">
         <div style="padding: 10px 20px; border-radius: 32px; border: 1px solid #EDEDED;">

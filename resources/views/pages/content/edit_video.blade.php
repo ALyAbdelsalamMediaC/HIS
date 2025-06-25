@@ -3,9 +3,9 @@
 @section('content')
   <section>
     <div class="gap-3 d-flex align-items-center">
-    <div class="arrow-back-btn" onclick="window.history.back()">
+    <a href="{{ url()->previous() }}" class="arrow-back-btn">
       <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
-    </div>
+    </a>
 
     <div>
       <h2 class="h2-semibold" style="color:#35758C;">Edit Video</h2>
@@ -205,6 +205,11 @@
     <div class="mt-3 mb-2 form-check">
       <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ $media->is_featured ? 'checked' : '' }}>
       <label class="form-check-label" for="is_featured">Featured</label>
+    </div>
+
+    <div class="mt-3 mb-2 form-check">
+      <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite" {{ $article->is_favorite ? 'checked' : '' }}>
+      <label class="form-check-label" for="is_favorite">Is favorite</label>
     </div>
 
     <div class="mt-3 d-flex justify-content-end">
