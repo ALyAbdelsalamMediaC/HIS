@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use App\Models\SubCategory;
 use App\Models\User;
 use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
@@ -185,14 +186,17 @@ class MediaController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('pages.content.add_video', compact('categories'));
+        $users = User::all();
+
+        return view('pages.content.add_video', compact('categories', 'users'));
     }
     public function store(Request $request)
     {
         try {
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'required|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
@@ -201,7 +205,44 @@ class MediaController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
+                'mention' => 'nullable|array', // Validate as array
+                'mention.*' => 'nullable|string|max:255', // Validate each mention
             ]);
+
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
+
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
+
+            $mentionsArray = $request->input('mention', []);
+
+            // If it's a string, convert to array
+            if (is_string($mentionsArray)) {
+                $mentionsArray = explode(',', $mentionsArray);
+            }
+
+            // Clean up any whitespace and filter out empty values
+            $mentionsArray = array_filter(array_map('trim', $mentionsArray));
+
+            // Convert to JSON
+            $mentiosJson = json_encode($mentionsArray);
+
 
             $getID3 = new getID3();
             $duration = null;
@@ -258,13 +299,15 @@ class MediaController extends Controller
 
             // Save to database
             $media = Media::create([
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'user_id' => Auth::id(),
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
                 'status' => 'published',
+                'mentions' => $mentiosJson,
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
@@ -296,8 +339,9 @@ class MediaController extends Controller
         try {
             $media = Media::with('category')->findOrFail($id);
             $categories = Category::all();
+            $users = User::all();
 
-            return view('pages.content.edit_video', compact('media', 'categories'));
+            return view('pages.content.edit_video', compact('media', 'categories', 'users'));
         } catch (Exception $e) {
             LaravelLog::error('Media edit error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load media for editing.');
@@ -311,7 +355,8 @@ class MediaController extends Controller
 
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
@@ -321,6 +366,27 @@ class MediaController extends Controller
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
             ]);
+
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
+
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
 
             $getID3 = new getID3();
             $duration = $media->duration;
@@ -402,7 +468,8 @@ class MediaController extends Controller
 
             // Update database
             $media->update([
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,

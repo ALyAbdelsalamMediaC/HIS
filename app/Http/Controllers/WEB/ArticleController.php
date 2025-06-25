@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Log;
+use App\Models\SubCategory;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
@@ -85,14 +86,16 @@ class ArticleController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('pages.content.add_article', compact('categories'));
+        $users = User::all();
+        return view('pages.content.add_article', compact('categories', 'users'));
     }
     public function store(Request $request)
     {
         try {
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
@@ -101,6 +104,27 @@ class ArticleController extends Controller
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
+
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
+
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
 
             $pdf = null;
             if ($request->hasFile('pdf')) {
@@ -138,7 +162,8 @@ class ArticleController extends Controller
 
             // Save to database
             $Article = Article::create([
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'user_id' => Auth::id(),
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
@@ -175,9 +200,8 @@ class ArticleController extends Controller
         try {
             $article = Article::with('category')->findOrFail($id);
             $categories = Category::all();
-
-
-            return view('pages.content.edit_article', compact('article', 'categories'));
+            $users = User::all();
+            return view('pages.content.edit_article', compact('article', 'categories', 'users'));
         } catch (Exception $e) {
             LaravelLog::error('Article edit error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load article for editing.');
@@ -191,7 +215,8 @@ class ArticleController extends Controller
 
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
@@ -200,6 +225,27 @@ class ArticleController extends Controller
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
             ]);
+
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
+
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
 
             // Update PDF file on Google Drive
             $pdf = $article->pdf;
@@ -255,7 +301,8 @@ class ArticleController extends Controller
 
             // Update database
             $article->update([
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
