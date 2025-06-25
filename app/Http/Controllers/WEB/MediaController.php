@@ -205,8 +205,8 @@ class MediaController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
-                'mention' => 'nullable|array', // Validate as array
-                'mention.*' => 'nullable|string|max:255', // Validate each mention
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
 
             $category = Category::firstOrCreate(
@@ -230,19 +230,12 @@ class MediaController extends Controller
                 ]
             );
 
-            $mentionsArray = $request->input('mention', []);
-
-            // If it's a string, convert to array
-            if (is_string($mentionsArray)) {
-                $mentionsArray = explode(',', $mentionsArray);
-            }
-
-            // Clean up any whitespace and filter out empty values
-            $mentionsArray = array_filter(array_map('trim', $mentionsArray));
-
-            // Convert to JSON
-            $mentiosJson = json_encode($mentionsArray);
-
+            // Clean up mentions array
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $getID3 = new getID3();
             $duration = null;
@@ -307,12 +300,12 @@ class MediaController extends Controller
                 'file_path' => $video,
                 'pdf' => $pdf,
                 'status' => 'published',
-                'mentions' => $mentiosJson,
+                'mentions' => json_encode($mentions),
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
-                'duration' => $duration, // Save duration
+                'duration' => $duration,
             ]);
             // Log success
             Log::create([
@@ -365,6 +358,8 @@ class MediaController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_recommended' => 'nullable|boolean',
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
 
             $category = Category::firstOrCreate(
@@ -387,6 +382,13 @@ class MediaController extends Controller
                     'description' => "Subcategory for {$validated['month']} {$validated['year']}"
                 ]
             );
+
+            // Clean up mentions array
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $getID3 = new getID3();
             $duration = $media->duration;
@@ -478,6 +480,7 @@ class MediaController extends Controller
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_recommended' => $request->boolean('is_recommended'),
+                'mentions' => json_encode($mentions),
                 'duration' => $duration,
             ]);
 

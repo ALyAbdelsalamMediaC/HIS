@@ -54,6 +54,17 @@
     <p class="h5-ragular">{{ $media->description }}</p>
     </div>
 
+    <!-- Video Mentions  -->
+    <div class="gap-4 mt-3 d-flex align-items-center">
+      <h3 class="h4-semibold">Mentioned to :</h3>
+
+      <div class="flex-wrap gap-3 d-flex align-items-center">
+        <div style="padding: 10px 20px; border-radius: 32px; border: 1px solid #EDEDED;">
+          <h3 class="h6-ragular" style="color:#7B7B7B;">@Lorem ipsum</h3>
+        </div>
+      </div>
+    </div>
+
     <!-- Video Assets -->
     <div class="gap-3 mt-4 d-flex align-items-center">
     <!-- PDF  -->

@@ -148,13 +148,28 @@
     </div>
 
     <div class="form-infield">
-      <x-text_label for="category_id" :required="true">Category</x-text_label>
-      <x-select id="category_id" name="category_id" :options="$categories->mapWithKeys(function ($category) {
-    return [$category->id => $category->name];
-    })->all()" :selected="$media->category_id" placeholder="Select Category"
-      data-required="true" data-name="Category" />
-      <div id="category_id-error-container">
-      <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
+      <x-text_label for="year" :required="true">Year</x-text_label>
+      <x-select id="year" name="year"
+        :options="collect(range(date('Y'), 2015))->mapWithKeys(fn($y) => [$y => $y])->all()"
+        :selected="old('year', $media->year ?? null)"
+        placeholder="Select Year" data-required="true" data-name="Year" />
+      <div id="year-error-container">
+        <x-input-error :messages="$errors->get('year')" class="mt-2" />
+      </div>
+    </div>
+
+    <div class="form-infield">
+      <x-text_label for="month" :required="true">Month</x-text_label>
+      <x-select id="month" name="month"
+        :options="[
+          1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+          5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+          9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+        ]"
+        :selected="old('month', $media->month ?? null)"
+        placeholder="Select Month" data-required="true" data-name="Month" />
+      <div id="month-error-container">
+        <x-input-error :messages="$errors->get('month')" class="mt-2" />
       </div>
     </div>
 
@@ -173,7 +188,21 @@
       value="{{ $media->description }}" />
     </div>
 
-    <div class="mb-2 form-check">
+    <div class="form-infield">
+        <x-text_label for="mention">Mention Users</x-text_label>
+        <select class="select2-mentions form-control" name="mention[]" multiple="multiple" id="mention">
+            @foreach($users as $user)
+                <option value="{{ $user->name }}" {{ in_array($user->name, json_decode($media->mentions ?? '[]', true) ?? []) ? 'selected' : '' }}>
+                    {{ $user->name }}
+                </option>
+            @endforeach
+            @foreach(array_diff(json_decode($media->mentions ?? '[]', true) ?? [], $users->pluck('name')->toArray()) as $customMention)
+                <option value="{{ $customMention }}" selected>{{ $customMention }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="mt-3 mb-2 form-check">
       <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ $media->is_featured ? 'checked' : '' }}>
       <label class="form-check-label" for="is_featured">Featured</label>
     </div>
@@ -256,6 +285,15 @@
       }
       `;
     document.head.appendChild(style);
+    });
+
+    $(document).ready(function() {
+      $('.select2-mentions').select2({
+        placeholder: 'Select or type names to mention',
+        tags: true,
+        tokenSeparators: [',', ' '],
+        width: '100%'
+      });
     });
   </script>
 @endpush

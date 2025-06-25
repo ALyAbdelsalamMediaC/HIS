@@ -103,7 +103,16 @@ class ArticleController extends Controller
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
+
+            // Clean up mentions array
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $category = Category::firstOrCreate(
                 [
@@ -172,6 +181,7 @@ class ArticleController extends Controller
                 'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
+                'mentions' => json_encode($mentions),
             ]);
 
             // Log success
@@ -224,7 +234,16 @@ class ArticleController extends Controller
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
+
+            // Clean up mentions array
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $category = Category::firstOrCreate(
                 [
@@ -310,6 +329,7 @@ class ArticleController extends Controller
                 'image_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
+                'mentions' => json_encode($mentions),
             ]);
 
             // Log success

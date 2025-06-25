@@ -99,10 +99,20 @@
                 <x-textarea name="description" id="description" placeholder="Enter Description" rows="3" />
             </div>
 
-            <div class="mb-2 form-check">
+            <div class="form-infield">
+                <x-text_label for="mention">Mention Users</x-text_label>
+                <select class="select2-mentions form-control" name="mention[]" multiple="multiple" id="mention">
+                    @foreach($users as $user)
+                        <option value="{{ $user->name }}">{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mt-3 mb-2 form-check">
                 <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
                 <label class="form-check-label" for="is_featured">Featured</label>
             </div>
+
 
             <div class="mt-3 d-flex justify-content-end">
                 <x-button type="submit">Upload Video</x-button>
@@ -182,6 +192,15 @@
                                                                                                                                                                                             }
                                                                                                                                                                                         `;
             document.head.appendChild(style);
+        });
+
+        $(document).ready(function() {
+            $('.select2-mentions').select2({
+                placeholder: 'Select or type names to mention',
+                tags: true,
+                tokenSeparators: [',', ' '],
+                width: '100%'
+            });
         });
     </script>
 @endpush
