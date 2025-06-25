@@ -19,8 +19,8 @@
           <div class="modal-body">
               <!-- Image Section -->
               @if($image)
-              <div class="mb-4 text-center">
-                  <img src="{{ $image }}" alt="User Image" class="img-fluid" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+              <div class="my-4 text-center">
+                  <img src="{{ $image }}" alt="User Image" class="img-fluid" style="width: 100%; max-height: 65vh; object-fit: contain;">
               </div>
               @endif
               

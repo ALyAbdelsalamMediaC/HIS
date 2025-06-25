@@ -127,7 +127,7 @@
         </div>
         <div>
         <x-svg-icon name="message" size="12" color="Black" />
-        <span class="h6-ragular">{{ $item->comments }}</span>
+        <span class="h6-ragular">{{ $item->comment_article_count }}</span>
         </div>
       </div>
       </div>

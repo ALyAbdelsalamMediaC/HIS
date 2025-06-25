@@ -120,7 +120,7 @@
     <div class="form-infield">
       <x-text_label for="description">Description (optional)</x-text_label>
       <x-textarea name="description" id="description" placeholder="Enter Description"
-      rows="3">{{ old('description', $article->description) }}</x-textarea>
+      rows="3" value="{{ $article->description }}" />
     </div>
 
     <div class="form-infield">

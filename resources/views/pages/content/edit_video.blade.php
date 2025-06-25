@@ -20,7 +20,7 @@
     <div class="row">
       <div class="col-md-6">
       <div class="video-preview-container">
-      <video controls style="width: 100%; border-radius: 8px;" preload="metadata">
+      <video controls style="width: 100%; border-radius: 20px; height: 300px;" preload="none">
       <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
       Your browser does not support the video tag.
       </video>
@@ -208,7 +208,7 @@
     </div>
 
     <div class="mt-3 mb-2 form-check">
-      <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite" {{ $article->is_favorite ? 'checked' : '' }}>
+      <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite" {{ $media->is_favorite ? 'checked' : '' }}>
       <label class="form-check-label" for="is_favorite">Is favorite</label>
     </div>
 

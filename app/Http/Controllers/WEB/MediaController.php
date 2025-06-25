@@ -166,15 +166,21 @@ class MediaController extends Controller
         // You can pass these to the view if needed:
         // compact('media', 'likesCount', 'commentsCount', 'commentsData')
         $user = Auth::user();
+        $userLiked = false;
+        if ($user) {
+            $userLiked = \App\Models\Like::where('user_id', $user->id)
+                ->where('media_id', $media->id)
+                ->exists();
+        }
 
         if ($status === 'pending') {
             if ($user && $user->role === 'admin') {
-                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
+                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
             } elseif ($user && $user->role === 'reviewer') {
-                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
+                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
             }
         } elseif ($status === 'published') {
-            return view('pages.content.video.single_video', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
+            return view('pages.content.video.single_video', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         }
 
         // Default fallback
