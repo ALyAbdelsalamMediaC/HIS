@@ -62,13 +62,26 @@
             </div>
 
             <div class="form-infield">
-                <x-text_label for="category_id" :required="true">Category</x-text_label>
-                <x-select id="category_id" name="category_id" :options="$categories->mapWithKeys(function ($category) {
-            return [$category->id => $category->name];
-        })->all()" placeholder="Select Category" data-required="true"
-                    data-name="Category" />
-                <div id="category_id-error-container">
-                    <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
+                <x-text_label for="year" :required="true">Year</x-text_label>
+                <x-select id="year" name="year"
+                    :options="collect(range(date('Y'), 2015))->mapWithKeys(fn($y) => [$y => $y])->all()"
+                    placeholder="Select Year" data-required="true" data-name="Year" />
+                <div id="year-error-container">
+                    <x-input-error :messages="$errors->get('year')" class="mt-2" />
+                </div>
+            </div>
+
+            <div class="form-infield">
+                <x-text_label for="month" :required="true">Month</x-text_label>
+                <x-select id="month" name="month"
+                    :options="[
+                        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+                        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+                        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+                    ]"
+                    placeholder="Select Month" data-required="true" data-name="Month" />
+                <div id="month-error-container">
+                    <x-input-error :messages="$errors->get('month')" class="mt-2" />
                 </div>
             </div>
 
