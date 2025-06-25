@@ -108,7 +108,7 @@ class ArticleController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -120,7 +120,7 @@ class ArticleController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
-                    $image_path = 'https://drive.google.com/file/d/' . $url . '/preview';;
+                    $image_path = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -132,7 +132,7 @@ class ArticleController extends Controller
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnail_path = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    $thumbnail_path = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 

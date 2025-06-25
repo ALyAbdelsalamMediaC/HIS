@@ -155,7 +155,7 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
-        $media = Media::with(['category', 'comments','likes'])->findOrFail($id);
+        $media = Media::with(['category', 'comments', 'likes'])->findOrFail($id);
         $user = Auth::user();
 
         if ($status === 'pending') {
@@ -229,7 +229,7 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -241,7 +241,7 @@ class MediaController extends Controller
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnailPath = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -252,7 +252,7 @@ class MediaController extends Controller
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                    $imagePath = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    $imagePath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -529,7 +529,6 @@ class MediaController extends Controller
             $response->headers->set('Accept-Ranges', 'bytes');
 
             return $response;
-
         } catch (Exception $e) {
             LaravelLog::error('Media streaming error: ' . $e->getMessage());
             abort(500, 'Error streaming video.');
