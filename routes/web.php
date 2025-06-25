@@ -12,6 +12,7 @@ use App\Http\Controllers\WEB\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\WEB\LikesController;
 
 
 
@@ -64,6 +65,10 @@ Route::middleware('auth')->group(function () {
     ])->except(['create', 'store', 'show']);
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
 
+Route::group(['middleware' => ['auth']], function () {
+    Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like.add');
+    Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.like.remove');
+});
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');

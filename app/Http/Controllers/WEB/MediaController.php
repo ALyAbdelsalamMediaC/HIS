@@ -156,17 +156,25 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
-        $media = Media::with(['category', 'comments', 'likes'])->findOrFail($id);
+        $media = Media::with(['category', 'comments.user', 'likes'])->findOrFail($id);
+
+        // Get count of likes and comments
+        $likesCount = $media->likes->count();
+        $commentsCount = $media->comments->count();
+        $commentsData = $media->comments;
+
+        // You can pass these to the view if needed:
+        // compact('media', 'likesCount', 'commentsCount', 'commentsData')
         $user = Auth::user();
 
         if ($status === 'pending') {
             if ($user && $user->role === 'admin') {
-                return view('pages.content.video.single_video_pending_admin', compact('media'));
+                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
             } elseif ($user && $user->role === 'reviewer') {
-                return view('pages.content.video.single_video_pending_reviewer', compact('media'));
+                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
             }
         } elseif ($status === 'published') {
-            return view('pages.content.video.single_video', compact('media'));
+            return view('pages.content.video.single_video', compact('media', 'likesCount', 'commentsCount', 'commentsData'));
         }
 
         // Default fallback
