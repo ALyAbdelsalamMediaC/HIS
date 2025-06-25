@@ -19,7 +19,7 @@
     <div class="form-infield">
       <x-text_label for="thumbnail_path">Upload Thumbnail</x-text_label>
       <div style="position: relative;">
-      <x-text_input type="file" id="thumbnail_path" name="image_path"
+      <x-text_input type="file" id="thumbnail_path" name="thumbnail_path"
         placeholder="Choose an thumbnail from your gallery" accept="image/jpeg,image/jpg,image/png"
         style="color: transparent; cursor: pointer;" onchange="updateFileName(this)" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">

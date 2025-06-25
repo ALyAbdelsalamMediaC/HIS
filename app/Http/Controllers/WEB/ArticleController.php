@@ -35,12 +35,12 @@ class ArticleController extends Controller
 
     public function getall(Request $request)
     {
-       
+
         try {
             $categories = Category::all();
 
             $article = Article::with('category', 'CommentArticle')
-                    ->withCount('CommentArticle')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();;
+                ->withCount('CommentArticle')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();;
             // Search by title
             if ($request->filled('title')) {
                 $article->where('title', 'like', '%' . $request->input('title') . '%');
@@ -107,7 +107,6 @@ class ArticleController extends Controller
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
-
             // Clean up mentions array
             $mentions = collect($request->input('mention', []))
                 ->filter()
@@ -142,7 +141,7 @@ class ArticleController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
