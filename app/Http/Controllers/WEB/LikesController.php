@@ -35,10 +35,7 @@ class LikesController extends Controller
                 ->first();
 
             if ($existingLike) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have already liked this media.'
-                ], 400);
+                return back()->with('error', 'You have already liked this media.');
             }
 
             // Create the like
@@ -54,19 +51,12 @@ class LikesController extends Controller
                 'description' => "Liked media: {$media->title}",
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Media liked successfully.',
-                'like_id' => $like->id
-            ], 201);
+            return back()->with('success', 'Media liked successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to like media: ' . $e->getMessage()
-            ], 500);
+            return back()->with('error', 'Failed to like media: ' . $e->getMessage());
         }
     }
 
@@ -86,10 +76,7 @@ class LikesController extends Controller
                 ->first();
 
             if (!$like) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have not liked this media.'
-                ], 404);
+                return back()->with('error', 'You have not liked this media.');
             }
 
             // Get media title before deleting like for logging
@@ -105,18 +92,12 @@ class LikesController extends Controller
                 'description' => "Unliked media: {$media->title}",
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Like removed successfully.'
-            ], 200);
+            return back()->with('success', 'Like removed successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like removal failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to remove like: ' . $e->getMessage()
-            ], 500);
+            return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }
     }
 }

@@ -15,7 +15,7 @@
   <section class="single-video-container">
 
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="metadata">
+    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
     <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
     Your browser does not support the video tag.
     </video>
@@ -45,8 +45,23 @@
       <span class="h6-ragular">{{ $media->views}} viewers</span>
       </div>
       <div>
-      <x-svg-icon name="like-empty" size="24" color="Black" />
-      <span class="h6-ragular">Liked</span>
+        @if($userLiked)
+          <form action="{{ route('media.like.remove', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn-nothing" title="Unlike">
+              <x-svg-icon name="like-fill" size="24" color="Black" />
+            </button>
+          </form>
+        @else
+          <form action="{{ route('media.like.add', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="btn-nothing" title="Like">
+              <x-svg-icon name="like-empty" size="24" color="Black" />
+            </button>
+          </form>
+        @endif
+        <span class="h6-ragular" id="like-count">{{$likesCount}} Likes</span>
       </div>
     </div>
     </div>
@@ -183,14 +198,14 @@
 @push('scripts')
   <script>
     document.querySelectorAll('.reply-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var replyInput = this.closest('.comment-container').querySelector('.reply-input-container');
-      if (replyInput.style.display === 'none' || replyInput.style.display === '') {
-      replyInput.style.display = 'block';
-      } else {
-      replyInput.style.display = 'none';
-      }
-    });
+      btn.addEventListener('click', function () {
+        var replyInput = this.closest('.comment-container').querySelector('.reply-input-container');
+        if (replyInput.style.display === 'none' || replyInput.style.display === '') {
+          replyInput.style.display = 'block';
+        } else {
+          replyInput.style.display = 'none';
+        }
+      });
     });
   </script>
 @endpush

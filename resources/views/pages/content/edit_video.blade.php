@@ -20,7 +20,7 @@
     <div class="row">
       <div class="col-md-6">
       <div class="video-preview-container">
-      <video controls style="width: 100%; border-radius: 8px;" preload="metadata">
+      <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
       <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
       Your browser does not support the video tag.
       </video>

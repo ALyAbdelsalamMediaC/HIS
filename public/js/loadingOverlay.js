@@ -1,6 +1,12 @@
 $(document).ready(function () {
-    // Hide the loading overlay when the page has fully loaded
+    // Always hide the overlay on page load
     $("#loading-overlay").addClass("hidden");
+
+    // Exclude overlay logic for all /content/videos* pages
+    var isVideoPage = /^\/content\/videos(\/.*)?$/.test(
+        window.location.pathname
+    );
+    if (isVideoPage) return;
 
     // Show the loading overlay when navigating to a new page
     $(document).on(
@@ -14,6 +20,10 @@ $(document).ready(function () {
 
 // Handle page show events (e.g., when navigating back)
 $(window).on("pageshow", function (event) {
+    var isVideoPage = /^\/content\/videos(\/.*)?$/.test(
+        window.location.pathname
+    );
+    if (isVideoPage) return;
     if (event.originalEvent.persisted) {
         $("#loading-overlay").addClass("hidden");
     }

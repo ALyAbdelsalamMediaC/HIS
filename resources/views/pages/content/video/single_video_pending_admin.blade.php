@@ -14,7 +14,7 @@
 
   <section class="single-video-container">
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="metadata">
+    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
     <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
     Your browser does not support the video tag.
     </video>
