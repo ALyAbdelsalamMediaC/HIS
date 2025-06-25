@@ -91,8 +91,7 @@ class ArticleController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-
+                    $url = 'https://drive.google.com/file/d/' . $url . '/preview';
                     $pdf = $url;
                 }
             }
