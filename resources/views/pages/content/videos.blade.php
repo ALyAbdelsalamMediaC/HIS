@@ -128,7 +128,7 @@
                                             </div>
                                             <div>
                                                 <x-svg-icon name="message" size="12" color="Black" />
-                                                <span class="h6-ragular">{{ $comments_count }}</span>
+                                                <span class="h6-ragular">{{ $item->comments_count }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -169,13 +169,13 @@
 
             </div>
             </div>
-            </div>
             <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
                 <!-- Table Info and Pagination -->
                 @if($media->count())
                     <x-table-info :paginator="$media" />
                     <x-pagination :paginator="$media" :appends="request()->query()" />
                 @endif
+            </div>
             </div>
 
             <!-- Assign Reviewer Modals -->
