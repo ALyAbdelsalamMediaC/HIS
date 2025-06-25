@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\Log;
+use App\Models\SubCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
@@ -47,7 +49,8 @@ class ArticleController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
@@ -55,9 +58,31 @@ class ArticleController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
+                'is_favorite' => 'nullable|boolean',
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
 
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
 
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
 
             // Store thumbnail if exists
             $pdf = null;
@@ -89,7 +114,8 @@ class ArticleController extends Controller
 
             // Save to database
             $Article = Article::create([
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'user_id' => $validated['user_id'],
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
@@ -97,6 +123,7 @@ class ArticleController extends Controller
                 'image_path' => $image_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
+                'is_favorite' => $request->boolean('is_favorite'),
             ]);
 
             // Log success

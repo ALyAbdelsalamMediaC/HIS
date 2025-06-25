@@ -102,6 +102,7 @@ class ArticleController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'is_favorite' => 'nullable|boolean',
                 'is_featured' => 'nullable|boolean',
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
@@ -180,6 +181,7 @@ class ArticleController extends Controller
                 'image_path' => $image_path,
                 'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
+                'is_favorite' => $request->boolean('is_favorite'),
                 'is_featured' => $request->boolean('is_featured'),
                 'mentions' => json_encode($mentions),
             ]);
@@ -233,6 +235,7 @@ class ArticleController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
+                'is_favorite' => 'nullable|boolean',
                 'is_featured' => 'nullable|boolean',
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
@@ -329,6 +332,7 @@ class ArticleController extends Controller
                 'image_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
+                'is_favorite' => $request->boolean('is_favorite'),
                 'mentions' => json_encode($mentions),
             ]);
 

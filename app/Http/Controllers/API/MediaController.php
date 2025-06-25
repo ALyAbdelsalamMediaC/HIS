@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use App\Models\SubCategory;
 use getID3;
 use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
@@ -37,16 +38,16 @@ class MediaController extends Controller
         $this->driveServicePDF = $driveServicePDF;
         $this->client = $this->driveServicePDF->getClient(); // Ensure this method exists in the service
 
-         $this->driveServiceImage = $driveServiceImage;
+        $this->driveServiceImage = $driveServiceImage;
         $this->client = $this->driveServiceImage->getClient(); // Ensure this method exists in the service
 
-         $this->driveServiceThumbnail = $driveServiceThumbnail;
+        $this->driveServiceThumbnail = $driveServiceThumbnail;
         $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
     public function show()
     {
         try {
-            $categories = Category::with(['media' => function($query) {
+            $categories = Category::with(['media' => function ($query) {
                 $query->withCount('comments', 'likes');
             }])->get();
 
@@ -69,7 +70,8 @@ class MediaController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+                'year' => 'required|digits:4',
+                'month' => 'required',
                 'user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -78,8 +80,31 @@ class MediaController extends Controller
                 'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
-                'is_recommended' => 'nullable|boolean',
+                'is_favorite' => 'nullable|boolean',
+                'mention' => 'nullable|array',
+                'mention.*' => 'nullable|string|max:255',
             ]);
+
+            $category = Category::firstOrCreate(
+                [
+                    'name' => $validated['year'],
+                    'user_id' => Auth::id()
+                ],
+                [
+                    'description' => "Category for year {$validated['year']}"
+                ]
+            );
+
+            // Find or create subcategory (month)
+            $subCategory = SubCategory::firstOrCreate(
+                [
+                    'name' => $validated['month'],
+                    'category_id' => $category->id
+                ],
+                [
+                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
+                ]
+            );
 
             $getID3 = new getID3();
             $duration = null;
@@ -92,13 +117,13 @@ class MediaController extends Controller
             }
 
 
-              $video = null;
+            $video = null;
             if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveServiceVideo();
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = 'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
+                    $video = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -108,30 +133,30 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
+                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
             // Store thumbnail if exists
             $thumbnailPath = null;
 
-              if ($request->hasFile('thumbnail_path')) {
+            if ($request->hasFile('thumbnail_path')) {
                 $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
                 if ($request->file('thumbnail_path')->isValid()) {
                     $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                     $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnailPath =  'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
+                    $thumbnailPath =  'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
             $imagePath = null;
 
-              if ($request->hasFile('image_path')) {
+            if ($request->hasFile('image_path')) {
                 $driveServiceImage = new GoogleDriveServiceImage();
                 if ($request->file('image_path')->isValid()) {
                     $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                     $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                    $imagePath =  'https://lh3.googleusercontent.com/d/'.$url.'=w1000?authuser=0';
+                    $imagePath =  'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }
 
@@ -139,7 +164,8 @@ class MediaController extends Controller
             // Save to database
             $media = Media::create([
                 'user_id' => $validated['user_id'],
-                'category_id' => $validated['category_id'],
+                'category_id' => $category->id,
+                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
@@ -148,7 +174,7 @@ class MediaController extends Controller
                 'image_path' => $imagePath,
                 'status' => 'pending', // Default status
                 'is_featured' => $request->boolean('is_featured'),
-                'is_recommended' => $request->boolean('is_recommended'),
+                'is_favorite' => $request->boolean('is_favorite'),
                 'duration' => $duration, // Save duration
 
             ]);
@@ -161,7 +187,7 @@ class MediaController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Media uploaded successfully.'. ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
+                'message' => 'Media uploaded successfully.' . ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
                 'media' => $media
             ], 201);
         } catch (Exception $e) {
@@ -223,7 +249,7 @@ class MediaController extends Controller
     public function recently_Added()
     {
         try {
-            $contents = Category::with(['media' => function($query) {
+            $contents = Category::with(['media' => function ($query) {
                 $query->withCount('comments', 'likes');
             }])->orderBy('created_at', 'desc')->take(10)->get();
             return response()->json([

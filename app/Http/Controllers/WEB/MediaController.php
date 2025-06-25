@@ -204,7 +204,7 @@ class MediaController extends Controller
                 'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
-                'is_recommended' => 'nullable|boolean',
+                'is_favorite' => 'nullable|boolean',
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
@@ -304,7 +304,7 @@ class MediaController extends Controller
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
-                'is_recommended' => $request->boolean('is_recommended'),
+                'is_favorite' => $request->boolean('is_favorite'),
                 'duration' => $duration,
             ]);
             // Log success
@@ -357,7 +357,7 @@ class MediaController extends Controller
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
-                'is_recommended' => 'nullable|boolean',
+                'is_favorite' => 'nullable|boolean',
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
@@ -479,7 +479,7 @@ class MediaController extends Controller
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
-                'is_recommended' => $request->boolean('is_recommended'),
+                'is_favorite' => $request->boolean('is_favorite'),
                 'mentions' => json_encode($mentions),
                 'duration' => $duration,
             ]);
