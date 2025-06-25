@@ -137,58 +137,55 @@
 
     <!-- Comments List -->
     <div class="comments-list-container">
-      <div class="comment-container">
-      <div class="gap-3 d-flex align-items-start">
-
-        <div class="comment-container-user-icon">
-        <x-svg-icon name="user" size="18" color="#35758c" />
+      @forelse($commentsData as $comment)
+        <div class="comment-container">
+          <div class="gap-3 d-flex align-items-start">
+            <div class="comment-container-user-icon">
+              <x-svg-icon name="user" size="18" color="#35758c" />
+            </div>
+            <div class="w-100">
+              <h4 class="h5-semibold">{{ $comment->user->name ?? 'Unknown User' }}</h4>
+              <span class="h6-ragular" style="color:#ADADAD;">Commented On {{ $comment->created_at->diffForHumans() }}</span>
+              <p class="mt-2 h6-ragular">{{ $comment->content }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="gap-3 mt-3 d-flex align-items-center">
+                  <div>
+                    <x-svg-icon name="heart-empty" size="16" color="#ADADAD" />
+                    <span class="h6-ragular">0 Likes</span>
+                  </div>
+                  <div>
+                    <x-svg-icon name="message" size="16" color="#ADADAD" />
+                    <span class="h6-ragular">0 Comments</span>
+                  </div>
+                </div>
+                <div class="gap-2 mt-3 d-flex align-items-center">
+                  <button class="btn-nothing reply-btn">
+                    <x-svg-icon name="replay" size="20" color="#ADADAD" />
+                  </button>
+                  <button class="btn-nothing">
+                    <x-svg-icon name="trash" size="20" color="#BB1313" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Reply input, hidden by default -->
+          <div class="reply-input-container" style="display:none; margin-top:16px;">
+            <form action="" method="POST" class="mb-2">
+              @csrf
+              <x-comment-input id="reply-comment" name="content" placeholder="Reply to this comment..." :value="old('content')" />
+              @error('content')
+                <div class="mt-1 text-danger">{{ $message }}</div>
+              @enderror
+              <button type="submit" class="mt-2 btn btn-primary" style="display:none"></button>
+            </form>
+          </div>
         </div>
-
-        <div>
-        <h4 class="h5-semibold">John Doe</h4>
-        <span class="h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
-        <p class="mt-2 h6-ragular">Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis nihil
-          inventore
-          ipsum necessitatibus
-          consectetur et. Enim culpa, accusantium magnam alias molestiae obcaecati sapiente dolore cum, architecto
-          dolores expedita nisi nulla.</p>
-
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="gap-3 mt-3 d-flex align-items-center">
-          <div>
-            <x-svg-icon name="heart-empty" size="16" color="#ADADAD" />
-            <span class="h6-ragular">0 Likes</span>
-          </div>
-          <div>
-            <x-svg-icon name="message" size="16" color="#ADADAD" />
-            <span class="h6-ragular">0 Comments</span>
-          </div>
-          </div>
-
-          <div class="gap-2 mt-3 d-flex align-items-center">
-          <button class="btn-nothing reply-btn">
-            <x-svg-icon name="replay" size="20" color="#ADADAD" />
-          </button>
-          <button class="btn-nothing">
-            <x-svg-icon name="trash" size="20" color="#BB1313" />
-          </button>
-          </div>
+      @empty
+        <div class="comment-container">
+          <p class="h6-ragular">No comments yet.</p>
         </div>
-        </div>
-      </div>
-      <!-- Reply input, hidden by default -->
-      <div class="reply-input-container" style="display:none; margin-top:16px;">
-        <form action="" method="POST" class="mb-2">
-        @csrf
-        <x-comment-input id="reply-comment" name="content" placeholder="Reply to this comment..."
-          :value="old('content')" />
-        @error('content')
-      <div class="mt-1 text-danger">{{ $message }}</div>
-      @enderror
-        <button type="submit" class="mt-2 btn btn-primary" style="display:none"></button>
-        </form>
-      </div>
-      </div>
+      @endforelse
     </div>
 
   </section>

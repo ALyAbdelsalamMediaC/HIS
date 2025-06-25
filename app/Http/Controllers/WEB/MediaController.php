@@ -156,7 +156,7 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
-        $media = Media::with(['category', 'comments.user', 'likes'])->findOrFail($id);
+        $media = Media::with(['category', 'comments', 'likes'])->findOrFail($id);
 
         // Get count of likes and comments
         $likesCount = $media->likes->count();
