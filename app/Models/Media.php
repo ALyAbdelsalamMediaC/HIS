@@ -22,7 +22,9 @@ class Media extends Model
         'thumbnail_path',
         'image_path',
         'is_featured',
-        'assigned_to'
+        'assigned_to',
+        'is_favorite',
+        'mention',
     ];
 
     public function category()

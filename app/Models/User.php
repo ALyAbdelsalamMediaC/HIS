@@ -74,4 +74,13 @@ class User extends Authenticatable
     {
         $this->notify(new AdminResetPasswordNotification($token));
     }
+    public function sentNotifications()
+    {
+        return $this->hasMany(Notification::class, 'sender_id');
+    }
+
+    public function receivedNotifications()
+    {
+        return $this->hasMany(Notification::class, 'receiver_id');
+    }
 }

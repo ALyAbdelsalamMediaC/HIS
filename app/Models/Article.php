@@ -17,7 +17,10 @@ class Article extends Model
         'thumbnail_path',
         'hyperlink',
         'pdf',
-        'is_featured'
+        'is_featured',
+        'is_favorite',
+        'mention',
+        'assigned_to',
     ];
     public function category()
     {

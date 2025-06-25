@@ -20,12 +20,14 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('file_path');
             $table->json('assigned_to')->nullable();
+            $table->json('mention')->nullable();
             $table->text('duration')->nullable();
             $table->string('pdf')->nullable();
             $table->string('thumbnail_path');
             $table->string('image_path')->nullable();
             $table->enum('status', ['published', 'pending', 'inreview', 'declined']);
             $table->boolean('is_featured')->default(false);
+            $table->boolean('is_favorite')->default(false);
             $table->timestamps();
         });
     }

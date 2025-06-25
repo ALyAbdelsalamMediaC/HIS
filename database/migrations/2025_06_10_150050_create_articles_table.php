@@ -19,9 +19,12 @@ return new class extends Migration
             $table->text('description');
             $table->string('image_path')->nullable();
             $table->string('thumbnail_path')->nullable();
+            $table->json('mention')->nullable();
+            $table->json('assigned_to')->nullable();
             $table->string('pdf')->nullable();
             $table->string('hyperlink')->nullable();
             $table->string('is_featured')->nullable();
+            $table->boolean('is_favorite')->default(false);
             $table->timestamps();
         });
     }

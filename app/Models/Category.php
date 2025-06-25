@@ -27,4 +27,8 @@ class Category extends Model
     {
         return $this->hasMany(Policy::class, 'category_id');
     }
+    public function subCategories()
+{
+    return $this->hasMany(SubCategory::class, 'category_id');
+}
 }
