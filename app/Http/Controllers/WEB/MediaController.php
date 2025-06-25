@@ -277,7 +277,7 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -462,7 +462,7 @@ class MediaController extends Controller
                 // Upload new thumbnail
                 $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                 $thumbnailPath = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                $thumbnailPath = 'https://drive.google.com/file/d/' . $thumbnailPath . '/preview';
+                $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $thumbnailPath . '=w1000?authuser=0';
             }
 
             // Update image if exists
@@ -479,7 +479,8 @@ class MediaController extends Controller
                 // Upload new image
                 $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                 $imagePath = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                $imagePath = 'https://drive.google.com/file/d/' . $imagePath . '/preview';
+                $imagePath = 'https://lh3.googleusercontent.com/d/' . $imagePath . '=w1000?authuser=0';
+
             }
 
             // Update database

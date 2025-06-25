@@ -88,7 +88,7 @@ class MediaController extends Controller
             $category = Category::firstOrCreate(
                 [
                     'name' => $validated['year'],
-                    'user_id' => Auth::id()
+                    'user_id' => $validated['user_id']
                 ],
                 [
                     'description' => "Category for year {$validated['year']}"
@@ -123,7 +123,7 @@ class MediaController extends Controller
                 if ($request->file('file')->isValid()) {
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
                     $url = $driveService->uploadFile($request->file('file'), $filename);
-                    $video = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                    $video = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
@@ -133,7 +133,7 @@ class MediaController extends Controller
                 if ($request->file('pdf')->isValid()) {
                     $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
                     $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
                 }
             }
 
