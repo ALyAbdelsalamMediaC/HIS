@@ -63,7 +63,8 @@ class MediaController extends Controller
                 return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
             } else {
 
-                $query = Media::with('category');
+                $query = Media::with('category', 'comments')
+                    ->withCount('comments');
 
                 // Search by title
                 if ($request->filled('title')) {
@@ -92,7 +93,6 @@ class MediaController extends Controller
 
                 // Order by latest
                 $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
-
                 // Get all users with role 'reviewer'
                 $reviewers = User::where('role', 'reviewer')->get();
 

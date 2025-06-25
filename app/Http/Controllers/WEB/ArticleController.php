@@ -35,11 +35,12 @@ class ArticleController extends Controller
 
     public function getall(Request $request)
     {
+       
         try {
             $categories = Category::all();
 
-            $article = Article::with('category')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();;
-
+            $article = Article::with('category', 'CommentArticle')
+                    ->withCount('CommentArticle')->orderBy('created_at', 'desc')->paginate(12)->withQueryString();;
             // Search by title
             if ($request->filled('title')) {
                 $article->where('title', 'like', '%' . $request->input('title') . '%');
@@ -51,7 +52,6 @@ class ArticleController extends Controller
                     $q->where('name', $request->input('category'));
                 });
             }
-
             return view('pages.content.articles', compact('article', 'categories'));
         } catch (Exception $e) {
             LaravelLog::error('Article getall error: ' . $e->getMessage());
