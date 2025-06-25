@@ -43,8 +43,23 @@
       <span class="h6-ragular">{{ $media->views}} viewers</span>
       </div>
       <div>
-      <x-svg-icon name="like-empty" size="24" color="Black" />
-      <span class="h6-ragular">Liked</span>
+        @if($userLiked)
+          <form action="{{ route('media.like.remove', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn-nothing" title="Unlike">
+              <x-svg-icon name="like-fill" size="24" color="Black" />
+            </button>
+          </form>
+        @else
+          <form action="{{ route('media.like.add', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="btn-nothing" title="Like">
+              <x-svg-icon name="like-empty" size="24" color="Black" />
+            </button>
+          </form>
+        @endif
+        <span class="h6-ragular" id="like-count">{{$likesCount}} Likes</span>
       </div>
     </div>
     </div>

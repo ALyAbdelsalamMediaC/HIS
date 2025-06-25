@@ -92,7 +92,6 @@
                         <a href="{{ route('content.video', ['id' => $item->id, 'status' => $item->status]) }}" class="w-100">
                             <div class="mt-3 content-container-card-img">
                                 <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}" />
-
                                 <span class="c-v-span">Video</span>
                                 <x-format-duration :seconds="$item->duration" class="c-d-span" />
                             </div>
@@ -103,70 +102,65 @@
                                 <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em; color:black;">
                                     {{ $item->title }}
                                 </h3>
-                                <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}
-                                </p>
+                                <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}</p>
                             </div>
 
                             @if($item->status !== 'pending')
-                                    <div class="dashboard-video-card-content-content-down">
-                                        <div class="gap-2 d-flex align-items-center">
-                                            <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
-                                                <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                            </a>
-
-                                            <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
-                                                data-bs-target="#deleteVideoModal{{ $item->id }}">
-                                                <x-svg-icon name="trash" size="12" color="Black" />
-                                            </button>
+                                <div class="dashboard-video-card-content-content-down">
+                                    <div class="gap-2 d-flex align-items-center">
+                                        <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
+                                            <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                        </a>
+                                        <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
+                                            data-bs-target="#deleteVideoModal{{ $item->id }}">
+                                            <x-svg-icon name="trash" size="12" color="Black" />
+                                        </button>
+                                    </div>
+                                    <div class="gap-3 d-flex align-items-center">
+                                        <div>
+                                            <x-svg-icon name="eye" size="12" color="Black" />
+                                            <span class="h6-ragular">{{ $item->views}}</span>
                                         </div>
-
-
-                                        <div class="gap-3 d-flex align-items-center">
-                                            <div>
-                                                <x-svg-icon name="eye" size="12" color="Black" />
-                                                <span class="h6-ragular">{{ $item->views}}</span>
-                                            </div>
-                                            <div>
-                                                <x-svg-icon name="message" size="12" color="Black" />
-                                                <span class="h6-ragular">{{ $item->comments_count }}</span>
-                                            </div>
+                                        <div>
+                                            <x-svg-icon name="message" size="12" color="Black" />
+                                            <span class="h6-ragular">{{ $item->comments_count }}</span>
                                         </div>
                                     </div>
                                 </div>
                             @else
-                            <div class="gap-3 mt-3 d-flex align-items-center">
-                                <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
-                                @if($item->assigned_reviewers->count() > 0)
-                                    @php
-                                        $reviewers_list = $item->assigned_reviewers;
-                                        $total_reviewers = $reviewers_list->count();
-                                        $visible_reviewers = $reviewers_list->take(2);
-                                        $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
-                                    @endphp
-                                    <div class="gap-2 d-flex align-items-center">
-                                        @foreach($visible_reviewers as $reviewer)
-                                            <span class="badge bg-primary">{{ $reviewer->name }}</span>
-                                        @endforeach
-                                        @if($hidden_reviewers_count > 0)
-                                            <span class="badge rounded-pill bg-secondary">+{{ $hidden_reviewers_count }} more</span>
-                                        @endif
+                                <div class="gap-3 mt-3 d-flex align-items-center">
+                                    <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
+                                    @if($item->assigned_reviewers->count() > 0)
+                                        @php
+                                            $reviewers_list = $item->assigned_reviewers;
+                                            $total_reviewers = $reviewers_list->count();
+                                            $visible_reviewers = $reviewers_list->take(2);
+                                            $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
+                                        @endphp
+                                        <div class="gap-2 d-flex align-items-center">
+                                            @foreach($visible_reviewers as $reviewer)
+                                                <span class="badge bg-primary">{{ $reviewer->name }}</span>
+                                            @endforeach
+                                            @if($hidden_reviewers_count > 0)
+                                                <span class="badge rounded-pill bg-secondary">+{{ $hidden_reviewers_count }} more</span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-muted">No reviewers assigned</span>
+                                    @endif
+                                    <div class="assign-to-btn" data-bs-toggle="modal"
+                                        data-bs-target="#assignReviewerModal{{ $item->id }}" onclick="event.stopPropagation();">
+                                        <x-svg-icon name="plus" size="12" color="#35758C" />
                                     </div>
-                                @else
-                                    <span class="text-muted">No reviewers assigned</span>
-                                @endif
-                                <div class="assign-to-btn" data-bs-toggle="modal"
-                                    data-bs-target="#assignReviewerModal{{ $item->id }}" onclick="event.stopPropagation();">
-                                    <x-svg-icon name="plus" size="12" color="#35758C" />
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 @empty
                     <div class="py-5 text-center" style="grid-column: 1 / -1;">
                         <p class="h5-ragular" style="color:#ADADAD;">No videos found</p>
                     </div>
                 @endforelse
-
             </div>
             </div>
             <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
