@@ -127,7 +127,6 @@ class UserAuthController extends Controller
 public function resetPassword(Request $request)
 {
     $request->validate([
-        'token' => 'required',
         'email' => 'required|email',
         'current_password' => 'required|string',
         'password' => 'required|string|min:8|confirmed',
@@ -160,34 +159,24 @@ public function resetPassword(Request $request)
         ], 422);
     }
 
-    $status = Password::reset(
-        $request->only('email', 'password', 'password_confirmation', 'token'),
-        function ($user, $password) {
-            $user->forceFill([
-                'password' => Hash::make($password)
-            ])->setRememberToken(Str::random(60));
+    // Update password directly
+    $user->forceFill([
+        'password' => Hash::make($request->password)
+    ])->setRememberToken(Str::random(60));
 
-            $user->save();
+    $user->save();
 
-            event(new PasswordReset($user));
+    event(new PasswordReset($user));
 
-            Log::create([
-                'user_id' => $user->id,
-                'type' => 'password_reset_success',
-                'description' => "Password reset successful for {$user->email}",
-            ]);
-        }
-    );
-
-    if ($status === Password::PASSWORD_RESET) {
-        return response()->json([
-            'message' => 'Password reset successfully.',
-        ], 200);
-    }
+    Log::create([
+        'user_id' => $user->id,
+        'type' => 'password_reset_success',
+        'description' => "Password reset successful for {$user->email}",
+    ]);
 
     return response()->json([
-        'errors' => ['email' => __($status)],
-    ], 422);
+        'message' => 'Password reset successfully.',
+    ], 200);
 }
     
 }
