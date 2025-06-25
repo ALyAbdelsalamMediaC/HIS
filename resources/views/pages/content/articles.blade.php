@@ -71,7 +71,6 @@
 
     <div class="content-container-cards">
       @forelse ($article as $item)
-      @dd($item)
       <div class="content-container-card">
       <div class="d-flex justify-content-between align-items-end w-100">
       <div>
