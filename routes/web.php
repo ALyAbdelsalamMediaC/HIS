@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
     // Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
+    Route::post('/comments/deleteComment/{media_id}', [CommentController::class, 'repdeleteCommently'])->name('comments.deleteComment');
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
@@ -64,9 +65,16 @@ Route::middleware('auth')->group(function () {
         ]
     ])->except(['create', 'store', 'show']);
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
+    
+    Route::post('/media/{mediaId}', [LikesController::class, 'getLikesCommentCount'])->name('media.like.count');
 
     Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like.add');
     Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.like.remove');
+
+    Route::post('/media/{mediaId}/like', [LikesController::class, 'addLikeComment'])->name('media.like.add');
+    Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLikeComment'])->name('media.like.remove');
+
+
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('users/change-password', [UserController::class, 'changePassword'])->name('users.change-password');

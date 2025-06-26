@@ -240,4 +240,43 @@ class CommentController extends Controller
                 ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
         }
     }
+    public function deleteComment($comment_id)
+    {
+        try {
+            // Validate the comment_id
+            $validator = Validator::make(['comment_id' => $comment_id], [
+                'comment_id' => 'required|exists:comments,id',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Find the comment
+            $comment = Comment::findOrFail($comment_id);
+
+            // Check if the authenticated user is the owner of the comment
+            if (auth()->user()->id !== $comment->user_id) {
+                return redirect()->back()
+                    ->with('error', 'You do not have permission to delete this comment.');
+            }
+
+            // Delete the comment
+            $comment->delete();
+
+            return redirect()->back()
+                ->with('success', 'Comment deleted successfully.');
+
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()
+                ->with('error', 'Comment not found.')
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'An unexpected error occurred while deleting the comment: ' . $e->getMessage());
+        }
+
+    }
 }

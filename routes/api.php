@@ -20,7 +20,10 @@ Route::post('/article/store', [ArticleController::class, 'store']);
 Route::get('/article/show', [ArticleController::class, 'show']);
 Route::get('/comments/media', [CommentsController::class, 'getCommentsByMediaId']);
 Route::get('/comments/article', [CommentsController::class, 'getCommentsByArticleId']);
-     // return $request->user();
+Route::put('/media/{id}', [MediaController::class, 'update'])->name('media.update');
+Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
+
+// return $request->user();
 // });
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);

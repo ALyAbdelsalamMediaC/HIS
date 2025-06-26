@@ -14,15 +14,63 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $mediaCountPublished = Media::where('status', operator: 'published')->count();
-        $mediaCountPending = Media::where('status', operator: 'pending')->count();
+        try {
+            $mediaCountPublished = Media::where('status', 'published')->count();
+            $mediaCountPending = Media::where('status', 'pending')->count();
 
-        $usersCount = User::count();
+            $usersCount = User::count();
 
-        $commentsVideo = Comment::count();
-        $commentsArticleCount = CommentArticle::count();
-        $commentsCount = $commentsVideo + $commentsArticleCount;
+            $commentsVideo = Comment::count();
+            $commentsArticleCount = CommentArticle::count();
+            $commentsCount = $commentsVideo + $commentsArticleCount;
 
-        return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount'));
+            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount'));
+        } catch (\Exception $e) {
+            // You can log the error or handle it as needed
+            return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
+        }
     }
+    public function topMedia()
+    {
+        try {
+            $topMedia = Media::withCount('likes')
+                ->orderBy('likes_count', 'desc')
+                ->take(5)
+                ->get();
+
+            return view('pages.admin.dashboard', compact('topMedia'));
+        } catch (\Exception $e) {
+            // You can log the error or handle it as needed
+            return back()->withErrors(['error' => 'Failed to retrieve top media.']);
+        }
+    }
+
+    public function topArticle()
+    {
+        try {
+            $topArticle = Article::withCount('likesArticle')
+                ->orderBy('likes_count', 'desc')
+                ->take(5)
+                ->get();
+
+            return view('pages.admin.dashboard', compact('topArticle'));
+        } catch (\Exception $e) {
+            // You can log the error or handle it as needed
+            return back()->withErrors(['error' => 'Failed to retrieve top article.']);
+        }
+    }
+    public function lastPublished(){
+        try {
+            $lastPublishedMedia = Media::where('status', 'published')
+                ->orderBy('created_at', 'desc')
+                ->take(1)
+                ->get();
+
+            return view('pages.admin.dashboard', compact('lastPublishedMedia'));
+        } catch (\Exception $e) {
+            // You can log the error or handle it as needed
+            return back()->withErrors(['error' => 'Failed to retrieve last published media.']);
+        }
+    }
+    
 }

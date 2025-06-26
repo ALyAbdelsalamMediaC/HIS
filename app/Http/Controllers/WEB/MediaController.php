@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
+use App\Models\Like;
 use App\Models\SubCategory;
 use App\Models\User;
 use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
@@ -168,7 +169,7 @@ class MediaController extends Controller
         $user = Auth::user();
         $userLiked = false;
         if ($user) {
-            $userLiked = \App\Models\Like::where('user_id', $user->id)
+            $userLiked = Like::where('user_id', $user->id)
                 ->where('media_id', $media->id)
                 ->exists();
         }
