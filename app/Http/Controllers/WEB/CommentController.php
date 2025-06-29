@@ -157,14 +157,14 @@ class CommentController extends Controller
                 }
             }
 
-            // Fetch parent comments with their replies and user data
+            // Fetch parent comments with their replies and user data - ORDER BY DESC for newest first
             $query = Comment::where('media_id', $media_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'asc')
+                    $query->orderBy('created_at', 'desc')
                           ->with('user');
                 }, 'user'])
-                ->orderBy('created_at', 'asc');
+                ->orderBy('created_at', 'desc');
 
             // Filter by user_id if provided
             if ($user_id) {
@@ -213,14 +213,14 @@ class CommentController extends Controller
                 }
             }
 
-            // Fetch parent comments with their replies and user data
+            // Fetch parent comments with their replies and user data - ORDER BY DESC for newest first
             $query = Comment::where('article_id', $article_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'asc')
+                    $query->orderBy('created_at', 'desc')
                           ->with('user');
                 }, 'user'])
-                ->orderBy('created_at', 'asc');
+                ->orderBy('created_at', 'desc');
 
             // Filter by user_id if provided
             if ($user_id) {

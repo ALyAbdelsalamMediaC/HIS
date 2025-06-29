@@ -163,14 +163,14 @@ class MediaController extends Controller
         // Get count of likes
         $likesCount = $media->likes->count();
         
-        // Get comments with replies and user data
+        // Get comments with replies and user data - ORDER BY DESC for newest first
         $commentsData = Comment::where('media_id', $id)
             ->whereNull('parent_id')
             ->with(['replies' => function ($query) {
-                $query->orderBy('created_at', 'asc')
+                $query->orderBy('created_at', 'desc')
                       ->with('user');
             }, 'user'])
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->get();
         
         $commentsCount = $commentsData->count();

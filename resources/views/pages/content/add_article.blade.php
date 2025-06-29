@@ -30,19 +30,6 @@
     </div>
 
     <div class="form-infield">
-      <x-text_label for="image_path">Image</x-text_label>
-      <div style="position: relative;">
-      <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
-        accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-        onchange=" updateFileName(this)" />
-      <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
-        <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
-        file</x-button>
-      </div>
-      </div>
-    </div>
-
-    <div class="form-infield">
       <x-text_label for="pdf">Media PDF</x-text_label>
       <div style="position: relative;">
       <x-text_input type="file" id="pdf" name="pdf" placeholder="Choose a PDF file" accept="application/pdf"
@@ -65,7 +52,7 @@
       </div>
     </div>
 
-    <div class="form-infield">
+    <!-- <div class="form-infield">
       <x-text_label for="year" :required="true">Year</x-text_label>
       <x-select id="year" name="year"
         :options="collect(range(date('Y'), 2015))->mapWithKeys(fn($y) => [$y => $y])->all()"
@@ -87,7 +74,7 @@
       <div id="month-error-container">
         <x-input-error :messages="$errors->get('month')" class="mt-2" />
       </div>
-    </div>
+    </div> -->
 
     <div class="form-infield">
       <x-text_label for="title" :required="true">Title</x-text_label>
@@ -115,12 +102,7 @@
       <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
       <label class="form-check-label" for="is_featured">Featured</label>
     </div>
-
-    <div class="mt-3 mb-2 form-check">
-      <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite">
-      <label class="form-check-label" for="is_favorite">Is favorite</label>
-    </div>
-
+    
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="submit">Add Article</x-button>
     </div>
@@ -161,7 +143,6 @@
     document.addEventListener('DOMContentLoaded', function () {
     const fileInputs = [
       { id: 'thumbnail_path', placeholder: 'Choose an thumbnail from your gallery' },
-      { id: 'image_path', placeholder: 'Choose an image from your gallery' },
       { id: 'pdf', placeholder: 'Choose a PDF file' }
     ];
 

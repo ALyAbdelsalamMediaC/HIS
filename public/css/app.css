@@ -1695,30 +1695,69 @@ body {
 }
 
 .comments-list-container {
-    min-height: 600px; /* Adjust as needed for your layout */
+    max-height: 600px; /* Maximum height instead of minimum */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) #f1f9fa; /* thumb color, track color */
     padding: 0 12px;
 }
 
+/* Show scrollbar only when needed */
+.comments-list-container {
+    scrollbar-width: none; /* Hide scrollbar when not hovering */
+}
+
 .comments-list-container::-webkit-scrollbar {
+    width: 0;
+}
+
+/* Show scrollbar on hover */
+.comments-list-container {
+    scrollbar-width: thin;
+}
+
+.comments-list-container:-webkit-scrollbar {
     width: 6px;
 }
+
 .comments-list-container::-webkit-scrollbar-thumb {
     background: var(--primary-color);
     border-radius: 4px;
 }
+
 .comments-list-container::-webkit-scrollbar-track {
     background: #f1f9fa;
     border-radius: 4px;
 }
 
+/* Optimize comment container for better performance */
 .comment-container {
     border-radius: var(--main-border-radius-md);
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
     padding: 24px;
     margin-top: 12px;
+}
+
+/* Optimize replies container */
+.replies-container {
+    max-height: 400px; /* Limit replies height */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #f1f9fa;
+}
+
+.replies-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.replies-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.replies-container::-webkit-scrollbar-track {
+    background: #f1f9fa;
+    border-radius: 2px;
 }
 
 .comment-container-user-icon {
@@ -1731,20 +1770,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.replay-list-container {
-    min-height: 600px; /* Adjust as needed for your layout */
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) #f1f9fa; /* thumb color, track color */
-    padding: 0 12px;
-    margin-top: 12px;
-}
-
-.replay-container {
-    padding: 0px 24px 12px 24px;
-    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .past-reviwer-container {
@@ -1754,7 +1780,6 @@ body {
     border-radius: var(--main-border-radius-md);
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
 }
-
 /* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */

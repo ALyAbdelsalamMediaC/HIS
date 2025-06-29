@@ -250,10 +250,14 @@
             function formatReviewer(reviewer) {
                 if (!reviewer.id) return reviewer.text;
                 return $(
-                    `<div class="py-2">
-                                                                                                                                                                    <div class="mb-0 h5-ragular">${reviewer.text}</div>
-                                                                                                                                                                    <div class="h6-ragular">Reviewer</div>
-                                                                                                                                                            </div>`
+                    `<div class="gap-3 py-2 d-flex align-items-center">
+         <div class="comment-container-user-icon">
+          <x-svg-icon name="user" size="18" color="#35758c" />
+          </div>
+      <div>
+       <div class="mb-0 h5-ragular">${reviewer.text}</div>
+      <div class="h6-ragular">Reviewer</div>
+      </div>`
                 );
             }
 

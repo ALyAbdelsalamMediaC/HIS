@@ -59,10 +59,9 @@
                             </x-link_btn>
                         </div>
                     </div>
-
                     <div class="dashboard-video-card">
                         <div class="dashboard-video-card-image">
-                            <img src="{{ asset('images/global/login-img.png') }}" alt="video image">
+                            <img src="{{ $lastPublishedMedia->thumbnail_path}}" alt="{{ $lastPublishedMedia->title }}">
 
                             <span>Video</span>
                         </div>
@@ -70,39 +69,37 @@
                         <div class="dashboard-video-card-content">
                             <div class="dashboard-video-card-content-top">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h4 class="h6-semibold" style="color:#35758C;">Men's health</h4>
-                                    <h4 class="h6-ragular"
-                                        style="color:#35758C; padding: 8px; border-radius: 12px; background: #F1F9FA;">
-                                        Puplished
-                                    </h4>
+                                    <h4 class="h6-semibold" style="color:#35758C;">{{ $lastPublishedMedia->user->name }}</h4>
+                      <h4 class="h6-ragular card-status {{ $lastPublishedMedia->status }}">
+                                    {{ ucfirst($lastPublishedMedia->status) }}
+                                </h4>
                                 </div>
 
                                 <h3 class="h5-semibold" style="line-height: 1.5em;">
-                                    Lorem
-                                    ipsum
-                                    dolor
-                                    sit
-                                    amet
-                                    consectetur.
+                                {{ $lastPublishedMedia->title }}
                                 </h3>
-                                <p class="h6-ragular" style="color:#ADADAD;">15:24 . Uploaded 2 days ago</p>
+                                <p class="h6-ragular" style="color:#ADADAD;"> <x-format-duration :seconds="$lastPublishedMedia->duration" class="c-d-span" /> Uploaded
+                                {{ $lastPublishedMedia->created_at->diffForHumans() }}</p>
                             </div>
 
                             <div class="dashboard-video-card-content-down">
                                 <div class="gap-2 d-flex align-items-center">
-                                    <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                    <x-svg-icon name="trash" size="12" color="Black" />
-                                    <x-svg-icon name="three-dots" size="12" color="Black" />
+                                    <a href="{{ route('content.edit', $lastPublishedMedia->id) }}" onclick="event.stopPropagation();">
+                                        <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                    </a>
+                                    <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteVideoModalDashboard" style="background: none; border: none; padding: 0;">
+                                        <x-svg-icon name="trash" size="12" color="Black" />
+                                    </button>
                                 </div>
 
                                 <div class="gap-3 d-flex align-items-center">
                                     <div>
                                         <x-svg-icon name="eye" size="12" color="Black" />
-                                        <span class="h6-ragular">2.5k</span>
+                                        <span class="h6-ragular">{{ $lastPublishedMedia->views}}</span>
                                     </div>
                                     <div>
                                         <x-svg-icon name="message" size="12" color="Black" />
-                                        <span class="h6-ragular">18</span>
+                                        <span class="h6-ragular">{{ $lastPublishedMedia->comments_count}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -195,8 +192,26 @@
 
             </div>
         </div>
+
+        {{-- Delete Video Modal for Dashboard --}}
+<x-modal id="deleteVideoModalDashboard" title="Delete Video">
+    <div class="my-3">
+        <p class="h3-semibold" style="color:black;">
+            Are you sure you want to delete the video "{{ $lastPublishedMedia->title }}"?
+        </p>
+    </div>
+    <div class="modal-footer">
+        <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+        <form action="{{ route('content.destroy', $lastPublishedMedia->id) }}" method="POST" style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
+        </form>
+    </div>
+</x-modal>
     </section>
 @endsection
 
 @push('scripts')
+
 @endpush

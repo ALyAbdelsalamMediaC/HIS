@@ -21,20 +21,21 @@
       <x-select id="role" name="role" :options="[
     'admin' => 'Admin',
     'reviewer' => 'Reviewer'
+    'user' => 'User'
     ]" placeholder="Select Role" data-required="true" data-name="Role" />
       <div id="role-error-container">
       <x-input-error :messages="$errors->get('role')" />
       </div>
     </div>
 
-    <div class="form-infield">
+    <!-- <div class="form-infield">
       <x-text_label for="username" :required="true">Username</x-text_label>
       <x-text_input type="text" id="username" name="username" value="{{ old('username') }}"
       placeholder="Enter your username" data-required="true" data-name="Username" />
       <div id="username-error-container">
       <x-input-error :messages="$errors->get('username')" />
       </div>
-    </div>
+    </div> -->
 
     <div class="form-infield">
       <x-text_label for="name" :required="true">Name</x-text_label>

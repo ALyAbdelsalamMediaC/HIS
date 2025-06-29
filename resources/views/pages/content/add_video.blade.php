@@ -113,11 +113,6 @@
                 <label class="form-check-label" for="is_featured">Featured</label>
             </div>
 
-            <div class="mt-3 mb-2 form-check">
-                <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite">
-                <label class="form-check-label" for="is_favorite">Is favorite</label>
-            </div>
-
             <div class="mt-3 d-flex justify-content-end">
                 <x-button type="submit">Upload Video</x-button>
             </div>

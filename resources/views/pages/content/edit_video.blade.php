@@ -96,7 +96,7 @@
       <div style="position: relative;">
       <x-text_input type="file" id="thumbnail_path" name="thumbnail_path"
         placeholder="Choose an thumbnail from your gallery" accept="image/jpeg,image/jpg,image/png"
-        style="color: transparent; cursor: pointer;" onchange="updateFileName(this)" />
+        style="color: transparent; cursor: pointer;" onchange="updateFileName(this); previewImage(this, 'thumbnail-preview')" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
         <x-button type="button" onclick="document.getElementById('thumbnail_path').click()">Choose
         file</x-button>
@@ -107,6 +107,11 @@
       <img src="{{ asset($media->thumbnail_path) }}" alt="Current thumbnail" style="max-width: 200px;">
       </div>
     @endif
+      <!-- New Thumbnail Preview -->
+      <div id="thumbnail-preview" class="mt-2" style="display: none;">
+        <h6 class="h6-semibold" style="color:#35758C;">New Thumbnail Preview:</h6>
+        <img id="thumbnail-preview-img" src="" alt="New thumbnail preview" style="max-width: 200px; border-radius: 8px;">
+      </div>
       <div id="thumbnail-error-container">
       <x-input-error :messages="$errors->get('thumbnail_path')" class="mt-2" />
       </div>
@@ -117,7 +122,7 @@
       <div style="position: relative;">
       <x-text_input type="file" id="image_path" name="image_path" placeholder="Choose an image from your gallery"
         accept="image/jpeg,image/jpg,image/png" style="color: transparent; cursor: pointer;"
-        onchange="updateFileName(this)" />
+        onchange="updateFileName(this); previewImage(this, 'image-preview')" />
       <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding-right: 16px;">
         <x-button type="button" onclick="document.getElementById('image_path').click()">Choose
         file</x-button>
@@ -128,6 +133,11 @@
       <img src="{{ asset($media->image_path) }}" alt="Current image" style="max-width: 200px;">
       </div>
     @endif
+      <!-- New Image Preview -->
+      <div id="image-preview" class="mt-2" style="display: none;">
+        <h6 class="h6-semibold" style="color:#35758C;">New Image Preview:</h6>
+        <img id="image-preview-img" src="" alt="New image preview" style="max-width: 200px; border-radius: 8px;">
+      </div>
     </div>
 
     <div class="form-infield">
@@ -192,11 +202,11 @@
         <x-text_label for="mention">Mention Users</x-text_label>
         <select class="select2-mentions form-control" name="mention[]" multiple="multiple" id="mention">
             @foreach($users as $user)
-                <option value="{{ $user->name }}" {{ in_array($user->name, json_decode($media->mentions ?? '[]', true) ?? []) ? 'selected' : '' }}>
+                <option value="{{ $user->name }}" {{ in_array($user->name, json_decode($media->mention ?? '[]', true) ?? []) ? 'selected' : '' }}>
                     {{ $user->name }}
                 </option>
             @endforeach
-            @foreach(array_diff(json_decode($media->mentions ?? '[]', true) ?? [], $users->pluck('name')->toArray()) as $customMention)
+            @foreach(array_diff(json_decode($media->mention ?? '[]', true) ?? [], $users->pluck('name')->toArray()) as $customMention)
                 <option value="{{ $customMention }}" selected>{{ $customMention }}</option>
             @endforeach
         </select>
@@ -205,11 +215,6 @@
     <div class="mt-3 mb-2 form-check">
       <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ $media->is_featured ? 'checked' : '' }}>
       <label class="form-check-label" for="is_featured">Featured</label>
-    </div>
-
-    <div class="mt-3 mb-2 form-check">
-      <input class="form-check-input" type="checkbox" name="is_favorite" value="1" id="is_favorite" {{ $media->is_favorite ? 'checked' : '' }}>
-      <label class="form-check-label" for="is_favorite">Is favorite</label>
     </div>
 
     <div class="mt-3 d-flex justify-content-end">
@@ -247,6 +252,20 @@
 
     function updateFileName(input) {
     validateFile(input, 'image/jpeg,image/jpg,image/png', 3 * 1024 * 1024, 'Image size exceeds 3MB. Please choose a smaller image.', 'Choose an image from your gallery');
+    }
+
+    function previewImage(input, previewId) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        preview.style.display = 'block';
+        const img = document.getElementById(`${previewId}-img`);
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
     }
 
     document.addEventListener('DOMContentLoaded', function () {

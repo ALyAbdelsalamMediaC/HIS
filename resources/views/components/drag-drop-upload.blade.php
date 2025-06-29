@@ -113,6 +113,98 @@
         </div>
     </div>
 
+    <!-- Preview Section for Selected Files -->
+    <div x-show="selectedFile || (multiple && selectedFiles.length > 0)" class="mt-3">
+        <h4 class="h4-semibold" style="color:#35758C;">Preview:</h4>
+        
+        <!-- Single File Preview -->
+        <template x-if="!multiple && selectedFile">
+            <div class="preview-container">
+                <!-- Video Preview -->
+                <template x-if="selectedFile.type.startsWith('video/')">
+                    <div class="video-preview">
+                        <video controls style="width: 100%; max-width: 400px; border-radius: 8px;">
+                            <source :src="URL.createObjectURL(selectedFile)" :type="selectedFile.type">
+                            Your browser does not support the video tag.
+                        </video>
+                        <p class="mt-2 h6-ragular" style="color:#676767;">
+                            <strong>Preview:</strong> <span x-text="selectedFile.name"></span>
+                        </p>
+                    </div>
+                </template>
+                
+                <!-- Image Preview -->
+                <template x-if="selectedFile.type.startsWith('image/')">
+                    <div class="image-preview">
+                        <img :src="URL.createObjectURL(selectedFile)" 
+                             :alt="selectedFile.name" 
+                             style="max-width: 400px; max-height: 300px; border-radius: 8px; object-fit: cover;">
+                        <p class="mt-2 h6-ragular" style="color:#676767;">
+                            <strong>Preview:</strong> <span x-text="selectedFile.name"></span>
+                        </p>
+                    </div>
+                </template>
+                
+                <!-- Other File Types -->
+                <template x-if="!selectedFile.type.startsWith('video/') && !selectedFile.type.startsWith('image/')">
+                    <div class="file-preview">
+                        <div class="p-3 rounded border" style="background-color: #f8f9fa;">
+                            <p class="mb-1 h5-ragular" style="color:#35758C;">
+                                <strong>File:</strong> <span x-text="selectedFile.name"></span>
+                            </p>
+                            <p class="mb-0 h6-ragular" style="color:#676767;">
+                                Type: <span x-text="selectedFile.type"></span> | 
+                                Size: <span x-text="formatFileSize(selectedFile.size)"></span>
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Multiple Files Preview -->
+        <template x-if="multiple && selectedFiles.length > 0">
+            <div class="multiple-preview-container">
+                <template x-for="(file, index) in selectedFiles" :key="index">
+                    <div class="mb-3 preview-item">
+                        <h5 class="h5-semibold" style="color:#35758C;" x-text="'File ' + (index + 1) + ': ' + file.name"></h5>
+                        
+                        <!-- Video Preview -->
+                        <template x-if="file.type.startsWith('video/')">
+                            <div class="video-preview">
+                                <video controls style="width: 100%; max-width: 400px; border-radius: 8px;">
+                                    <source :src="URL.createObjectURL(file)" :type="file.type">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </template>
+                        
+                        <!-- Image Preview -->
+                        <template x-if="file.type.startsWith('image/')">
+                            <div class="image-preview">
+                                <img :src="URL.createObjectURL(file)" 
+                                     :alt="file.name" 
+                                     style="max-width: 400px; max-height: 300px; border-radius: 8px; object-fit: cover;">
+                            </div>
+                        </template>
+                        
+                        <!-- Other File Types -->
+                        <template x-if="!file.type.startsWith('video/') && !file.type.startsWith('image/')">
+                            <div class="file-preview">
+                                <div class="p-2 rounded border" style="background-color: #f8f9fa;">
+                                    <p class="mb-0 h6-ragular" style="color:#676767;">
+                                        Type: <span x-text="file.type"></span> | 
+                                        Size: <span x-text="formatFileSize(file.size)"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+
     <!-- File List for Multiple Files -->
     <div x-show="multiple && selectedFiles.length > 0 && !hasError" class="mt-3">
         <h4 class="h4-semibold" style="color:#35758C;">Selected Files:</h4>

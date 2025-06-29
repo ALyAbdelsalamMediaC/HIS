@@ -74,11 +74,19 @@
       <h3 class="h5-semibold">Mentioned to :</h3>
 
       <div class="flex-wrap gap-3 d-flex align-items-center">
-        <div style="padding: 10px 20px; border-radius: 32px; border: 1px solid #EDEDED;">
-          <h3 class="h6-ragular" style="color:#7B7B7B;">@Lorem ipsum</h3>
-        </div>
+        @if($media->mention && is_array(json_decode($media->mention, true)))
+          @foreach(json_decode($media->mention, true) as $mentionedUser)
+            <div style="padding: 10px 20px; border-radius: 32px; border: 1px solid #EDEDED;">
+              <h3 class="h6-ragular" style="color:#7B7B7B;">{{ '@' . $mentionedUser }}</h3>
+            </div>
+          @endforeach
+        @else
+          <div style="padding: 10px 20px; border-radius: 32px; border: 1px solid #EDEDED;">
+            <h3 class="h6-ragular" style="color:#7B7B7B;">No mentions</h3>
+          </div>
+        @endif
       </div>
-    </div>
+     </div>
 
     <!-- Video Assets -->
     <div class="gap-3 mt-4 d-flex align-items-center">
@@ -122,7 +130,7 @@
     <div class="mt-4">
     <h3 class="h4-semibold">Assigned to : <span class="h4-ragular" style="color:#35758C;">2 Reviews </span></h3>
 
-    <div class="replay-list-container">
+    <div class="mt-2 replay-list-container">
       <div class="replay-container">
       <div class="d-flex justify-content-between align-items-center">
         <div>
