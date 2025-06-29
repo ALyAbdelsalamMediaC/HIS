@@ -107,11 +107,11 @@ class LikesController extends Controller
     public function addLikeComment(Request $request, $commentId)
     {
         try {
-            // Find the media item
+            // Find the comment
             $comment = Comment::findOrFail($commentId);
 
-            // Check if the user already liked this media
-            $existingLike = Like::where('user_id', Auth::id())
+            // Check if the user already liked this comment
+            $existingLike = LikeComment::where('user_id', Auth::id())
                 ->where('comment_id', $commentId)
                 ->first();
 
@@ -132,7 +132,7 @@ class LikesController extends Controller
                 'description' => "Liked comment: {$comment->content}",
             ]);
 
-            return back()->with('success', 'comment liked successfully.');
+            return back()->with('success', 'Comment liked successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
@@ -142,17 +142,17 @@ class LikesController extends Controller
     }
 
     /**
-     * Remove a like from a media item for the authenticated user.
+     * Remove a like from a comment for the authenticated user.
      *
      * @param Request $request
-     * @param int $mediaId
+     * @param int $commentId
      * @return \Illuminate\Http\JsonResponse
      */
     public function removeLikeComment(Request $request, $commentId)
     {
         try {
             // Find the like
-            $like = Comment::where('user_id', Auth::id())
+            $like = LikeComment::where('user_id', Auth::id())
                 ->where('comment_id', $commentId)
                 ->first();
 
@@ -160,7 +160,7 @@ class LikesController extends Controller
                 return back()->with('error', 'You have not liked this comment.');
             }
 
-            // Get media title before deleting like for logging
+            // Get comment content before deleting like for logging
             $comment = Comment::findOrFail($commentId);
 
             // Delete the like
@@ -181,6 +181,7 @@ class LikesController extends Controller
             return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }
     }
+
     public function getLikesCommentCount($commentId)
     {
         try {

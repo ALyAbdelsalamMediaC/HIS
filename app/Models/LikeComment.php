@@ -21,3 +21,4 @@ class LikeComment extends Model
         return $this->belongsTo(Comment::class);
     }
 }
+
