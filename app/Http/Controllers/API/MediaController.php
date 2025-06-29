@@ -445,7 +445,7 @@ class MediaController extends Controller
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_favorite' => $request->boolean('is_favorite'),
-                'mentions' => json_encode($mentions),
+                'mention' => json_encode($mentions),
                 'duration' => $duration,
             ]);
 

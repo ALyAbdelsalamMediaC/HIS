@@ -127,11 +127,11 @@
         <x-text_label for="mention">Mention Users</x-text_label>
         <select class="select2-mentions form-control" name="mention[]" multiple="multiple" id="mention">
             @foreach($users as $user)
-                <option value="{{ $user->name }}" {{ in_array($user->name, json_decode($article->mentions ?? '[]', true) ?? []) ? 'selected' : '' }}>
+                <option value="{{ $user->name }}" {{ in_array($user->name, json_decode($article->mention ?? '[]', true) ?? []) ? 'selected' : '' }}>
                     {{ $user->name }}
                 </option>
             @endforeach
-            @foreach(array_diff(json_decode($article->mentions ?? '[]', true) ?? [], $users->pluck('name')->toArray()) as $customMention)
+            @foreach(array_diff(json_decode($article->mention ?? '[]', true) ?? [], $users->pluck('name')->toArray()) as $customMention)
                 <option value="{{ $customMention }}" selected>{{ $customMention }}</option>
             @endforeach
         </select>
