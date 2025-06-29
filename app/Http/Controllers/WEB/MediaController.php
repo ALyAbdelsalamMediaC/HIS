@@ -326,7 +326,7 @@ class MediaController extends Controller
                 'file_path' => $video,
                 'pdf' => $pdf,
                 'status' => 'published',
-                'mentions' => json_encode($mentions),
+                'mention' => json_encode($mentions),
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
@@ -507,7 +507,7 @@ class MediaController extends Controller
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_favorite' => $request->boolean('is_favorite'),
-                'mentions' => json_encode($mentions),
+                'mention' => json_encode($mentions),
                 'duration' => $duration,
             ]);
 

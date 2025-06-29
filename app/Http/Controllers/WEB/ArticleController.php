@@ -182,7 +182,7 @@ class ArticleController extends Controller
                 'pdf' => $pdf,
                 'is_favorite' => $request->boolean('is_favorite'),
                 'is_featured' => $request->boolean('is_featured'),
-                'mentions' => json_encode($mentions),
+                'mention' => json_encode($mentions),
             ]);
 
             // Log success
@@ -332,7 +332,7 @@ class ArticleController extends Controller
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_favorite' => $request->boolean('is_favorite'),
-                'mentions' => json_encode($mentions),
+                'mention' => json_encode($mentions),
             ]);
 
             // Log success
