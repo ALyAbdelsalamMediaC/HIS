@@ -71,7 +71,7 @@ class CommentController extends Controller
     public function showReplyForm($media_id, $parent_id)
     {
         // Pass media_id and parent_id to the view
-        return view('pages.content.reply-comment', compact('media_id', 'parent_id'));
+        return view('pages.content.video.single_video_published', compact('media_id', 'parent_id'));
     }
 
     public function reply(Request $request, $media_id, $parent_id)
@@ -240,7 +240,8 @@ class CommentController extends Controller
                 ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
         }
     }
-    public function deleteComment($comment_id)
+
+    public function deleteComment(Request $request, $comment_id)
     {
         try {
             // Validate the comment_id
@@ -263,7 +264,8 @@ class CommentController extends Controller
                     ->with('error', 'You do not have permission to delete this comment.');
             }
 
-            // Delete the comment
+            // Delete the comment and all its replies
+            $comment->replies()->delete();
             $comment->delete();
 
             return redirect()->back()
@@ -277,6 +279,5 @@ class CommentController extends Controller
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while deleting the comment: ' . $e->getMessage());
         }
-
     }
 }

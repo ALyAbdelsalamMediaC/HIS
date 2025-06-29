@@ -24,6 +24,7 @@ use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service i
 use getID3;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\Comment;
 
 class MediaController extends Controller
 {
@@ -157,12 +158,22 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
-        $media = Media::with(['category', 'comments', 'likes'])->findOrFail($id);
+        $media = Media::with(['category', 'likes'])->findOrFail($id);
 
-        // Get count of likes and comments
+        // Get count of likes
         $likesCount = $media->likes->count();
-        $commentsCount = $media->comments->count();
-        $commentsData = $media->comments;
+        
+        // Get comments with replies and user data
+        $commentsData = Comment::where('media_id', $id)
+            ->whereNull('parent_id')
+            ->with(['replies' => function ($query) {
+                $query->orderBy('created_at', 'asc')
+                      ->with('user');
+            }, 'user'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        $commentsCount = $commentsData->count();
 
         // You can pass these to the view if needed:
         // compact('media', 'likesCount', 'commentsCount', 'commentsData')
@@ -181,7 +192,7 @@ class MediaController extends Controller
                 return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
             }
         } elseif ($status === 'published') {
-            return view('pages.content.video.single_video', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
+            return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         }
 
         // Default fallback

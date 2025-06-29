@@ -43,9 +43,9 @@ Route::middleware('auth')->group(function () {
 
     // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
-    // Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
+    Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
-    Route::post('/comments/deleteComment/{media_id}', [CommentController::class, 'repdeleteCommently'])->name('comments.deleteComment');
+    Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
@@ -71,9 +71,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like.add');
     Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.like.remove');
 
-    Route::post('/media/{mediaId}/like', [LikesController::class, 'addLikeComment'])->name('media.like.add');
-    Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLikeComment'])->name('media.like.remove');
-
+    Route::post('/comments/{commentId}/like', [LikesController::class, 'addLikeComment'])->name('comments.like.add');
+    Route::delete('/comments/{commentId}/like', [LikesController::class, 'removeLikeComment'])->name('comments.like.remove');
+    Route::get('/comments/{commentId}/likes/count', [LikesController::class, 'getLikesCommentCount'])->name('comments.like.count');
 
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
