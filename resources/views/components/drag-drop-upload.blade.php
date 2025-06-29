@@ -33,8 +33,7 @@
         class="uploadBox"
         :class="{
             'dragging': isDragging, 
-            'uploading': isUploading, 
-            'success': uploadComplete, 
+            'success': hasSelectedFiles, 
             'error': hasError 
         }"
         @dragover.prevent="isDragging = true"
@@ -51,8 +50,9 @@
         <!-- Upload Text -->
         <div>
             <h3 class="mt-3 h2-semibold">
-                <span x-show="!isDragging && currentFile === null">Drag & drop files or <span style="color:#35758C;">Browse</span></span>
-                <span x-show="!isDragging && currentFile !== null">Drag & drop new file or <span style="color:#35758C;">Browse</span></span>
+                <span x-show="!isDragging && currentFile === null && !hasSelectedFiles">Drag & drop files or <span style="color:#35758C;">Browse</span></span>
+                <span x-show="!isDragging && currentFile !== null && !hasSelectedFiles">Drag & drop new file or <span style="color:#35758C;">Browse</span></span>
+                <span x-show="!isDragging && hasSelectedFiles">Files selected successfully!</span>
                 <span x-show="isDragging">Drop files here</span>
             </h3>
             <p class="mt-1 h4-ragular" style="color:#676767;">Supported formats: {{ $supportedFormats }}</p>
@@ -60,7 +60,7 @@
         </div>
 
         <!-- Current File Info (for edit mode) -->
-        <div x-show="currentFile !== null && !selectedFile && !(multiple && selectedFiles.length > 0)" class="mt-3">
+        <div x-show="currentFile !== null && !hasSelectedFiles" class="mt-3">
             <div class="p-3 rounded border" style="background-color: #e9ecef;">
                 <p class="mb-1 h5-ragular" style="color:#35758C;">
                     <strong>Current File:</strong>
@@ -75,11 +75,11 @@
         </div>
 
         <!-- Selected File Info -->
-        <div x-show="selectedFile || (multiple && selectedFiles.length > 0)" class="mt-3">
+        <div x-show="hasSelectedFiles" class="mt-3">
             <template x-if="!multiple && selectedFile">
                 <div>
-                    <p class="h5-ragular" style="color:#35758C;">
-                        Selected: <span x-text="selectedFile.name"></span>
+                    <p class="h5-ragular" style="color:#28a745;">
+                        ✓ Selected: <span x-text="selectedFile.name"></span>
                     </p>
                     <p class="h6-ragular" style="color:#676767;">
                         Size: <span x-text="formatFileSize(selectedFile.size)"></span>
@@ -88,23 +88,11 @@
             </template>
             <template x-if="multiple && selectedFiles.length > 0">
                 <div>
-                    <p class="h5-ragular" style="color:#35758C;">
-                        Selected: <span x-text="selectedFiles.length + ' file(s)'"></span>
+                    <p class="h5-ragular" style="color:#28a745;">
+                        ✓ Selected: <span x-text="selectedFiles.length + ' file(s)'"></span>
                     </p>
                 </div>
             </template>
-        </div>
-
-        <!-- Upload Progress -->
-        <div x-show="isUploading" class="mt-2">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-
-        <!-- Success Message -->
-        <div x-show="uploadComplete" class="mt-2">
-            <p class="h5-ragular" style="color:#28a745;">✓ completed successfully!</p>
         </div>
 
         <!-- Error Message -->
@@ -114,7 +102,7 @@
     </div>
 
     <!-- Preview Section for Selected Files -->
-    <div x-show="selectedFile || (multiple && selectedFiles.length > 0)" class="mt-3">
+    <div x-show="hasSelectedFiles" class="mt-3">
         <h4 class="h4-semibold" style="color:#35758C;">Preview:</h4>
         
         <!-- Single File Preview -->
@@ -218,7 +206,6 @@
                     type="button" 
                     class="btn btn-sm btn-outline-danger"
                     @click="removeFile(index)"
-                    :disabled="isUploading"
                 >
                     Remove
                 </button>
@@ -243,16 +230,14 @@ function dragDropUpload(config) {
 
         // State
         isDragging: false,
-        isUploading: false,
-        uploadComplete: false,
         hasError: false,
-        uploadProgress: 0,
         selectedFile: null,
         selectedFiles: [],
         errorMessage: '',
-        uploadInterval: null,
-        retryAttempts: 0,
-        maxRetries: 3,
+
+        get hasSelectedFiles() {
+            return this.multiple ? this.selectedFiles.length > 0 : this.selectedFile !== null;
+        },
 
         handleDrop(e) {
             e.preventDefault();
@@ -262,9 +247,7 @@ function dragDropUpload(config) {
         },
 
         openFileDialog() {
-            if (!this.isUploading) {
-                this.$refs.fileInput.click();
-            }
+            this.$refs.fileInput.click();
         },
 
         handleFileSelect(e) {
@@ -275,11 +258,8 @@ function dragDropUpload(config) {
         processFiles(files) {
             if (!files.length) return;
 
-            // Reset previous states but keep the component ready for new upload
-            this.isUploading = false;
-            this.uploadComplete = false;
+            // Reset previous states
             this.hasError = false;
-            this.uploadProgress = 0;
             this.errorMessage = '';
             
             const validFiles = files.filter(file => this.validateFile(file));
@@ -292,7 +272,7 @@ function dragDropUpload(config) {
                 this.selectedFile = validFiles[0];
             }
 
-            this.startUpload();
+            showToast('Files selected successfully!', 'success');
         },
 
         validateFile(file) {
@@ -320,70 +300,18 @@ function dragDropUpload(config) {
             return true;
         },
 
-        startUpload() {
-            this.isUploading = true;
-            this.uploadProgress = 0;
-            this.hasError = false;
-            this.retryAttempts = 0;
-
-            this.simulateUpload();
-        },
-
-        simulateUpload() {
-            this.uploadInterval = setInterval(() => {
-                this.uploadProgress += Math.random() * 10 + 5;
-                
-                if (this.uploadProgress >= 100) {
-                    this.uploadProgress = 100;
-                    this.completeUpload();
-                }
-            }, 300);
-        },
-
-        completeUpload() {
-            clearInterval(this.uploadInterval);
-            this.isUploading = false;
-            this.uploadComplete = true;
-
-            // Auto-hide success message after 3 seconds but keep file info
-            setTimeout(() => {
-                this.uploadComplete = false;
-            }, 3000);
-        },
-
-        handleUploadError(message) {
-            clearInterval(this.uploadInterval);
-            this.isUploading = false;
-            this.hasError = true;
-            this.errorMessage = message;
-            showToast(message, 'danger');
-        },
-
-        retry() {
-            this.hasError = false;
-            this.uploadProgress = 0;
-            this.startUpload();
-        },
-
         removeFile(index) {
-            if (!this.isUploading) {
-                this.selectedFiles.splice(index, 1);
-                if (this.selectedFiles.length === 0) {
-                    this.reset();
-                }
+            this.selectedFiles.splice(index, 1);
+            if (this.selectedFiles.length === 0) {
+                this.reset();
             }
         },
 
         reset() {
-            clearInterval(this.uploadInterval);
             this.selectedFile = null;
             this.selectedFiles = [];
-            this.isUploading = false;
-            this.uploadComplete = false;
             this.hasError = false;
-            this.uploadProgress = 0;
             this.errorMessage = '';
-            this.retryAttempts = 0;
             this.$refs.fileInput.value = '';
         },
 
