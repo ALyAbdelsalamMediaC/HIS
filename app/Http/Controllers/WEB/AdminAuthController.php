@@ -101,6 +101,7 @@ class AdminAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        dd($data); 
         // Handle profile image upload if present
         if ($request->hasFile('profile_image')) {
             $data['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
