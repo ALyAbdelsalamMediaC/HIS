@@ -12,25 +12,22 @@ use Illuminate\Support\Facades\Validator;
 
 class BookmarkController extends Controller
 {
-    /**
-     * Add a bookmark for an article or media
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function addBookmark(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
             'article_id' => 'nullable|integer|exists:articles,id',
             'media_id' => 'nullable|integer|exists:media,id',
             'flag' => 'required|string|max:255',
         ], [
+            'user_id.exists' => 'The specified user does not exist.',
             'article_id.exists' => 'The specified article does not exist.',
             'media_id.exists' => 'The specified media does not exist.',
         ]);
 
         // Ensure exactly one of article_id or media_id is provided
-        if (!$request->has('article_id') && !$request->has('media_id') || $request->has('article_id') && $request->has('media_id')) {
+        if ((!$request->has('article_id') && !$request->has('media_id')) || ($request->has('article_id') && $request->has('media_id'))) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Exactly one of article_id or media_id must be provided.'
@@ -45,13 +42,13 @@ class BookmarkController extends Controller
             ], 422);
         }
 
-        $user = Auth::user();
+        $userId = $request->input('user_id');
         $articleId = $request->input('article_id');
         $mediaId = $request->input('media_id');
         $flag = $request->input('flag');
 
         // Check if bookmark already exists
-        $existingBookmark = Bookmark::where('user_id', $user->id)
+        $existingBookmark = Bookmark::where('user_id', $userId)
             ->where(function ($query) use ($articleId, $mediaId) {
                 if ($articleId) {
                     $query->where('article_id', $articleId)->whereNull('media_id');
@@ -69,7 +66,7 @@ class BookmarkController extends Controller
 
         // Create new bookmark
         $bookmark = new Bookmark();
-        $bookmark->user_id = $user->id;
+        $bookmark->user_id = $userId;
         $bookmark->flag = $flag;
         $bookmark->article_id = $articleId;
         $bookmark->media_id = $mediaId;
@@ -82,24 +79,21 @@ class BookmarkController extends Controller
         ], 201);
     }
 
-    /**
-     * Remove a bookmark
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function removeBookmark(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
             'article_id' => 'nullable|integer|exists:articles,id',
             'media_id' => 'nullable|integer|exists:media,id',
         ], [
+            'user_id.exists' => 'The specified user does not exist.',
             'article_id.exists' => 'The specified article does not exist.',
             'media_id.exists' => 'The specified media does not exist.',
         ]);
 
         // Ensure exactly one of article_id or media_id is provided
-        if (!$request->has('article_id') && !$request->has('media_id') || $request->has('article_id') && $request->has('media_id')) {
+        if ((!$request->has('article_id') && !$request->has('media_id')) || ($request->has('article_id') && $request->has('media_id'))) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Exactly one of article_id or media_id must be provided.'
@@ -114,11 +108,11 @@ class BookmarkController extends Controller
             ], 422);
         }
 
-        $user = Auth::user();
+        $userId = $request->input('user_id');
         $articleId = $request->input('article_id');
         $mediaId = $request->input('media_id');
 
-        $bookmark = Bookmark::where('user_id', $user->id)
+        $bookmark = Bookmark::where('user_id', $userId)
             ->where(function ($query) use ($articleId, $mediaId) {
                 if ($articleId) {
                     $query->where('article_id', $articleId)->whereNull('media_id');
@@ -142,17 +136,26 @@ class BookmarkController extends Controller
         ], 200);
     }
 
-    /**
-     * Get all bookmarks for the authenticated user
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function getBookmarks(Request $request)
     {
-        $user = Auth::user();
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
+        ], [
+            'user_id.exists' => 'The specified user does not exist.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $userId = $request->input('user_id');
         
-        $bookmarks = Bookmark::where('user_id', $user->id)
+        $bookmarks = Bookmark::where('user_id', $userId)
             ->with(['article' => function ($query) {
                 $query->select('id', 'title', 'description', 'image_path', 'thumbnail_path');
             }, 'media' => function ($query) {

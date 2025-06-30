@@ -7,20 +7,27 @@ use App\Models\Media;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\LikeComment;
+use App\Models\Log as ModelsLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class LikesController extends Controller
 {
-    public function addLike(Request $request, $mediaId)
+    public function addLike(Request $request,$mediaId)
     {
         try {
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $userId = $request->input('user_id');
+
             // Find the media item
             $media = Media::findOrFail($mediaId);
 
             // Check if the user already liked this media
-            $existingLike = Like::where('user_id', Auth::id())
+            $existingLike = Like::where('user_id', $userId)
                 ->where('media_id', $mediaId)
                 ->first();
 
@@ -33,13 +40,13 @@ class LikesController extends Controller
 
             // Create the like
             $like = Like::create([
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
                 'media_id' => $mediaId,
             ]);
 
             // Log the action
-            Log::create([
-                'user_id' => Auth::id(),
+            ModelsLog::create([
+                'user_id' => $userId,
                 'type' => 'like_added',
                 'description' => "Liked media: {$media->title}",
             ]);
@@ -63,11 +70,17 @@ class LikesController extends Controller
         }
     }
 
-    public function removeLike(Request $request, $mediaId)
+    public function removeLike(Request $request,$mediaId)
     {
         try {
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $userId = $request->input('user_id');
+
             // Find the like
-            $like = Like::where('user_id', Auth::id())
+            $like = Like::where('user_id', $userId)
                 ->where('media_id', $mediaId)
                 ->first();
 
@@ -85,8 +98,8 @@ class LikesController extends Controller
             $like->delete();
 
             // Log the action
-            Log::create([
-                'user_id' => Auth::id(),
+            ModelsLog::create([
+                'user_id' => $userId,
                 'type' => 'like_removed',
                 'description' => "Unliked media: {$media->title}",
             ]);
@@ -106,14 +119,20 @@ class LikesController extends Controller
         }
     }
 
-    public function addLikeComment(Request $request, $commentId)
+    public function addLikeComment(Request $request,$commentId)
     {
         try {
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $userId = $request->input('user_id');
+
             // Find the comment
             $comment = Comment::findOrFail($commentId);
 
             // Check if the user already liked this comment
-            $existingLike = LikeComment::where('user_id', Auth::id())
+            $existingLike = LikeComment::where('user_id', $userId)
                 ->where('comment_id', $commentId)
                 ->first();
 
@@ -126,13 +145,13 @@ class LikesController extends Controller
 
             // Create the like
             $like = LikeComment::create([
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
                 'comment_id' => $commentId,
             ]);
 
             // Log the action
-            Log::create([
-                'user_id' => Auth::id(),
+            ModelsLog::create([
+                'user_id' => $userId,
                 'type' => 'like_added',
                 'description' => "Liked comment: {$comment->content}",
             ]);
@@ -156,11 +175,17 @@ class LikesController extends Controller
         }
     }
 
-    public function removeLikeComment(Request $request, $commentId)
+    public function removeLikeComment(Request $request ,$commentId)
     {
         try {
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $userId = $request->input('user_id');
+
             // Find the like
-            $like = LikeComment::where('user_id', Auth::id())
+            $like = LikeComment::where('user_id', $userId)
                 ->where('comment_id', $commentId)
                 ->first();
 
@@ -178,8 +203,8 @@ class LikesController extends Controller
             $like->delete();
 
             // Log the action
-            Log::create([
-                'user_id' => Auth::id(),
+            ModelsLog::create([
+                'user_id' => $userId,
                 'type' => 'like_removed',
                 'description' => "Unliked comment: {$comment->content}",
             ]);

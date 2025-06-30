@@ -503,6 +503,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
+                'status' => 'pending', 
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
