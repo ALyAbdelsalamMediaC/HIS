@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog; // for system logs if needed
 use App\Http\Controllers\Controller;
+use App\Services\GoogleDriveServiceImageProfile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -15,6 +16,19 @@ use Illuminate\Support\Str;
 
 class AdminAuthController extends Controller
 {
+
+
+    protected $client;
+    protected $GoogleDriveServiceImageProfile;
+    
+
+    public function __construct(
+        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+    ) {
+        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
+        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+    }
+
     public function showLoginForm()
     {
         return view('pages.auth.admin-login'); // Create this Blade view
@@ -101,19 +115,25 @@ class AdminAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Handle profile image upload if present
+
+        $profile_image = null;
+
         if ($request->hasFile('profile_image')) {
-            $data['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
-        } else {
-            $data['profile_image'] = null;
+            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+            if ($request->file('profile_image')->isValid()) {
+                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            }
         }
-        
+
+
         try {
             // Create user
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'profile_image' => $data['profile_image'],
+                'profile_image' => $profile_image,
                 'role' => $data['role'],
                 'phone' => $data['phone'],
                 'password' => Hash::make($data['password']),
@@ -130,7 +150,6 @@ class AdminAuthController extends Controller
             Auth::login($user);
             return redirect()->route('users.index')
                 ->with('success', 'Registration successful! Welcome, ' . $user->name . '.');
-
         } catch (\Exception $e) {
             LaravelLog::error("Registration error: " . $e->getMessage());
             return back()
