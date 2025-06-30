@@ -69,8 +69,8 @@ class MediaController extends Controller
                     ->withCount('comments');
 
                 // Search by title
-                if ($request->filled('title')) {
-                    $query->where('title', 'like', '%' . $request->input('title') . '%');
+                if ($request->filled('search')) {
+                    $query->where('title', 'like', '%' . $request->input('search') . '%');
                 }
 
                 // Filter by category name
