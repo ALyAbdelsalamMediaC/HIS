@@ -162,17 +162,17 @@ class MediaController extends Controller
 
         // Get count of likes
         $likesCount = $media->likes->count();
-        
+
         // Get comments with replies and user data - ORDER BY DESC for newest first
         $commentsData = Comment::where('media_id', $id)
             ->whereNull('parent_id')
             ->with(['replies' => function ($query) {
                 $query->orderBy('created_at', 'desc')
-                      ->with('user');
+                    ->with('user');
             }, 'user'])
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         $commentsCount = $commentsData->count();
 
         // You can pass these to the view if needed:
@@ -359,8 +359,12 @@ class MediaController extends Controller
             $media = Media::with('category')->findOrFail($id);
             $categories = Category::all();
             $users = User::all();
+            $year = Category::where('id', $media->category_id)->first();
+            $yearName = $year['name'];
 
-            return view('pages.content.edit_video', compact('media', 'categories', 'users'));
+            $month = SubCategory::where('id', $media->sub_category_id)->first();
+            $monthName = $month['name'];
+            return view('pages.content.edit_video', compact('media', 'categories', 'users', 'yearName', 'monthName'));
         } catch (Exception $e) {
             LaravelLog::error('Media edit error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load media for editing.');
@@ -492,7 +496,6 @@ class MediaController extends Controller
                 $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
                 $imagePath = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
                 $imagePath = 'https://lh3.googleusercontent.com/d/' . $imagePath . '=w1000?authuser=0';
-
             }
 
             // Update database
@@ -503,7 +506,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
-                'status' => 'pending', 
+                'status' => 'pending',
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
