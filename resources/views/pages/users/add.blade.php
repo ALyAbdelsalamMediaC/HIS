@@ -13,7 +13,7 @@
     </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.register') }}" class="mt-4" novalidate>
+    <form method="POST" action="{{ route('admin.register') }}" class="mt-4" novalidate enctype="multipart/form-data">
     @csrf
 
     <div class="form-infield">
@@ -92,11 +92,6 @@
     </form>
   </section>
 @endsection
-
-@push('scripts')
-  <script src="{{ asset('js/validations.js') }}"></script>
-@endpush
-
 
 @push('scripts')
   <script src="{{ asset('js/validations.js') }}"></script>
