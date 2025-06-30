@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\LikeComment;
+use App\Models\Log as ModelsLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,7 @@ class LikesController extends Controller
             ]);
 
             // Log the action
-            Log::create([
+            ModelsLog::create([
                 'user_id' => $userId,
                 'type' => 'like_added',
                 'description' => "Liked media: {$media->title}",
@@ -97,7 +98,7 @@ class LikesController extends Controller
             $like->delete();
 
             // Log the action
-            Log::create([
+            ModelsLog::create([
                 'user_id' => $userId,
                 'type' => 'like_removed',
                 'description' => "Unliked media: {$media->title}",
@@ -149,7 +150,7 @@ class LikesController extends Controller
             ]);
 
             // Log the action
-            Log::create([
+            ModelsLog::create([
                 'user_id' => $userId,
                 'type' => 'like_added',
                 'description' => "Liked comment: {$comment->content}",
@@ -202,7 +203,7 @@ class LikesController extends Controller
             $like->delete();
 
             // Log the action
-            Log::create([
+            ModelsLog::create([
                 'user_id' => $userId,
                 'type' => 'like_removed',
                 'description' => "Unliked comment: {$comment->content}",
