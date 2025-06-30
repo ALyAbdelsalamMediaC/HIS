@@ -97,7 +97,7 @@ class AdminAuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'profile_image' => 'nullable|image|max:2048',
             'role' => 'required|string',
-            'phone' => 'required|string',
+            'phone' => 'required|string|unique:users,phone',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
