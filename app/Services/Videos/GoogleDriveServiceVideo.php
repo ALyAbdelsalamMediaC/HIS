@@ -66,7 +66,6 @@ class GoogleDriveServiceVideo
             'parents' => [env('GOOGLE_DRIVE_FOLDER_V_VIDEOS')], //  Upload to specific folder
 
         ]);
-
         $content = file_get_contents($file->getRealPath());
 
         $uploadedFile = $this->service->files->create($fileMetadata, [

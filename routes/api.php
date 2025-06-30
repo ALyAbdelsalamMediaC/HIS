@@ -4,12 +4,13 @@ use App\Http\Controllers\API\UserAuthController;
 use App\Http\Controllers\API\CommentsController;
 use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\ArticleController;
+use App\Http\Controllers\API\BookmarkController;
+use App\Http\Controllers\API\LikesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Http\Request;
 
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/comments', [CommentsController::class, 'addComment']);
 Route::post('/comments/reply', [CommentsController::class, 'reply']);
 Route::post('/media/store', [MediaController::class, 'store']);
@@ -23,8 +24,20 @@ Route::get('/comments/article', [CommentsController::class, 'getCommentsByArticl
 Route::put('/media/{id}', [MediaController::class, 'update'])->name('media.update');
 Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
 
-// return $request->user();
-// });
+Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like');
+Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.unlike');
+
+Route::post('/comment/{commentId}/like', [LikesController::class, 'addLikeComment'])->name('comment.like');
+Route::delete('/comment/{commentId}/like', [LikesController::class, 'removeLikeComment'])->name('comment.unlike');
+
+Route::get('/comment/{commentId}/likes', [LikesController::class, 'getLikesCommentCount'])->name('comment.likes.count');
+
+
+Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
+Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);
+Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
+
+
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 

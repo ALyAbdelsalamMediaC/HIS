@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\GoogleDriveService;
+use App\Services\Videos\GoogleDriveServiceVideo;
 class GoogleDriveController extends Controller
 {
     protected $googleDriveService;
 
-    public function __construct(GoogleDriveService $googleDriveService)
+    public function __construct(GoogleDriveServiceVideo $googleDriveService)
     {
         $this->googleDriveService = $googleDriveService;
     }

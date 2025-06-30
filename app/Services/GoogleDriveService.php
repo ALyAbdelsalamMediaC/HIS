@@ -4,9 +4,8 @@ namespace App\Services\Videos;
 
 use Google\Client;
 use Google\Service\Drive;
-use Google\Service\Drive\DriveFile;
 
-class GoogleDriveServiceThumbnail
+class GoogleDriveService
 {
     protected $client;
     protected $service;
@@ -31,10 +30,10 @@ class GoogleDriveServiceThumbnail
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
 
-            //     if ($this->client->isAccessTokenExpired()) {
-            //     header('Location: http://localhost:8000/get-google-token.php');
-            //     exit;
-            // }
+                if ($this->client->isAccessTokenExpired()) {
+                header('Location: http://localhost:8000/get-google-token.php');
+                exit;
+            }
             $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
             if (isset($accessToken['error'])) {
                 throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
@@ -59,52 +58,5 @@ class GoogleDriveServiceThumbnail
         return $this->client;
     }
 
-
-
-    public function uploadThumbnail($file, $name)
-    {
-        $fileMetadata = new DriveFile([
-            'name' => $name,
-            'parents' => [env('GOOGLE_DRIVE_FOLDER_V_THUMBNAILS')], //  Upload to specific folder
-
-        ]);
-
-        $content = file_get_contents($file->getRealPath());
-
-        $uploadedFile = $this->service->files->create($fileMetadata, [
-            'data' => $content,
-            'mimeType' => $file->getMimeType(),
-            'uploadType' => 'multipart',
-            'fields' => 'id'
-        ]);
-
-        // Make the file public
-        $permission = new \Google\Service\Drive\Permission();
-        $permission->setRole('reader');
-        $permission->setType('anyone');
-
-        $this->service->permissions->create($uploadedFile->id, $permission);
-
-        return $uploadedFile->id;
-
-    }
-
-    public function getFileIdFromUrl($url)
-    {
-        // Extract file ID from Google Drive URL
-        if (preg_match('/\/d\/([a-zA-Z0-9-_]+)/', $url, $matches)) {
-            return $matches[1];
-        }
-        return null;
-    }
-
-    public function deleteFile($fileId)
-    {
-        try {
-            $this->service->files->delete($fileId);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
+   
 }

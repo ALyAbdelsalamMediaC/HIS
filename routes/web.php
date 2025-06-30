@@ -11,7 +11,7 @@ use App\Http\Controllers\WEB\PolicyController;
 use App\Http\Controllers\WEB\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\LikesController;
 
 
@@ -56,14 +56,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
-    Route::resource('users', UserController::class, [
-        'names' => [
-            'index' => 'users.index',
-            'edit' => 'users.edit',
-            'update' => 'users.update',
-            'destroy' => 'users.destroy',
-        ]
-    ])->except(['create', 'store', 'show']);
+ 
+    Route::get('/users/', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::get('/users/update', [UserController::class, 'update'])->name('users.update');
+    Route::get('/users/destroy', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
     
     Route::post('/media/{mediaId}', [LikesController::class, 'getLikesCommentCount'])->name('media.like.count');

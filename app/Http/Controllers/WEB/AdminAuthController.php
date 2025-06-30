@@ -95,17 +95,25 @@ class AdminAuthController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'profile_image' => 'nullable|image|max:2048',
             'role' => 'required|string',
             'phone' => 'required|string',
-            'username' => 'required|string|max:50|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        // Handle profile image upload if present
+        if ($request->hasFile('profile_image')) {
+            $data['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
+        } else {
+            $data['profile_image'] = null;
+        }
+        
         try {
             // Create user
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'username' => $data['username'],
+                'profile_image' => $data['profile_image'],
                 'role' => $data['role'],
                 'phone' => $data['phone'],
                 'password' => Hash::make($data['password']),

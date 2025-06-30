@@ -71,7 +71,7 @@ class UserAuthController extends Controller
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|email|unique:users,email',
                 'role'     => 'required|string',
-                'username' => 'required|string|max:255',
+                'username' => 'nullable',
                 'phone'    => 'required|string|max:20',
                 'password' => 'required|string|min:8|confirmed',
             ]);

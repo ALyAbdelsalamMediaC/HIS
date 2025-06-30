@@ -94,12 +94,9 @@ class ArticleController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'year' => 'required|digits:4',
-                'month' => 'required',
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_favorite' => 'nullable|boolean',
@@ -114,26 +111,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-            $category = Category::firstOrCreate(
-                [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
-                ],
-                [
-                    'description' => "Category for year {$validated['year']}"
-                ]
-            );
-
-            // Find or create subcategory (month)
-            $subCategory = SubCategory::firstOrCreate(
-                [
-                    'name' => $validated['month'],
-                    'category_id' => $category->id
-                ],
-                [
-                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
-                ]
-            );
+           
 
             $pdf = null;
             if ($request->hasFile('pdf')) {
@@ -145,17 +123,7 @@ class ArticleController extends Controller
                 }
             }
 
-            // Store thumbnail if exists
-            $image_path = null;
-
-            if ($request->hasFile('image_path')) {
-                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
-                if ($request->file('image_path')->isValid()) {
-                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
-                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
-                    $image_path = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-                }
-            }
+           
 
 
             $thumbnail_path = null;
@@ -171,13 +139,10 @@ class ArticleController extends Controller
 
             // Save to database
             $Article = Article::create([
-                'category_id' => $category->id,
-                'sub_category_id' => $subCategory->id,
                 'user_id' => Auth::id(),
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'image_path' => $image_path,
                 'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_favorite' => $request->boolean('is_favorite'),
@@ -226,12 +191,10 @@ class ArticleController extends Controller
 
             // Validate input
             $validated = $request->validate([
-                'year' => 'required|digits:4',
-                'month' => 'required',
+               
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_favorite' => 'nullable|boolean',
@@ -247,26 +210,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-            $category = Category::firstOrCreate(
-                [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
-                ],
-                [
-                    'description' => "Category for year {$validated['year']}"
-                ]
-            );
-
-            // Find or create subcategory (month)
-            $subCategory = SubCategory::firstOrCreate(
-                [
-                    'name' => $validated['month'],
-                    'category_id' => $category->id
-                ],
-                [
-                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
-                ]
-            );
+           
 
             // Update PDF file on Google Drive
             $pdf = $article->pdf;
@@ -322,16 +266,13 @@ class ArticleController extends Controller
 
             // Update database
             $article->update([
-                'category_id' => $category->id,
-                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'image_path' => $image_path,
-                'image_path' => $thumbnail_path,
+                'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
-                'is_favorite' => $request->boolean('is_favorite'),
+                // 'is_favorite' => $request->boolean('is_favorite'),
                 'mention' => json_encode($mentions),
             ]);
 

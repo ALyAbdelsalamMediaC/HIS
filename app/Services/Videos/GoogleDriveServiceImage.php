@@ -59,34 +59,7 @@ class GoogleDriveServiceImage
         return $this->client;
     }
 
-    public function uploadFile($file, $name)
-    {
-        $fileMetadata = new DriveFile([
-            'name' => $name,
-            'parents' => [env('GOOGLE_DRIVE_FOLDER_ID')], //  Upload to specific folder
-
-        ]);
-
-        $content = file_get_contents($file->getRealPath());
-
-        $uploadedFile = $this->service->files->create($fileMetadata, [
-            'data' => $content,
-            'mimeType' => $file->getMimeType(),
-            'uploadType' => 'multipart',
-            'fields' => 'id'
-        ]);
-
-        // Make the file public
-        $permission = new \Google\Service\Drive\Permission();
-        $permission->setRole('reader');
-        $permission->setType('anyone');
-
-        $this->service->permissions->create($uploadedFile->id, $permission);
-
-        return $uploadedFile->id;
-
-
-    }
+  
 
     public function uploadImage($file, $name)
     {

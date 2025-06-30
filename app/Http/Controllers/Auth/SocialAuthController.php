@@ -12,35 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class SocialAuthController extends Controller
 {
-    /**
-     * Generate a unique username based on name or email.
-     *
-     * @param string $name
-     * @param string $email
-     * @return string
-     */
-    protected function generateUniqueUsername($name, $email)
-    {
-        // Base username from name (remove spaces, lowercase)
-        $baseUsername = Str::slug($name, '');
-        if (empty($baseUsername)) {
-            // Fallback to email prefix if name is empty
-            $baseUsername = Str::before($email, '@');
-        }
-
-        $username = $baseUsername;
-        $counter = 1;
-
-        // Ensure uniqueness by appending a number if needed
-        while (User::where('username', $username)->exists()) {
-            $username = $baseUsername . $counter;
-            $counter++;
-        }
-
-        return $username;
-    }
-
-    public function redirectToGoogle()
+   public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
     }
@@ -53,7 +25,6 @@ class SocialAuthController extends Controller
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
                 ->first();
-
 
             if ($user) {
                 // Update google_id if not set
@@ -78,14 +49,11 @@ class SocialAuthController extends Controller
                     'description' => "Google login successful for {$socialUser->email}",
                 ]);
             } else {
-                // Create new user with a unique username
-                $username = $this->generateUniqueUsername($socialUser->name, $socialUser->email);
-
+                // Create new user
                 $user = User::create([
                     'name' => $socialUser->name,
                     'email' => $socialUser->email,
                     'google_id' => $socialUser->id,
-                    'username' => $username,
                     'role' => 'admin', // Adjust as needed
                     'password' => Hash::make(Str::random(16)),
                     'email_verified_at' => now(),
@@ -101,8 +69,8 @@ class SocialAuthController extends Controller
 
             return redirect()->intended(route('dashboard.index'));
         } catch (\Exception $e) {
-            Log::error("Google login error: " . $e->getMessage());
-            return redirect()->route('login')->withErrors(['login' => 'Google authentication failed. Please try again.']);
+            LaravelLog::error("Google login error: " . $e->getMessage());
+            return redirect()->route('login')->withErrors(['login' => 'Google callback authentication failed. Please try again.']);
         }
     }
 
@@ -144,14 +112,11 @@ class SocialAuthController extends Controller
                     'description' => "Apple login successful for {$socialUser->email}",
                 ]);
             } else {
-                // Create new user with a unique username
-                $username = $this->generateUniqueUsername($socialUser->name ?? 'Apple User', $socialUser->email);
-
+                // Create new user
                 $user = User::create([
                     'name' => $socialUser->name ?? 'Apple User',
                     'email' => $socialUser->email,
                     'apple_id' => $socialUser->id,
-                    'username' => $username,
                     'role' => 'admin', // Adjust as needed
                     'password' => Hash::make(Str::random(16)),
                     'email_verified_at' => now(),
@@ -167,10 +132,11 @@ class SocialAuthController extends Controller
 
             return redirect()->intended(route('dashboard.index'));
         } catch (\Exception $e) {
-            Log::error("Apple login error: " . $e->getMessage());
+            LaravelLog::error("Apple login error: " . $e->getMessage());
             return redirect()->route('login')->withErrors(['login' => 'Apple authentication failed. Please try again.']);
         }
     }
+
     public function handleGoogleLoginApi(Request $request)
     {
         $request->validate([
@@ -184,8 +150,6 @@ class SocialAuthController extends Controller
             $user = User::where('google_id', $socialUser->id)
                 ->orWhere('email', $socialUser->email)
                 ->first();
-
-
 
             if ($user) {
                 // Update google_id if not set
@@ -212,14 +176,11 @@ class SocialAuthController extends Controller
                     'description' => "Google API login successful for {$socialUser->email}",
                 ]);
             } else {
-                // Create new user with a unique username
-                $username = $this->generateUniqueUsername($socialUser->name, $socialUser->email);
-
+                // Create new user
                 $user = User::create([
                     'name' => $socialUser->name,
                     'email' => $socialUser->email,
                     'google_id' => $socialUser->id,
-                    'username' => $username,
                     'role' => 'user', // Adjust as needed
                     'password' => Hash::make(Str::random(16)),
                     'email_verified_at' => now(),
@@ -228,7 +189,7 @@ class SocialAuthController extends Controller
                 Log::create([
                     'user_id' => $user->id,
                     'type' => 'registration',
-                    'description' => "New admin registered via Google API ({$socialUser->email})",
+                    'description' => "New user registered via Google API ({$socialUser->email})",
                 ]);
             }
 
@@ -246,9 +207,9 @@ class SocialAuthController extends Controller
                 'token' => $token,
             ], 200);
         } catch (\Exception $e) {
-            // Log::error("Google API login error: " . $e->getMessage());
+            LaravelLog::error("Google API login error: " . $e->getMessage());
             return response()->json([
-                'error' => 'Google authentication failed. Please try again.',
+                'error' => 'Google login authentication failed. Please try again.',
             ], 401);
         }
     }

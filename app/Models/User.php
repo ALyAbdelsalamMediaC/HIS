@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'fcm_token',
-        'username',
+        'profile_image',
         'password',
         'role',
         'google_id',

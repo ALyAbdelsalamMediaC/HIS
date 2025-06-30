@@ -55,7 +55,7 @@ class ArticleController extends Controller
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_favorite' => 'nullable|boolean',
@@ -97,16 +97,16 @@ class ArticleController extends Controller
             }
 
             // Store thumbnail if exists
-            $image_path = null;
+            $thumbnail_path = null;
 
-            if ($request->hasFile('image_path')) {
+            if ($request->hasFile('thumbnail_path')) {
                 $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
-                if ($request->file('image_path')->isValid()) {
-                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
-                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
+                if ($request->file('thumbnail_path')->isValid()) {
+                    $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
                     $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
 
-                    $image_path = $url;
+                    $thumbnail_path = $url;
                 }
             }
 
@@ -119,7 +119,7 @@ class ArticleController extends Controller
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'image_path' => $image_path,
+                'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
                 'is_favorite' => $request->boolean('is_favorite'),
@@ -161,12 +161,10 @@ class ArticleController extends Controller
             // Validate input
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
-                'year' => 'required|digits:4',
-                'month' => 'required',
+                
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'is_favorite' => 'nullable|boolean',
@@ -182,27 +180,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-            $category = Category::firstOrCreate(
-                [
-                    'name' => $validated['year'],
-                    'user_id' => $validated['user_id']
-                ],
-                [
-                    'description' => "Category for year {$validated['year']}"
-                ]
-            );
-
-            // Find or create subcategory (month)
-            $subCategory = SubCategory::firstOrCreate(
-                [
-                    'name' => $validated['month'],
-                    'category_id' => $category->id
-                ],
-                [
-                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
-                ]
-            );
-
+            
             // Update PDF file on Google Drive
             $pdf = $article->pdf;
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
@@ -219,21 +197,7 @@ class ArticleController extends Controller
                 $pdf = 'https://drive.google.com/file/d/' . $pdf . '/preview';
             }
 
-            // Update image if exists
-            $image_path = $article->image_path;
-            if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
-                // Delete old image from Google Drive if exists
-                if ($article->image_path) {
-                    $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->image_path);
-                    if ($fileId) {
-                        $this->driveServiceThumbnail->deleteFile($fileId);
-                    }
-                }
-                // Upload new image
-                $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
-                $image_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('image_path'), $filename);
-                $image_path = 'https://drive.google.com/file/d/' . $image_path . '/preview';
-            }
+          
 
             // Update thumbnail if exists
             $thumbnail_path = $article->thumbnail_path;
@@ -245,20 +209,13 @@ class ArticleController extends Controller
                         $this->driveServiceThumbnail->deleteFile($fileId);
                     }
                 }
-                // Upload new thumbnail
-                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
-                $thumbnail_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                $thumbnail_path = 'https://drive.google.com/file/d/' . $thumbnail_path . '/preview';
-            }
+             
 
             // Update database
             $article->update([
-                'category_id' => $category->id,
-                'sub_category_id' => $subCategory->id,
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
                 'description' => $validated['description'] ?? null,
-                'image_path' => $image_path,
                 'thumbnail_path' => $thumbnail_path, // Fixed: Corrected field name
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),

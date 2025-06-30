@@ -46,11 +46,7 @@ class SettingsController extends Controller
             $user->email = $request->input('email');
             $user->username = $request->input('username');
 
-            if ($request->hasFile('profile_picture')) {
-                $file = $request->file('profile_picture');
-                $path = $file->store('profile_pictures', 'public');
-                $user->profile_picture = $path;
-            }
+            
 
             $user->save();
 
