@@ -57,10 +57,18 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'device_id' => 'nullable|string|max:255',
             'role' => 'required|in:admin,reviewer,user',
+            'phone' => 'required|string',
+            'profile_image' => 'nullable|image|max:2048',
         ]);
+
+        // Handle profile image upload if present
+        if ($request->hasFile('profile_image')) {
+            $validated['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
+        } else {
+            unset($validated['profile_image']);
+        }
 
         $user->update($validated);
 
