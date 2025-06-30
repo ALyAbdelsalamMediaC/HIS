@@ -272,7 +272,6 @@ class ArticleController extends Controller
                 'thumbnail_path' => $thumbnail_path,
                 'pdf' => $pdf,
                 'is_featured' => $request->boolean('is_featured'),
-                // 'is_favorite' => $request->boolean('is_favorite'),
                 'mention' => json_encode($mentions),
             ]);
 
