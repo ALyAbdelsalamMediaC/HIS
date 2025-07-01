@@ -4,6 +4,7 @@ namespace App\Http\Controllers\WEB;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use App\Models\Media;
+use App\Models\Rate;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -225,4 +226,39 @@ class ReviewsController extends Controller
                 ->with('error', 'An unexpected error occurred while deleting the comment: ' . $e->getMessage());
         }
     }
+
+    public function rate(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'media_id' => 'required|exists:media,id',
+            'user_id' => 'required|exists:users,id',
+            'rate' => 'required|integer|min:1|max:5',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Check user role
+        $user = User::find($request->user_id);
+        if (!$user || $user->role !== 'reviewer') {
+            return redirect()->back()
+                ->with('error', 'Only reviewers can submit a rating.')
+                ->withInput();
+        }
+
+        // Save rate (assuming Rate model and rates table exist)
+        Rate::create([
+            'media_id' => $request->media_id,
+            'user_id' => $request->user_id,
+            'rate' => $request->rate,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Rating submitted successfully.');
+    }
+    
 }

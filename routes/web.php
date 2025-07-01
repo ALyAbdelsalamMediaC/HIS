@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'showReplyForm'])->name('reviews.reply.form');
     Route::post('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'reply'])->name('reviews.reply');
     Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteComment'])->name('reviews.delete');
-
+    Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
 
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
@@ -62,13 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
- 
+
     Route::get('/users/', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::get('/users/destroy', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
-    
+
     Route::post('/media/{mediaId}', [LikesController::class, 'getLikesCommentCount'])->name('media.like.count');
 
     Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like.add');
