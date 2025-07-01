@@ -3,7 +3,11 @@
 @section('content')
 
   @if($media->status === 'pending')
-    @include('pages.content.video.single_video_pending_admin')
+    @if(auth()->user()->hasRole('reviewer'))
+        @include('pages.content.video.single_video_pending_reviewer')
+    @elseif(auth()->user()->hasRole('admin'))
+        @include('pages.content.video.single_video_pending_admin')
+    @endif
   @elseif($media->status === 'published')
     @include('pages.content.video.single_video_published')
   @else

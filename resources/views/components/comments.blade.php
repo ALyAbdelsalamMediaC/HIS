@@ -75,7 +75,7 @@
                                 <x-svg-icon name="replay" size="20" color="#ADADAD" />
                             </button>
                             @endif
-                            @if($enableDelete && auth()->user()->role === 'admin')
+                            @if($enableDelete && (auth()->user()->role === 'admin' || (auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id)))
                                 <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteCommentModal{{ $comment->id }}">
                                     <x-svg-icon name="trash" size="20" color="#BB1313" />
                                 </button>
@@ -142,7 +142,7 @@
                                             </div>
                                         </div>
                                         @endif
-                                        @if($enableDelete && auth()->user()->role === 'admin')
+                                        @if($enableDelete && (auth()->user()->role === 'admin' || (auth()->user()->role === 'reviewer' && auth()->id() === $reply->user_id)))
                                             <div class="gap-2 mt-3 d-flex align-items-center">
                                                 <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteCommentModal{{ $reply->id }}">
                                                     <x-svg-icon name="trash" size="20" color="#BB1313" />
@@ -155,7 +155,7 @@
                         </div>
 
                         <!-- Delete Modal for Reply -->
-                        @if($enableDelete && auth()->user()->role === 'admin')
+                        @if($enableDelete && (auth()->user()->role === 'admin' || (auth()->user()->role === 'reviewer' && auth()->id() === $reply->user_id)))
                         <x-modal id="deleteCommentModal{{ $reply->id }}" title="Delete Reply">
                             <div class="my-3">
                                 <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this reply?</p>
@@ -176,7 +176,7 @@
         </div>
 
         <!-- Delete Modal for Comment -->
-        @if($enableDelete && auth()->user()->role === 'admin')
+        @if($enableDelete && (auth()->user()->role === 'admin' || (auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id)))
         <x-modal id="deleteCommentModal{{ $comment->id }}" title="Delete Comment">
             <div class="my-3">
                 <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this comment?</p>

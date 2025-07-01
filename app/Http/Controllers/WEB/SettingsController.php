@@ -9,9 +9,21 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Services\GoogleDriveServiceImageProfile;
 
 class SettingsController extends Controller
 {
+    protected $client;
+    protected $GoogleDriveServiceImageProfile;
+    
+
+    public function __construct(
+        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+    ) {
+        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
+        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+    }
+
     public function index()
     {
         return view('pages.settings.index');
@@ -36,17 +48,26 @@ class SettingsController extends Controller
     {
         try {
             $user = Auth::user();
-            $request->validate([
+            $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-                'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+                'phone' => 'required|string',
+                'profile_image' => 'nullable|image|max:2048',
             ]);
 
-            $user->name = $request->input('name');
-            $user->email = $request->input('email');
-            $user->username = $request->input('username');
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->phone = $validated['phone'];
 
-            
+            // Handle profile image upload if present (Google Drive)
+            if ($request->hasFile('profile_image')) {
+                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                if ($request->file('profile_image')->isValid()) {
+                    $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                    $user->profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                }
+            }
 
             $user->save();
 

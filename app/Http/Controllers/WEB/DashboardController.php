@@ -22,9 +22,14 @@ class DashboardController extends Controller
             // ->orderBy('likes_count', 'desc')
             // ->take(5)
             // ->get();
-            // $lastPublishedMedia = Media::where('status', 'published')
-            // ->orderBy('created_at', 'desc')
-            // ->first();
+            $lastPublishedMedia = Media::where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+            $lastPublishedMediaCommentsCount = 0;
+            if ($lastPublishedMedia) {
+                $lastPublishedMediaCommentsCount = \App\Models\Comment::where('media_id', $lastPublishedMedia->id)->count();
+            }
 
             // $topArticle = Article::withCount('LikeArticle')
             //     ->orderBy('likes_count', 'desc')
@@ -38,7 +43,7 @@ class DashboardController extends Controller
             $commentsArticleCount = CommentArticle::count();
             $commentsCount = $commentsVideo + $commentsArticleCount;
 
-            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount'));
+            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
         } catch (\Exception $e) {
             // You can log the error or handle it as needed
             return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);

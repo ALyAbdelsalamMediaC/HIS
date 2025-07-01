@@ -11,6 +11,7 @@
             </div>
 
             <div class="gap-3 d-flex align-items-center">
+                @if(!auth()->user()->hasRole('reviewer'))
                 <x-link_btn href="{{  route('content.store') }}">
                     <x-svg-icon name="content" size="20" />
                     <span>Add Video</span>
@@ -19,17 +20,22 @@
                     <x-svg-icon name="article" size="20" />
                     <span>Add Article</span>
                 </x-link_btn>
+                @endif
             </div>
 
         </div>
 
         <!-- Articles & Videos -->
         <div class="mt-4">
-            <!-- Tabs using the component -->
-            <x-tabs_pages :tabs="[
-            ['id' => 'videos', 'label' => 'Videos', 'route' => route('content.videos')],
-            ['id' => 'articles', 'label' => 'Articles', 'route' => route('content.articles')],
-        ]" activeTab="videos" />
+            @php
+                $tabs = [
+                    ['id' => 'videos', 'label' => 'Videos', 'route' => route('content.videos')],
+                ];
+                if (!auth()->user()->hasRole('reviewer')) {
+                    $tabs[] = ['id' => 'articles', 'label' => 'Articles', 'route' => route('content.articles')];
+                }
+            @endphp
+            <x-tabs_pages :tabs="$tabs" activeTab="videos" />
         </div>
 
         <div class="content-container">
@@ -109,11 +115,15 @@
                                 <div class="dashboard-video-card-content-content-down">
                                     <div class="gap-2 d-flex align-items-center">
                                         <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
+                                            @if(!auth()->user()->hasRole('reviewer'))
                                             <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                            @endif
                                         </a>
                                         <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
                                             data-bs-target="#deleteVideoModal{{ $item->id }}">
+                                            @if(!auth()->user()->hasRole('reviewer'))
                                             <x-svg-icon name="trash" size="12" color="Black" />
+                                            @endif
                                         </button>
                                     </div>
                                     <div class="gap-3 d-flex align-items-center">
@@ -128,6 +138,7 @@
                                     </div>
                                 </div>
                             @else
+                                @if(auth()->user()->hasRole('admin'))
                                 <div class="gap-3 mt-3 d-flex align-items-center">
                                     <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
                                     @if($item->assigned_reviewers->count() > 0)
@@ -153,6 +164,7 @@
                                         <x-svg-icon name="plus" size="12" color="#35758C" />
                                     </div>
                                 </div>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -214,11 +226,13 @@
                         </div>
                         <div class="modal-footer">
                             <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
+                            @if(!auth()->user()->hasRole('reviewer'))
                             <form action="{{ route('content.destroy', $item->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
                                 <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
                             </form>
+                            @endif
                         </div>
                     </x-modal>
                 @endif

@@ -37,31 +37,6 @@
       {{ $media->created_at->diffForHumans() }}</span>
       <span class="h5-ragular" style="color:#ADADAD;">by {{ $media->user->name }}</span>
     </div>
-    <div class="gap-4 d-flex align-items-center">
-      <div>
-      <x-svg-icon name="eye" size="24" color="Black" />
-      <span class="h6-ragular">{{ $media->views}} viewers</span>
-      </div>
-      <div>
-        @if($userLiked)
-          <form action="{{ route('media.like.remove', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn-nothing" title="Unlike">
-              <x-svg-icon name="like-fill" size="24" color="Black" />
-            </button>
-          </form>
-        @else
-          <form action="{{ route('media.like.add', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
-            @csrf
-            <button type="submit" class="btn-nothing" title="Like">
-              <x-svg-icon name="like-empty" size="24" color="Black" />
-            </button>
-          </form>
-        @endif
-        <span class="h6-ragular" id="like-count">{{$likesCount}} Likes</span>
-      </div>
-    </div>
     </div>
 
     <!-- Video Description -->
@@ -185,7 +160,7 @@
     <div class="mt-4">
     <h3 class="mb-2 h4-semibold">Admin`s Rating : ( 0 - 10 )</h3>
 
-    <x-text_input type="text" id="rating" name="rating" placeholder="0 - 10" />
+    <x-text_input type="number" id="rating" name="rating" placeholder="0 - 10" />
     </div>
 
     <!-- Comments -->

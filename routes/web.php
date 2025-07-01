@@ -79,7 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/add', [AdminAuthController::class, 'register'])->name('admin.register');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
-    Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
+    Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
     Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
     Route::post('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
 

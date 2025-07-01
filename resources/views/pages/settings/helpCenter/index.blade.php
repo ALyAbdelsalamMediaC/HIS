@@ -16,6 +16,7 @@
     </div>
 
     <div class="gap-2 d-flex align-items-center">
+      @if(auth()->user()->hasRole('admin'))
       <x-button type="button" data-bs-toggle="modal" data-bs-target="#editCategoriesModal" class="me-2">
       <x-svg-icon name="edit-pen2" size="16" />
       Edit Categories
@@ -25,6 +26,7 @@
       <x-svg-icon name="plus3" size="20" />
       <span>Add new help</span>
       </x-link_btn>
+      @endif
     </div>
 
     </div>
@@ -35,7 +37,9 @@
       <h2 class="accordion-header d-flex" id="categoryHeading{{ $category->id }}">
       <button type="button" class="p-0 border-0 btn btn-link delete-category-btn ms-2" data-bs-toggle="modal"
       data-bs-target="#deleteCategoryModal{{ $category->id }}">
+      @if(auth()->user()->hasRole('admin'))
       <x-svg-icon name="trash" size="18" color="#adadad" />
+      @endif
       </button>
       <button class="accordion-button h3-semibold" type="button" data-bs-toggle="collapse"
       data-bs-target="#categoryCollapse{{ $category->id }}" aria-expanded="true"
@@ -53,14 +57,18 @@
       <h2 class="accordion-header d-flex" id="policyHeading{{ $policy->id }}">
       <button type="button" class="p-0 border-0 btn btn-link delete-policy-btn ms-1" data-bs-toggle="modal"
       data-bs-target="#deletePolicyModal{{ $policy->id }}">
+      @if(auth()->user()->hasRole('admin'))
       <x-svg-icon name="trash" size="18" color="#adadad" />
+      @endif
       </button>
       <button class="accordion-button h3-regular" type="button" data-bs-toggle="collapse"
       data-bs-target="#policyCollapse{{ $policy->id }}" aria-expanded="true"
       aria-controls="policyCollapse{{ $policy->id }}">
       {{ $policy->title }}
       <a href="{{ route('policies.edit', $policy) }}">
+      @if(auth()->user()->hasRole('admin'))
       <x-svg-icon class="mx-2" name="edit-pen2" size="18" color="#adadad" />
+      @endif
       </a>
       </button>
       </h2>
@@ -76,6 +84,7 @@
       </div>
       <!-- Delete Modal for Policy -->
       <x-modal id="deletePolicyModal{{ $policy->id }}" title="Delete Help">
+      @if(auth()->user()->hasRole('admin'))
       <div class="my-3">
       <p class="h3-semibold" style="color:black;">Are you sure you want to delete the help
       "{{ $policy->title }}"?</p>
@@ -88,6 +97,7 @@
       <x-button type="submit" class="px-4 btn-danger">Delete</x-button>
       </form>
       </div>
+      @endif
       </x-modal>
       @endforeach
       </div>
@@ -99,6 +109,7 @@
     </div>
     <!-- Delete Modal for Category -->
     <x-modal id="deleteCategoryModal{{ $category->id }}" title="Delete Category">
+      @if(auth()->user()->hasRole('admin'))
       <div class="my-3">
       <p class="h3-semibold" style="color:black;">Are you sure you want to delete the category
       "{{ $category->title }}"?</p>
@@ -112,6 +123,7 @@
       <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
       </form>
       </div>
+      @endif
     </x-modal>
     @empty
     <p>No categories found.</p>
@@ -120,6 +132,7 @@
 
     <!-- Edit Categories Modal -->
     <x-modal id="editCategoriesModal" title="Edit Categories">
+    @if(auth()->user()->hasRole('admin'))
     <div class="categories-list">
       @forelse($categories as $category)
       <div class="p-2 category-item d-flex align-items-center justify-content-between border-bottom">
@@ -148,6 +161,7 @@
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="button" class="bg-trans-btn" data-bs-dismiss="modal">Close</x-button>
     </div>
+    @endif
     </x-modal>
   </section>
 

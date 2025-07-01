@@ -9,9 +9,21 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\GoogleDriveServiceImageProfile;
 
 class UserController extends Controller
 {
+    protected $client;
+    protected $GoogleDriveServiceImageProfile;
+    
+
+    public function __construct(
+        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+    ) {
+        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
+        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+    }
+
     /**
      * Display a listing of the users.
      */
@@ -63,11 +75,17 @@ class UserController extends Controller
             'profile_image' => 'nullable|image|max:2048',
         ]);
 
-        // Handle profile image upload if present
+
+        $profile_image = null;
+
         if ($request->hasFile('profile_image')) {
-            $validated['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
-        } else {
-            unset($validated['profile_image']);
+            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+            if ($request->file('profile_image')->isValid()) {
+                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                $validated['profile_image']= 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                
+            }
         }
 
         $user->update($validated);

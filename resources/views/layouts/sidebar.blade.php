@@ -29,13 +29,15 @@
             <span class="sidebar-menu-text">Dashboard</span>
           </a>
         </li>
-
+        
+        @if(auth()->check() && auth()->user()->hasRole('admin'))
         <li class="sidebar-menu-li">
           <a href="{{ route('users.index') }}" class="h6-semibold">
             <x-svg-icon name="user" size="18" />
             <span class="sidebar-menu-text">User Management</span>
           </a>
         </li>
+        @endif
 
         <li class="sidebar-menu-li">
           <a href="{{ route('content.videos') }}" class="h6-semibold">
