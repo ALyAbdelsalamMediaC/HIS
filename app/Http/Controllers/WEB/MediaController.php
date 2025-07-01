@@ -117,16 +117,13 @@ class MediaController extends Controller
             // Get reviewers from request body
             $reviewersArray = $request->input('reviewer_ids', []);
 
-            // If it's a string, convert to array
-            if (is_string($reviewersArray)) {
-                $reviewersArray = explode(',', $reviewersArray);
-            }
+            // Clean up any whitespace, filter out empty values, and cast to int
+            $reviewersArray = array_filter(array_map(function($id) {
+                return (int) trim($id);
+            }, $reviewersArray));
 
-            // Clean up any whitespace and filter out empty values
-            $reviewersArray = array_filter(array_map('trim', $reviewersArray));
-
-            // Convert to JSON
-            $reviewersJson = json_encode($reviewersArray);
+            // Convert to JSON (array of integers)
+            $reviewersJson = json_encode(array_values($reviewersArray));
 
             // Update media table using Eloquent
             Media::where('id', $id)
