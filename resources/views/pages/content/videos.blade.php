@@ -150,7 +150,14 @@
                                         @endphp
                                         <div class="gap-2 d-flex align-items-center">
                                             @foreach($visible_reviewers as $reviewer)
-                                                <span class="badge bg-primary">{{ $reviewer->name }}</span>
+                                                <span class="badge bg-primary d-flex align-items-center" style="gap: 6px;">
+                                                    @if($reviewer->profile_image)
+                                                        <img src="{{ $reviewer->profile_image }}" class="user-profile-img" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" alt="User Image" />
+                                                    @else
+                                                        <x-svg-icon name="user" size="16" color="#fff" />
+                                                    @endif
+                                                    {{ $reviewer->name }}
+                                                </span>
                                             @endforeach
                                             @if($hidden_reviewers_count > 0)
                                                 <span class="badge rounded-pill bg-secondary">+{{ $hidden_reviewers_count }} more</span>
@@ -197,7 +204,10 @@
                                 <select class="select2-reviewers form-control" name="reviewer_ids[]" multiple="multiple"
                                     id="reviewer_ids_{{ $item->id }}" required>
                                     @foreach($reviewers as $reviewer)
-                                        <option value="{{ $reviewer->id }}" {{ $item->assigned_reviewers->contains($reviewer->id) ? 'selected' : '' }}>
+                                        <option 
+                                            value="{{ $reviewer->id }}" 
+                                            data-profile-image="{{ $reviewer->profile_image ?? '' }}"
+                                            {{ $item->assigned_reviewers->contains($reviewer->id) ? 'selected' : '' }}>
                                             {{ $reviewer->name }}
                                         </option>
                                     @endforeach
@@ -263,15 +273,24 @@
             // Format reviewer display in dropdown
             function formatReviewer(reviewer) {
                 if (!reviewer.id) return reviewer.text;
+                // Get the profile image from the option's data attribute
+                var profileImage = $(reviewer.element).data('profile-image');
+                var iconHtml = '';
+                if (profileImage) {
+                    iconHtml = `<img src="${profileImage}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />`;
+                } else {
+                    iconHtml = `<div class="comment-container-user-icon">
+                        <x-svg-icon name="user" size="18" color="#35758c" />
+                    </div>`;
+                }
                 return $(
                     `<div class="gap-3 py-2 d-flex align-items-center">
-         <div class="comment-container-user-icon">
-          <x-svg-icon name="user" size="18" color="#35758c" />
-          </div>
-      <div>
-       <div class="mb-0 h5-ragular">${reviewer.text}</div>
-      <div class="h6-ragular">Reviewer</div>
-      </div>`
+                        ${iconHtml}
+                        <div>
+                            <div class="mb-0 h5-ragular">${reviewer.text}</div>
+                            <div class="h6-ragular">Reviewer</div>
+                        </div>
+                    </div>`
                 );
             }
 
@@ -294,6 +313,22 @@
                 const modalId = $(this).attr('id');
                 if (modalId.startsWith('assignReviewerModal')) {
                     $(`#${modalId} .select2-reviewers`).select2('destroy');
+                }
+            });
+
+            // Add validation to ensure reviewer_ids[] is sent as array
+            $(document).on('submit', 'form[action*="assignTo"]', function(e) {
+                var $form = $(this);
+                var $select = $form.find('select[name="reviewer_ids[]"]');
+                var selected = $select.val();
+                var errorContainer = $form.find('[id^="reviewer_ids-error-container_"]');
+                errorContainer.html('');
+                if (!selected || selected.length === 0) {
+                    e.preventDefault();
+                    errorContainer.html('<span class="text-danger">Please select at least one reviewer.</span>');
+                    $select.addClass('is-invalid');
+                } else {
+                    $select.removeClass('is-invalid');
                 }
             });
         });

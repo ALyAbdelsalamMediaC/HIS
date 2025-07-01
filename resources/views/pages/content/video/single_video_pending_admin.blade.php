@@ -111,7 +111,11 @@
         <div>
         <div class="gap-3 d-flex align-items-center">
           <div class="comment-container-user-icon">
-          <x-svg-icon name="user" size="18" color="#35758c" />
+            @if(isset($reviewer) && $reviewer->profile_image)
+                <img src="{{ $reviewer->profile_image }}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
+            @else
+                <x-svg-icon name="user" size="18" color="#35758c" />
+            @endif
           </div>
 
           <div>
@@ -257,3 +261,12 @@
     });
   </script>
 @endpush
+
+<style>
+.user-profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+</style>

@@ -1408,6 +1408,9 @@ body {
     width: 57px;
     height: 57px;
     line-height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     background-color: #f1f9fa;
     border-radius: 50%;
@@ -1684,6 +1687,13 @@ body {
     background: #fff;
 }
 
+.user-profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .input-icon-send {
     position: absolute;
     cursor: pointer;
@@ -1694,6 +1704,9 @@ body {
     width: 28px;
     height: 28px;
     line-height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 50%;
     text-align: center;
 }
@@ -1769,6 +1782,7 @@ body {
     border-radius: 50%;
     width: 51.103px;
     height: 51.103px;
+    line-height: 51.103px;
     text-align: center;
     padding: 17px;
     display: flex;
