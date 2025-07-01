@@ -27,7 +27,7 @@ class DashboardController extends Controller
             $mediaCountPending = Media::where('status', 'pending')
                 ->count();
             
-            $lastPublishedMedia = Media::where('status', 'published')
+            $lastPublishedMedia = Media::whereIn('status', ['published', 'pending'])
                 ->whereJsonContains('assigned_to', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->first();

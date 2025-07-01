@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\WEB;
 use App\Http\Controllers\Controller;
-
-use App\Models\Comment;
+use App\Models\Review;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class CommentController extends Controller
+class ReviewsController extends Controller
 {
-    // public function showAddCommentForm($media_id)
-    // {
-    //     // Pass media_id to the view
-    //     return view('pages.content.add-comment', compact('media_id'));
-    // }
+    
+    public function showAddReviewForm($media_id)
+    {
+        // Pass media_id to the view
+        return view('pages.content.add-comment', compact('media_id'));
+    }
 
-    public function addComment(Request $request, $media_id)
+    public function addReview(Request $request, $media_id)
     {
         try {
             // Validate the request
@@ -48,7 +48,7 @@ class CommentController extends Controller
             }
 
             // Create the comment
-            Comment::create([
+            Review::create([
                 'user_id' => $user->id,
                 'media_id' => $media_id,
                 'parent_id' => null,
@@ -99,7 +99,7 @@ class CommentController extends Controller
 
             // Verify media and parent comment exist
             $media = Media::findOrFail($media_id);
-            $parentComment = Comment::findOrFail($parent_id);
+            $parentComment = Review::findOrFail($parent_id);
 
             // Verify that parent comment belongs to the specified media
             if ($parentComment->media_id != $media_id) {
@@ -109,7 +109,7 @@ class CommentController extends Controller
             }
 
             // Create the reply
-            Comment::create([
+            Review::create([
                 'user_id' => $user->id,
                 'media_id' => $media_id,
                 'parent_id' => $parent_id,
@@ -130,7 +130,7 @@ class CommentController extends Controller
         }
     }
 
-    public function showMediaComments(Request $request, $media_id)
+    public function showMediaReview(Request $request, $media_id)
     {
         try {
             // Validate the media_id
@@ -159,7 +159,7 @@ class CommentController extends Controller
             }
 
             // Fetch parent comments with their replies and user data - ORDER BY DESC for newest first
-            $query = Comment::where('media_id', $media_id)
+            $query = Review::where('media_id', $media_id)
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'desc')
@@ -185,64 +185,8 @@ class CommentController extends Controller
                 ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
         }
     }
-
-    public function showArticleComments(Request $request, $article_id)
-    {
-        try {
-            // Validate the article_id
-            $validator = Validator::make(['article_id' => $article_id], [
-                'article_id' => 'required|exists:articles,id',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            // Validate the user_id if provided
-            $user_id = $request->query('user_id');
-            if ($user_id) {
-                $userValidator = Validator::make(['user_id' => $user_id], [
-                    'user_id' => 'exists:users,id',
-                ]);
-
-                if ($userValidator->fails()) {
-                    return redirect()->back()
-                        ->withErrors($userValidator)
-                        ->withInput();
-                }
-            }
-
-            // Fetch parent comments with their replies and user data - ORDER BY DESC for newest first
-            $query = Comment::where('article_id', $article_id)
-                ->whereNull('parent_id')
-                ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'desc')
-                          ->with('user');
-                }, 'user'])
-                ->orderBy('created_at', 'desc');
-
-            // Filter by user_id if provided
-            if ($user_id) {
-                $query->where('user_id', $user_id);
-            }
-
-            $comments = $query->get();
-
-            return view('comments.article', [
-                'comments' => $comments,
-                'article_id' => $article_id,
-                'user_id' => $user_id
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'An unexpected error occurred while retrieving comments: ' . $e->getMessage());
-        }
-    }
-
-    public function deleteComment(Request $request, $comment_id)
+    
+    public function deleteReview(Request $request, $comment_id)
     {
         try {
             // Validate the comment_id
@@ -257,7 +201,7 @@ class CommentController extends Controller
             }
 
             // Find the comment
-            $comment = Comment::findOrFail($comment_id);
+            $comment = Review::findOrFail($comment_id);
 
             // Check if the authenticated user is the owner of the comment
             if (auth()->user()->id !== $comment->user_id) {

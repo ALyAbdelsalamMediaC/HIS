@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\LikesController;
-
-
-
+use App\Http\Controllers\WEB\ReviewsController;
 
 Route::middleware('auth')->group(function () {
 
@@ -46,6 +44,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
+
+
+    Route::post('/reviews/add/{media_id}', [ReviewsController::class, 'addComment'])->name('reviews.add');
+    Route::get('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'showReplyForm'])->name('reviews.reply.form');
+    Route::post('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'reply'])->name('reviews.reply');
+    Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteComment'])->name('reviews.delete');
+
+
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
