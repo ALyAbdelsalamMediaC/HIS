@@ -104,9 +104,13 @@
 
     <!-- Admin`s Rating -->
     <div class="mt-4">
-      <h3 class="mb-2 h4-semibold">Reviewer Rating : ( 0 - 10 )</h3>
-
-      <x-text_input type="number" id="rating" name="rating" placeholder="0 - 10" />
+      <h3 class="mb-2 h4-semibold">Reviewer Rating : ( 1 - 10 )</h3>
+      <form action="{{ route('reviews.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
+        @csrf
+        <input type="hidden" name="media_id" value="{{ $media->id }}">
+        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+        <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" />
+      </form>
     </div>
 
     <!-- Comments -->
@@ -120,6 +124,9 @@
         :enableLikes="false"
         :enableDelete="true"
         :showAddComment="true"
+        commentRoute="reviews.add"
+        replyRoute="reviews.reply"
+        deleteRoute="reviews.delete"
     />
     </div>
 
