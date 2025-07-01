@@ -325,27 +325,16 @@
             });
 
             // Add validation to ensure reviewer_ids[] is sent as array of integers
-            $(document).on('submit', 'form[action*="assignTo"]', function(e) {
-                var $form = $(this);
-                var $select = $form.find('select[name="reviewer_ids[]"]');
-                var selected = $select.val();
-                var errorContainer = $form.find('[id^="reviewer_ids-error-container_"]');
-                errorContainer.html('');
-                if (!selected || selected.length === 0) {
-                    e.preventDefault();
-                    errorContainer.html('<span class="text-danger">Please select at least one reviewer.</span>');
-                    $select.addClass('is-invalid');
-                } else {
-                    // Convert selected values to integers
-                    var intSelected = selected.map(function(val) { return parseInt(val, 10); });
-                    // Remove all current options' selected attribute
-                    $select.find('option').prop('selected', false);
-                    // Set selected attribute for integer values
-                    intSelected.forEach(function(val) {
-                        $select.find('option[value="' + val + '"]').prop('selected', true);
-                    });
-                    $select.removeClass('is-invalid');
-                }
+            $('form[action*="content.assignTo"]').on('submit', function (e) {
+                var $select = $(this).find('.select2-reviewers');
+                var selected = $select.val() || [];
+                // Convert all values to integers
+                var intSelected = selected.map(function(val) { return parseInt(val, 10); });
+                // Remove all current options and add integer options
+                $select.find('option').prop('selected', false);
+                intSelected.forEach(function(val) {
+                    $select.find('option[value="' + val + '"]').prop('selected', true);
+                });
             });
         });
     </script>
