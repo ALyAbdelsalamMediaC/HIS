@@ -29,7 +29,7 @@ class GoogleDriveServiceImageProfile
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
-
+            
                 if ($this->client->isAccessTokenExpired()) {
                 header('Location: http://localhost:8000/get-google-token.php');
                 exit;
