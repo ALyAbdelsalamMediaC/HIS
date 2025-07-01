@@ -48,6 +48,15 @@ class ReviewsController extends Controller
                     ->withInput();
             }
 
+            $existingReview = Review::where('media_id', $request->media_id)
+            ->where('user_id', $user->id)->where('parent_id', null)
+            ->first();
+
+        if ($existingReview) {
+            return redirect()->back()
+                ->with('error', 'You have already rated this media.');
+        }
+
             // Create the comment
             Review::create([
                 'user_id' => $user->id,
@@ -248,6 +257,16 @@ class ReviewsController extends Controller
             return redirect()->back()
                 ->with('error', 'Only reviewers can submit a rating.')
                 ->withInput();
+        }
+
+        // Check if rate already exists for this user and media
+        $existingRate = Rate::where('media_id', $request->media_id)
+            ->where('user_id', $request->user_id)
+            ->first();
+
+        if ($existingRate) {
+            return redirect()->back()
+                ->with('error', 'You have already rated this media.');
         }
 
         // Save rate (assuming Rate model and rates table exist)
