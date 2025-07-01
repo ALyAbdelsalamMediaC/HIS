@@ -156,14 +156,15 @@ class BookmarkController extends Controller
         $userId = $request->input('user_id');
         
         $bookmarks = Bookmark::where('user_id', $userId)
-            ->with(['article' => function ($query) {
-                $query->select('id', 'title', 'description', 'image_path', 'thumbnail_path');
-            }, 'media' => function ($query) {
-                $query->select('id', 'title', 'description', 'file_path', 'thumbnail_path', 'image_path');
-            }])
+            ->with(['article', 'media'])
             ->get()
             ->map(function ($bookmark) {
-                $item = $bookmark->article ?? $bookmark->media;
+                $item = null;
+                if ($bookmark->article_id && $bookmark->article) {
+                    $item = $bookmark->article;
+                } elseif ($bookmark->media_id && $bookmark->media) {
+                    $item = $bookmark->media;
+                }
                 return [
                     'id' => $bookmark->id,
                     'article_id' => $bookmark->article_id,
