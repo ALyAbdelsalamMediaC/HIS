@@ -145,17 +145,7 @@
 
       <!-- Past Reviwer Comments -->
       <div class="past-reviwer-container past-reviewer-section" style="display: none;">
-      <h4 class="h5-ragular"
-        style="color:#ADADAD; border-bottom: 1px solid var(--border-color);padding-bottom: 12px;">Past Reviwer
-        Comments</h4>
-
-      <div class="mt-3" style="border-bottom: 1px solid var(--border-color);padding-bottom: 12px;">
-        <p class="h6-ragular">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nisi aperiam voluptas, magni
-        temporibus asperiores
-        ipsum nemo iure fuga repudiandae nesciunt, magnam vero. Tempora suscipit fugit cumque laboriosam ratione
-        reiciendis veritatis.</p>
-        <span class="mt-2 h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
-      </div>
+      
       </div>
     </div>
     </div>

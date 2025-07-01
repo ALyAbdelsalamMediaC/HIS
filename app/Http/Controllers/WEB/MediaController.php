@@ -25,6 +25,7 @@ use getID3;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Comment;
+use App\Models\Review;
 
 class MediaController extends Controller
 {
@@ -186,6 +187,15 @@ class MediaController extends Controller
             if ($user && $user->role === 'admin') {
                 return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
             } elseif ($user && $user->role === 'reviewer') {
+                $commentsData = Review::where('media_id', $id)
+                    ->whereNull('parent_id')
+                    ->with(['replies' => function ($query) {
+                        $query->orderBy('created_at', 'desc')
+                            ->with('user');
+                    }, 'user'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                $commentsCount = $commentsData->count();
                 return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
             }
         } elseif ($status === 'published') {

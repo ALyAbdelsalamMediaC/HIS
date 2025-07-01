@@ -192,7 +192,7 @@ class ReviewsController extends Controller
         try {
             // Validate the comment_id
             $validator = Validator::make(['comment_id' => $comment_id], [
-                'comment_id' => 'required|exists:comments,id',
+                'comment_id' => 'required|exists:reviews,id',
             ]);
 
             if ($validator->fails()) {
