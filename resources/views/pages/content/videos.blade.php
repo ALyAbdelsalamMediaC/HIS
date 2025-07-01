@@ -141,31 +141,38 @@
                                 @if(auth()->user()->hasRole('admin'))
                                 <div class="gap-3 mt-3 d-flex align-items-center">
                                     <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
-                                    @if($item->assigned_reviewers->count() > 0)
-                                        @php
-                                            $reviewers_list = $item->assigned_reviewers;
-                                            $total_reviewers = $reviewers_list->count();
-                                            $visible_reviewers = $reviewers_list->take(2);
-                                            $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
-                                        @endphp
-                                        <div class="gap-2 d-flex align-items-center">
-                                            @foreach($visible_reviewers as $reviewer)
-                                                <span class="badge bg-primary d-flex align-items-center" style="gap: 6px;">
-                                                    @if($reviewer->profile_image)
-                                                        <img src="{{ $reviewer->profile_image }}" class="user-profile-img" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" alt="User Image" />
-                                                    @else
-                                                        <x-svg-icon name="user" size="16" color="#fff" />
-                                                    @endif
-                                                    {{ $reviewer->name }}
-                                                </span>
-                                            @endforeach
-                                            @if($hidden_reviewers_count > 0)
-                                                <span class="badge rounded-pill bg-secondary">+{{ $hidden_reviewers_count }} more</span>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <span class="text-muted">No reviewers assigned</span>
-                                    @endif
+                                    @php
+                                        $reviewers_list = $item->assigned_reviewers;
+                                        $total_reviewers = $reviewers_list->count();
+                                        $visible_reviewers = $reviewers_list->take(2);
+                                        $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
+                                    @endphp
+                                    <div class="gap-1 d-flex align-items-center">
+                                        @foreach($visible_reviewers as $reviewer)
+                                            <img
+                                                src="{{ $reviewer->profile_image ?? asset('images/global/user-placeholder.png') }}"
+                                                class="user-profile-img"
+                                                style="width:40px;height:40px;border-radius:50%;object-fit:cover; border:2px solid #fff; box-shadow:0 0 2px #35758C;"
+                                                alt="{{ $reviewer->name }}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $reviewer->name }}"
+                                            />
+                                        @endforeach
+                                        @if($hidden_reviewers_count > 0)
+                                            @php
+                                                $hidden_reviewers = $reviewers_list->slice(2);
+                                                $hidden_names = $hidden_reviewers->pluck('name')->implode(', ');
+                                            @endphp
+                                            <span
+                                                class="badge rounded-pill bg-secondary"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $hidden_names }}"
+                                                style="cursor:pointer;"
+                                            >+{{ $hidden_reviewers_count }} more</span>
+                                        @endif
+                                    </div>
                                     <div class="assign-to-btn" data-bs-toggle="modal"
                                         data-bs-target="#assignReviewerModal{{ $item->id }}" onclick="event.stopPropagation();">
                                         <x-svg-icon name="plus" size="12" color="#35758C" />
@@ -255,6 +262,7 @@
 @push('scripts')
     <script src="{{ asset('js/filters.js') }}"></script>
     <script src="{{ asset('js/validations.js') }}"></script>
+    <script src="{{ asset('js/tooltips.js') }}"></script>
     <script>
         $(document).ready(function () {
             // Initialize Select2 for reviewer assignment with better modal handling
@@ -316,7 +324,7 @@
                 }
             });
 
-            // Add validation to ensure reviewer_ids[] is sent as array
+            // Add validation to ensure reviewer_ids[] is sent as array of integers
             $(document).on('submit', 'form[action*="assignTo"]', function(e) {
                 var $form = $(this);
                 var $select = $form.find('select[name="reviewer_ids[]"]');
@@ -328,6 +336,14 @@
                     errorContainer.html('<span class="text-danger">Please select at least one reviewer.</span>');
                     $select.addClass('is-invalid');
                 } else {
+                    // Convert selected values to integers
+                    var intSelected = selected.map(function(val) { return parseInt(val, 10); });
+                    // Remove all current options' selected attribute
+                    $select.find('option').prop('selected', false);
+                    // Set selected attribute for integer values
+                    intSelected.forEach(function(val) {
+                        $select.find('option[value="' + val + '"]').prop('selected', true);
+                    });
                     $select.removeClass('is-invalid');
                 }
             });
