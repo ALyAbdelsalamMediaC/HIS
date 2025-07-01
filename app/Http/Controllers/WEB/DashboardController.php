@@ -8,88 +8,52 @@ use App\Models\Media;
 use App\Models\User;
 use App\Models\CommentArticle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
 
     public function index()
-    {
-                try {
+{
+    try {
+        $user = Auth::user();
+        
+        if ($user->role === 'reviewer') {
+            // For reviewers: get media where they are in assigned_to or status is pending
+            $mediaCountPublished = Media::where('status', 'published')
+                ->whereJsonContains('assigned_to', $user->id)
+                ->count();
+            
+            $mediaCountPending = Media::where('status', 'pending')
+                ->count();
+            
+            $lastPublishedMedia = Media::where('status', 'published')
+                ->whereJsonContains('assigned_to', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        } else {
+            // For other roles (admin, user)
             $mediaCountPublished = Media::where('status', 'published')->count();
             $mediaCountPending = Media::where('status', 'pending')->count();
-
-            // $topMedia = Media::withCount('likes')
-            // ->orderBy('likes_count', 'desc')
-            // ->take(5)
-            // ->get();
+            
             $lastPublishedMedia = Media::where('status', 'published')
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-            $lastPublishedMediaCommentsCount = 0;
-            if ($lastPublishedMedia) {
-                $lastPublishedMediaCommentsCount = \App\Models\Comment::where('media_id', $lastPublishedMedia->id)->count();
-            }
-
-            // $topArticle = Article::withCount('LikeArticle')
-            //     ->orderBy('likes_count', 'desc')
-            //     ->take(5)
-            //     ->get();
-
-                
-            $usersCount = User::count();
-
-            $commentsVideo = Comment::count();
-            $commentsArticleCount = CommentArticle::count();
-            $commentsCount = $commentsVideo + $commentsArticleCount;
-
-            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
-        } catch (\Exception $e) {
-            // You can log the error or handle it as needed
-            return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
+                ->orderBy('created_at', 'desc')
+                ->first();
         }
+
+        $lastPublishedMediaCommentsCount = 0;
+        if ($lastPublishedMedia) {
+            $lastPublishedMediaCommentsCount = Comment::where('media_id', $lastPublishedMedia->id)->count();
+        }
+        
+        $usersCount = User::count();
+        $commentsVideo = Comment::count();
+        $commentsArticleCount = CommentArticle::count();
+        $commentsCount = $commentsVideo + $commentsArticleCount;
+
+        return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
     }
-    // public function topMedia()
-    // {
-    //     try {
-    //         $topMedia = Media::withCount('likes')
-    //             ->orderBy('likes_count', 'desc')
-    //             ->take(5)
-    //             ->get();
-
-    //         return view('pages.admin.dashboard', compact('topMedia'));
-    //     } catch (\Exception $e) {
-    //         // You can log the error or handle it as needed
-    //         return back()->withErrors(['error' => 'Failed to retrieve top media.']);
-    //     }
-    // }
-
-    // public function topArticle()
-    // {
-    //     try {
-    //         $topArticle = Article::withCount('likesArticle')
-    //             ->orderBy('likes_count', 'desc')
-    //             ->take(5)
-    //             ->get();
-
-    //         return view('pages.admin.dashboard', compact('topArticle'));
-    //     } catch (\Exception $e) {
-    //         // You can log the error or handle it as needed
-    //         return back()->withErrors(['error' => 'Failed to retrieve top article.']);
-    //     }
-    // }
-    // public function lastPublished(){
-    //     try {
-    //         $lastPublishedMedia = Media::where('status', 'published')
-    //             ->orderBy('created_at', 'desc')
-    //             ->take(1)
-    //             ->get();
-
-    //         return view('pages.admin.dashboard', compact('lastPublishedMedia'));
-    //     } catch (\Exception $e) {
-    //         // You can log the error or handle it as needed
-    //         return back()->withErrors(['error' => 'Failed to retrieve last published media.']);
-    //     }
-    // }
-    
+}
 }
