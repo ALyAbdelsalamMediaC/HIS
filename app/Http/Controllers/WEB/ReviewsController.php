@@ -54,7 +54,7 @@ class ReviewsController extends Controller
 
         if ($existingReview) {
             return redirect()->back()
-                ->with('error', 'You have already rated this media.');
+                ->with('error', 'You have already added a review for this media.');
         }
 
             // Create the comment
@@ -213,8 +213,8 @@ class ReviewsController extends Controller
             // Find the comment
             $comment = Review::findOrFail($comment_id);
 
-            // Check if the authenticated user is the owner of the comment
-            if (auth()->user()->id !== $comment->user_id) {
+            // Check if the authenticated user is allowed to delete
+            if (auth()->user()->role !== 'admin' && auth()->user()->id !== $comment->user_id) {
                 return redirect()->back()
                     ->with('error', 'You do not have permission to delete this comment.');
             }
@@ -242,7 +242,7 @@ class ReviewsController extends Controller
         $validator = Validator::make($request->all(), [
             'media_id' => 'required|exists:media,id',
             'user_id' => 'required|exists:users,id',
-            'rate' => 'required|integer|min:1|max:5',
+            'rate' => 'required|integer|min:1|max:10',
         ]);
 
         if ($validator->fails()) {

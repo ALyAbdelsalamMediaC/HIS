@@ -54,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/add/{media_id}', [ReviewsController::class, 'addReview'])->name('reviews.add');
     Route::get('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'showReplyForm'])->name('reviews.reply.form');
     Route::post('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'reply'])->name('reviews.reply');
-    Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteComment'])->name('reviews.delete');
+    Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteReview'])->name('reviews.delete');
     Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
 
 

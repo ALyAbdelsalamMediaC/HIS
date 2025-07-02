@@ -190,14 +190,10 @@ class MediaController extends Controller
 
         if ($status === 'pending') {
             if ($user && $user->role === 'admin') {
-                $adminComment = AdminComment::where('media_id', $id)
-                    ->whereNull('parent_id')->orderBy('created_at', 'desc')
+                $adminComments = AdminComment::where('media_id', $id)
+                    ->orderBy('created_at', 'desc')
                     ->get();
-
-                    $userComment = AdminComment::where('media_id', $id)
-                    ->whereNotNull('parent_id')->orderBy('created_at', 'desc')
-                    ->get();
-                    
+                
                 $reviewers = Review::where('media_id', $id)
                     ->whereNull('parent_id')
                     ->with(['replies' => function ($query) {
@@ -218,7 +214,7 @@ class MediaController extends Controller
                 $replysCount = $replys->count();
                 $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
                 $assignedReviewersCount = count($assignedReviewers);
-                return view('pages.content.video.single_video_pending_admin', compact('userComment','adminComment','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
+                return view('pages.content.video.single_video_pending_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')

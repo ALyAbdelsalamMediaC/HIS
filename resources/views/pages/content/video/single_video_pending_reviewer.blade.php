@@ -116,23 +116,89 @@
     <!-- Comments -->
     <div class="mt-4">
     <h3 class="mb-2 h4-semibold">Reviewer Comment</h3>
-    
-    <x-comments 
-        :commentsData="$commentsData" 
-        :mediaId="$media->id"
-        :enableReplies="false"
-        :enableLikes="false"
-        :enableDelete="true"
-        :showAddComment="true"
-        commentRoute="reviews.add"
-        replyRoute="reviews.reply"
-        deleteRoute="reviews.delete"
-    />
+    <!-- Add Comment Form -->
+    <form action="{{ route('reviews.add', ['media_id' => $media->id]) }}" method="POST" class="mb-3">
+        @csrf
+        <x-comment-input id="comment" name="content" placeholder="Add new comment..." :value="old('content')" />
+    </form>
+
+    <!-- Comments List -->
+    @foreach($commentsData as $comment)
+      <div class="comment-container">
+        <div class="gap-3 d-flex align-items-start">
+          <div class="comment-container-user-icon">
+            <x-svg-icon name="user" size="18" color="#35758c" />
+          </div>
+          <div class="w-100">
+            <h4 class="h5-semibold">{{ $comment->user->name ?? 'Unknown User' }}</h4>
+            <span class="h6-ragular" style="color:#ADADAD;">Commented On {{ $comment->created_at->diffForHumans() }}</span>
+            <p class="mt-2 h6-ragular">{{ $comment->content }}</p>
+            <div class="w-100 d-flex justify-content-end align-items-end">
+              <div class="gap-2 d-flex align-items-center">
+                <x-svg-icon name="message" size="16" color="#ADADAD" />
+                <span class="h6-ragular">{{ $replysCount }} Replies</span>
+              </div>
+            </div>
+            @php
+              $reviewReplies = $replys->where('parent_id', $comment->id);
+              $hasAdminReply = $reviewReplies->contains(function($r) { return isset($r->user) && $r->user->role === 'admin'; });
+            @endphp
+            @if(auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id && !$hasAdminReply)
+              <div class="d-flex align-items-center mt-2">
+                <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $comment->id }}">
+                  <x-svg-icon name="trash" size="20" color="#BB1313" />
+                </button>
+              </div>
+              <!-- Delete Modal for Review -->
+              <x-modal id="deleteReviewModal{{ $comment->id }}" title="Delete Review">
+                <div class="my-3">
+                  <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this review?</p>
+                  <p class="h5-ragular" style="color:#ADADAD;">This will also delete all replies to this review.</p>
+                </div>
+                <div class="modal-footer">
+                  <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
+                  <form action="{{ route('reviews.delete', ['comment_id' => $comment->id]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+                  </form>
+                </div>
+              </x-modal>
+            @endif
+            @if($reviewReplies->count() > 0)
+              <div class="mt-2 replies-container" style="margin-left: 40px;">
+                @foreach($reviewReplies as $reply)
+                  <x-review-reply :reply="$reply" :replys="$replys" :media="$media" />
+                @endforeach
+              </div>
+            @endif
+          </div>
+        </div>
+      </div>
+    @endforeach
     </div>
 
   </section>
 
 @endsection
 
+@push('scripts')
+<script src="{{ asset('js/validations.js') }}"></script>
+<script>
+  document.querySelectorAll('.reply-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var replyId = this.getAttribute('data-reply-id');
+      var replyInput = document.getElementById('reply-container-' + replyId);
+      if (replyInput.style.display === 'none' || replyInput.style.display === '') {
+        replyInput.style.display = 'block';
+        var inputField = replyInput.querySelector('input, textarea');
+        if (inputField) inputField.focus();
+      } else {
+        replyInput.style.display = 'none';
+      }
+    });
+  });
+</script>
+@endpush
 
 
