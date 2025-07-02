@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'reply'])->name('reviews.reply');
     Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteReview'])->name('reviews.delete');
     Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
+    Route::post('/admins/rate', [AdminCommentController::class, 'rate'])->name('admins.rate');
 
 
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
