@@ -129,7 +129,10 @@ class MediaController extends Controller
 
             // Update media table using Eloquent
             Media::where('id', $id)
-                ->update(['assigned_to' => $reviewersJson]);
+                ->update([
+                    'assigned_to' => $reviewersJson,
+                    'status' => 'inreview'
+                ]);
 
             return back()->with('success', 'Reviewers assigned successfully.');
         } catch (Exception $e) {
