@@ -59,55 +59,63 @@ class MediaController extends Controller
     }
 
     public function getall(Request $request)
-    {
-        try {
+{
+    try {
+        $user = Auth::user();
 
-            $categories = Category::all();
+        $categories = Category::all();
 
-            if ($this->client->isAccessTokenExpired()) {
-                return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
-            } else {
-
-                $query = Media::with('category', 'comments')
-                    ->withCount('comments');
-
-                // Search by title
-                if ($request->filled('search')) {
-                    $query->where('title', 'like', '%' . $request->input('search') . '%');
-                }
-
-                // Filter by category name
-                if ($request->filled('category')) {
-                    $query->whereHas('category', function ($q) use ($request) {
-                        $q->where('name', $request->input('category'));
-                    });
-                }
-
-                // Filter by status
-                if ($request->filled('status')) {
-                    $query->where('status', $request->input('status'));
-                }
-
-                // Filter by date (created_at)
-                if ($request->filled('date_from')) {
-                    $query->whereDate('created_at', '>=', $request->input('date_from'));
-                }
-                if ($request->filled('date_to')) {
-                    $query->whereDate('created_at', '<=', $request->input('date_to'));
-                }
-
-                // Order by latest
-                $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
-                // Get all users with role 'reviewer'
-                $reviewers = User::where('role', 'reviewer')->get();
-
-                return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
-            }
-        } catch (Exception $e) {
-            LaravelLog::error('Media getall error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to fetch media.');
+        if ($this->client->isAccessTokenExpired()) {
+            return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
         }
+
+        $query = Media::with('category', 'comments')
+            ->withCount('comments');
+
+        // Apply role-based filtering
+        if ($user->role === 'reviewer') {
+            // For reviewers: get media where they are in assigned_to and status is pending or published
+            $query->whereJsonContains('assigned_to', $user->id)
+                  ->whereIn('status', ['inreview', 'published']);
+        } else {
+            // For admins: apply status filter only if provided, otherwise get all media
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+        }
+
+        // Search by title
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->input('search') . '%');
+        }
+
+        // Filter by category name
+        if ($request->filled('category')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('name', $request->input('category'));
+            });
+        }
+
+        // Filter by date (created_at)
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        // Order by latest and paginate
+        $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+
+        // Get all users with role 'reviewer'
+        $reviewers = User::where('role', 'reviewer')->get();
+
+        return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
+    } catch (Exception $e) {
+        \Log::error('Media getall error: ' . $e->getMessage());
+        return back()->with('error', 'Failed to fetch media.');
     }
+}
     public function assignTo(Request $request, $id)
     {
         try {

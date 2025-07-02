@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Comment;
@@ -14,46 +15,47 @@ class DashboardController extends Controller
 {
 
     public function index()
-{
-    try {
-        $user = Auth::user();
-        
-        if ($user->role === 'reviewer') {
-            // For reviewers: get media where they are in assigned_to or status is pending
-            $mediaCountPublished = Media::where('status', 'published')
-                ->whereJsonContains('assigned_to', $user->id)
-                ->count();
-            
-            $mediaCountPending = Media::where('status', 'pending')
-                ->count();
-            
-            $lastPublishedMedia = Media::whereIn('status', ['published', 'pending'])
-                ->whereJsonContains('assigned_to', $user->id)
-                ->orderBy('created_at', 'desc')
-                ->first();
-        } else {
-            // For other roles (admin, user)
-            $mediaCountPublished = Media::where('status', 'published')->count();
-            $mediaCountPending = Media::where('status', 'pending')->count();
-            
-            $lastPublishedMedia = Media::where('status', 'published')
-                ->orderBy('created_at', 'desc')
-                ->first();
-        }
+    {
+        try {
+            $user = Auth::user();
 
-        $lastPublishedMediaCommentsCount = 0;
-        if ($lastPublishedMedia) {
-            $lastPublishedMediaCommentsCount = Comment::where('media_id', $lastPublishedMedia->id)->count();
-        }
-        
-        $usersCount = User::count();
-        $commentsVideo = Comment::count();
-        $commentsArticleCount = CommentArticle::count();
-        $commentsCount = $commentsVideo + $commentsArticleCount;
+            if ($user->role === 'reviewer') {
+                // For reviewers: get media where they are in assigned_to or status is pending
+                $mediaCountPublished = Media::where('status', 'published')
+                    ->whereJsonContains('assigned_to', $user->id)
+                    ->count();
 
-        return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
-    } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
+                $mediaCountPending = Media::where('status', 'inreview')
+                    ->count();
+
+                $lastPublishedMedia = Media::whereIn('status', ['published', 'inreview'])
+                    ->whereJsonContains('assigned_to', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            } else {
+                // For other roles (admin, user)
+                $mediaCountPublished = Media::where('status', 'published')->count();
+                $mediaCountPending = Media::where('status', 'pending')->count();
+                $mediaCountInreview = Media::where('status', 'inreview')->count();
+
+                $lastPublishedMedia = Media::where('status', 'published')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            }
+
+            $lastPublishedMediaCommentsCount = 0;
+            if ($lastPublishedMedia) {
+                $lastPublishedMediaCommentsCount = Comment::where('media_id', $lastPublishedMedia->id)->count();
+            }
+
+            $usersCount = User::count();
+            $commentsVideo = Comment::count();
+            $commentsArticleCount = CommentArticle::count();
+            $commentsCount = $commentsVideo + $commentsArticleCount;
+
+            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending','mediaCountInreview', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
+        }
     }
-}
 }
