@@ -240,6 +240,9 @@ class MediaController extends Controller
         } elseif ($status === 'published') {
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         }
+        elseif ($status === 'pending') {
+            return view('pages.content.video.single_video_pending', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
+        }
 
         // Default fallback
         return back()->with('error', 'Invalid status or permissions.');
