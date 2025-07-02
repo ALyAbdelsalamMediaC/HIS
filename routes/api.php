@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AdminCommentController;
 use App\Http\Controllers\API\UserAuthController;
 use App\Http\Controllers\API\CommentsController;
 use App\Http\Controllers\API\MediaController;
@@ -34,7 +35,9 @@ Route::get('/comment/{commentId}/likes', [LikesController::class, 'getLikesComme
 
 Route::get('/categories', [MediaController::class, 'categories']);
 
+Route::get('/api/media/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show')->middleware('auth');
 
+Route::post('/media/admin-comment/reply', [AdminCommentController::class, 'reply'])->name('admin.comments.reply')->middleware('auth');
 
 Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
 Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);
