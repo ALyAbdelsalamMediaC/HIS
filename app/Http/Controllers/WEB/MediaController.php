@@ -202,11 +202,11 @@ class MediaController extends Controller
                         $review->rate = $rate;
                         return $review;
                     });
-                    $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
                 $replysCount = $replys->count();
                 $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
                 $assignedReviewersCount = count($assignedReviewers);
-                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked','reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
+                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
@@ -216,8 +216,10 @@ class MediaController extends Controller
                     }, 'user'])
                     ->orderBy('created_at', 'desc')
                     ->get();
+                $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replysCount = $replys->count();
                 $commentsCount = $commentsData->count();
-                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
+                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked'));
             }
         } elseif ($status === 'published') {
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
