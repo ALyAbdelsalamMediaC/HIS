@@ -144,7 +144,7 @@
               $hasAdminReply = $reviewReplies->contains(function($r) { return isset($r->user) && $r->user->role === 'admin'; });
             @endphp
             @if(auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id && !$hasAdminReply)
-              <div class="d-flex align-items-center mt-2">
+              <div class="mt-2 d-flex align-items-center">
                 <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $comment->id }}">
                   <x-svg-icon name="trash" size="20" color="#BB1313" />
                 </button>
