@@ -25,6 +25,7 @@ use getID3;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Comment;
+use App\Models\Rate;
 use App\Models\Review;
 
 class MediaController extends Controller
@@ -119,7 +120,7 @@ class MediaController extends Controller
             $reviewersArray = $request->input('reviewer_ids', []);
 
             // Clean up any whitespace, filter out empty values, and cast to int
-            $reviewersArray = array_filter(array_map(function($id) {
+            $reviewersArray = array_filter(array_map(function ($id) {
                 return (int) trim($id);
             }, $reviewersArray));
 
@@ -185,7 +186,27 @@ class MediaController extends Controller
 
         if ($status === 'pending') {
             if ($user && $user->role === 'admin') {
-                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
+                $reviewers = Review::where('media_id', $id)
+                    ->whereNull('parent_id')
+                    ->with(['replies' => function ($query) {
+                        $query->orderBy('created_at', 'desc')
+                            ->with('user');
+                    }, 'user'])
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->map(function ($review) use ($id) {
+                        // Get the rate for this reviewer and media
+                        $rate = Rate::where('media_id', $id)
+                            ->where('user_id', $review->user_id)
+                            ->value('rate');
+                        $review->rate = $rate;
+                        return $review;
+                    });
+                    $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replysCount = $replys->count();
+                $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
+                $assignedReviewersCount = count($assignedReviewers);
+                return view('pages.content.video.single_video_pending_admin', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked','reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
