@@ -16,6 +16,8 @@ use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is bu
 use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
+use Google\Service\MyBusinessBusinessInformation\Resource\Categories;
+
 class MediaController extends Controller
 {
     protected $client;
@@ -483,4 +485,28 @@ class MediaController extends Controller
             ], 500);
         }
     }
+    public function categories(Request $request)
+    {
+        try {
+            $categories = Category::all();
+            $subCategory = SubCategory::where('category_id', $request->category_id)->get();
+            $subCategoryDetails = Media::where('sub_category_id', $request->sub_category_id)
+                ->with(['likes', 'comments'])
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Categories retrieved successfully.',
+                'data' => [
+                    'categories' => $categories,
+                    'subCategory' => $subCategory,
+                    'subCategoryDetails' => $subCategoryDetails,
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Categories retrieval error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve categories.'], 500);
+        }
+    }
+
 }

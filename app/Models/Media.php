@@ -37,6 +37,14 @@ class Media extends Model
     {
         return $this->hasMany(Comment::class);
     }
+    public function AdminComment()
+    {
+        return $this->hasMany(AdminComment::class);
+    }
+    public function reviewas()
+    {
+        return $this->hasMany(Review::class);
+    }
 
     public function tags()
     {

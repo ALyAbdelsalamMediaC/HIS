@@ -32,6 +32,9 @@ Route::delete('/comment/{commentId}/like', [LikesController::class, 'removeLikeC
 
 Route::get('/comment/{commentId}/likes', [LikesController::class, 'getLikesCommentCount'])->name('comment.likes.count');
 
+Route::get('/categories', [MediaController::class, 'categories']);
+
+
 
 Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
 Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);

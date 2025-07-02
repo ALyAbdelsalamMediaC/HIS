@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\WEB\CommentController;
 use App\Http\Controllers\WEB\AdminAuthController;
+use App\Http\Controllers\WEB\AdminCommentController;
 use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\DashboardController;
@@ -45,6 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
 
+    Route::post('/AdminComment/add/{media_id}', [AdminCommentController::class, 'addComment'])->name('AdminComment.add');
+    Route::get('/AdminComment/reply/{media_id}/{parent_id}', [AdminCommentController::class, 'showReplyForm'])->name('AdminComment.reply.form');
+    Route::post('/AdminComment/reply/{media_id}/{parent_id}', [AdminCommentController::class, 'reply'])->name('AdminComment.reply');
+    Route::delete('/AdminComment/{comment_id}', [AdminCommentController::class, 'deleteComment'])->name('AdminComment.delete');
 
     Route::post('/reviews/add/{media_id}', [ReviewsController::class, 'addReview'])->name('reviews.add');
     Route::get('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'showReplyForm'])->name('reviews.reply.form');
