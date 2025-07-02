@@ -27,4 +27,5 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/validations.js') }}"></script>
 @endpush

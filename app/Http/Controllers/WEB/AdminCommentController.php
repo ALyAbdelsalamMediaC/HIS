@@ -185,9 +185,8 @@ class AdminCommentController extends Controller
         try {
             // Validate the comment_id
             $validator = Validator::make(['comment_id' => $comment_id], [
-                'comment_id' => 'required|exists:comments,id',
+                'comment_id' => 'required|exists:admin_comments,id',
             ]);
-
             if ($validator->fails()) {
                 return redirect()->back()
                     ->withErrors($validator)
@@ -198,7 +197,7 @@ class AdminCommentController extends Controller
             $comment = AdminComment::findOrFail($comment_id);
 
             // Check if the authenticated user is the owner of the comment
-            if (auth()->user()->id !== $comment->user_id) {
+            if (auth()->user()->role !== 'admin' && auth()->user()->id !== $comment->user_id){
                 return redirect()->back()
                     ->with('error', 'You do not have permission to delete this comment.');
             }

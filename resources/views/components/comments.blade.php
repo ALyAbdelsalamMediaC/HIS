@@ -31,7 +31,7 @@
                 </div>
                 <div class="w-100">
                     <h4 class="h5-semibold">{{ $comment->user->name ?? 'Unknown User' }}</h4>
-                    <span class="h6-ragular" style="color:#ADADAD;">Commented On {{ $comment->created_at->diffForHumans() }}</span>
+                    <span class="h6-ragular" style="color:#ADADAD;">Commented On    {{ $comment->created_at ? $comment->created_at->diffForHumans() : '' }}</span>
                     <p class="mt-2 h6-ragular">{{ $comment->content }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         @if($enableLikes)

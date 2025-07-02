@@ -103,51 +103,93 @@
 
     <!-- Assigned -->
     <div class="mt-4">
-    <h3 class="h4-semibold">Assigned to : <span class="h4-ragular" style="color:#35758C;">2 Reviews </span></h3>
+    <h3 class="h4-semibold">Assigned to : <span class="h4-ragular" style="color:#35758C;">{{ $assignedReviewersCount }} Reviews </span></h3>
 
     <div class="mt-2 replay-list-container">
-      <div class="replay-container">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-        <div class="gap-3 d-flex align-items-center">
-          <div class="comment-container-user-icon">
-            @if(isset($reviewer) && $reviewer->profile_image)
-                <img src="{{ $reviewer->profile_image }}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
-            @else
-                <x-svg-icon name="user" size="18" color="#35758c" />
-            @endif
-          </div>
-
+      @if($reviewers->isEmpty())
+        <div class="comment-container">
+          <p class="h6-ragular">No reviews yet.</p>
+        </div>
+      @endif
+      @foreach($reviewers as $review)
+      <div class="mb-3 replay-container">
+        <div class="d-flex justify-content-between align-items-center">
           <div>
-          <h4 class="h5-semibold">John Doe</h4>
-          <span class="h5-ragular">Rating : 9 / 10</span>
+            <div class="gap-3 d-flex align-items-center">
+              <div class="comment-container-user-icon">
+                @if(isset($review->user) && $review->user->profile_image)
+                  <img src="{{ $review->user->profile_image }}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
+                @else
+                  <x-svg-icon name="user" size="18" color="#35758c" />
+                @endif
+              </div>
+              <div>
+                <h4 class="h5-semibold">{{ $review->user->name ?? 'Unknown User' }}</h4>
+                <span class="h5-ragular">Rating : {{ $review->rate ?? '-' }} / 10</span>
+              </div>
+            </div>
+            <h4 class="mt-3 h5-semibold">Reviewer Comment :</h4>
+            <p class="h6-ragular">{{ $review->content }}</p>
+            <div class="gap-3 d-flex align-items-center">
+              <span class="mt-2 h6-ragular" style="color:#ADADAD;">Commented On {{ $review->created_at->diffForHumans() }}</span>
+              <div>
+                  <x-svg-icon name="message" size="16" color="#ADADAD" />
+                  <span class="h6-ragular">{{ $replysCount }} Replies</span>
+              </div>
+              <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $review->id }}">
+            <x-svg-icon name="trash" size="20" color="#BB1313" />
+          </button>
+            </div>
           </div>
+          <button class="btn-nothing toggle-reply-btn" type="button" data-review-id="{{ $review->id }}">
+            <span class="arrow-down-icon">
+              <x-svg-icon name="arrow-down" size="20" color="#0F1417" />
+            </span>
+            <span class="arrow-up-icon" style="display:none;">
+              <x-svg-icon name="arrow-up" size="20" color="#0F1417" />
+            </span>
+          </button>
         </div>
+        <!-- Delete Modal for Review -->
+        <x-modal id="deleteReviewModal{{ $review->id }}" title="Delete Review">
+          <div class="my-3">
+            <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this review?</p>
+            <p class="h5-ragular" style="color:#ADADAD;">This will also delete all replies to this review.</p>
+          </div>
+          <div class="modal-footer">
+            <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
+            <form action="{{ route('reviews.delete', ['comment_id' => $review->id]) }}" method="POST">
+              @csrf
+              @method('DELETE')
+              <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+            </form>
+          </div>
+        </x-modal>
+        <!-- Reply input, hidden by default -->
+        <div class="mt-3 reply-input-container" id="reply-container-{{ $review->id }}" style="display:none;">
+          <form action="{{ route('reviews.reply', ['media_id' => $media->id, 'parent_id' => $review->id]) }}" method="POST" class="mb-2">
+            @csrf
+            <x-comment-input id="reply-comment-{{ $review->id }}" name="content" placeholder="Reply to this reviewer comment..." :value="old('content')" />
+            @error('content')
+              <div class="mt-1 text-danger">{{ $message }}</div>
+            @enderror
+            <button type="submit" class="mt-2 btn btn-primary" style="display:none;"></button>
+          </form>
 
-        <h4 class="mt-3 h5-semibold">Reviewer Comment :</h4>
-        <p class="h6-ragular">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nisi aperiam voluptas, magni
-          temporibus asperiores
-          ipsum nemo iure fuga repudiandae nesciunt, magnam vero. Tempora suscipit fugit cumque laboriosam ratione
-          reiciendis veritatis.</p>
-        <span class="mt-2 h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
+            <!-- Show replies -->
+        @php
+          $reviewReplies = $replys->where('parent_id', $review->id);
+        @endphp
+        @if($reviewReplies->count() > 0)
+        <div class="mt-2 replies-container" style="margin-left: 40px;">
+          @foreach($reviewReplies as $reply)
+            <x-review-reply :reply="$reply" :replys="$replys" :media="$media" />
+          @endforeach
         </div>
-
-        <button class="btn-nothing toggle-past-reviewer-btn" type="button">
-        <span class="arrow-down-icon">
-          <x-svg-icon name="arrow-down" size="20" color="#0F1417" />
-        </span>
-        <span class="arrow-up-icon" style="display:none;">
-          <x-svg-icon name="arrow-up" size="20" color="#0F1417" />
-        </span>
-        </button>
+        @endif
       </div>
-      </div>
-
-      <!-- Past Reviwer Comments -->
-      <div class="past-reviwer-container past-reviewer-section" style="display: none;">
-      
-      </div>
-    </div>
+      @endforeach
+        </div>
     </div>
 
     <!-- Admin`s Rating -->
@@ -157,65 +199,38 @@
     <x-text_input type="number" id="rating" name="rating" placeholder="0 - 10" />
     </div>
 
-    <!-- Comments -->
+    <!-- Admin Comments -->
     <div class="mt-4">
-    <h3 class="mb-2 h4-semibold">Admin Comment</h3>
-    <!-- Add Comment -->
-    <x-comment-input id="comment" name="comment" placeholder="Add new comment..." />
-    <!-- Comments List -->
-    <div class="comments-list-container">
-      <div class="comment-container">
-      <div class="gap-3 d-flex align-items-start">
-        <div class="comment-container-user-icon">
-        <x-svg-icon name="user" size="18" color="#35758c" />
-        </div>
-        <div>
-        <h4 class="h5-semibold">John Doe</h4>
-        <span class="h6-ragular" style="color:#ADADAD;">Commented On 2HOURES</span>
-        <p class="mt-2 h6-ragular">Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis nihil
-          inventore ipsum necessitatibus consectetur et. Enim culpa, accusantium magnam alias molestiae obcaecati
-          sapiente dolore cum, architecto dolores expedita nisi nulla.</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="gap-3 mt-3 d-flex align-items-center">
-          <div>
-            <x-svg-icon name="heart-empty" size="16" color="#ADADAD" />
-            <span class="h6-ragular">0 Likes</span>
-          </div>
-          <div>
-            <x-svg-icon name="message" size="16" color="#ADADAD" />
-            <span class="h6-ragular">0 Comments</span>
-          </div>
-          </div>
-          <div class="gap-2 mt-3 d-flex align-items-center">
-          <button class="btn-nothing reply-btn">
-            <x-svg-icon name="replay" size="20" color="#ADADAD" />
-          </button>
-          <button class="btn-nothing">
-            <x-svg-icon name="trash" size="20" color="#BB1313" />
-          </button>
-          </div>
-        </div>
-        </div>
-      </div>
-      <!-- Reply input, hidden by default -->
-      <div class="reply-input-container" style="display:none; margin-top:16px;">
-        <x-comment-input id="reply-comment" name="reply-comment" placeholder="Reply to this comment..." />
-      </div>
-      </div>
+        <h3 class="mb-2 h4-semibold">Admin Comments (Visible to Users)</h3>
+        <x-comments 
+            :commentsData="$adminComments"
+            :mediaId="$media->id"
+            :enableReplies="false"
+            :enableLikes="false"
+            :enableDelete="true"
+            :showAddComment="true"
+            commentRoute="AdminComment.add"
+            deleteRoute="AdminComment.delete"
+        />
     </div>
     </div>
   </section>
 @endsection
 
 @push('scripts')
+  <script src="{{ asset('js/validations.js') }}"></script>
+
   <script>
     document.querySelectorAll('.reply-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var replyInput = this.closest('.comment-container').querySelector('.reply-input-container');
+      var replyId = this.getAttribute('data-reply-id');
+      var replyInput = document.getElementById('reply-container-' + replyId);
       if (replyInput.style.display === 'none' || replyInput.style.display === '') {
-      replyInput.style.display = 'block';
+        replyInput.style.display = 'block';
+        var inputField = replyInput.querySelector('input, textarea');
+        if (inputField) inputField.focus();
       } else {
-      replyInput.style.display = 'none';
+        replyInput.style.display = 'none';
       }
     });
     });
@@ -249,14 +264,28 @@
       }
     });
     });
+
+    document.querySelectorAll('.toggle-reply-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var reviewId = this.getAttribute('data-review-id');
+        var replyInput = document.getElementById('reply-container-' + reviewId);
+        var arrowDown = this.querySelector('.arrow-down-icon');
+        var arrowUp = this.querySelector('.arrow-up-icon');
+        if (replyInput.style.display === 'none' || replyInput.style.display === '') {
+          replyInput.style.display = 'block';
+          arrowDown.style.display = 'none';
+          arrowUp.style.display = '';
+          // Focus on the input field
+          var inputField = replyInput.querySelector('input, textarea');
+          if (inputField) {
+            inputField.focus();
+          }
+        } else {
+          replyInput.style.display = 'none';
+          arrowDown.style.display = '';
+          arrowUp.style.display = 'none';
+        }
+      });
+    });
   </script>
 @endpush
-
-<style>
-.user-profile-img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-</style>
