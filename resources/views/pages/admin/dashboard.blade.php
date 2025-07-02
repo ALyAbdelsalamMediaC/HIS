@@ -32,6 +32,7 @@
                     <h3 class="h3-semibold">{{ number_format($commentsCount) }}</h3>
                 </div>
             </div>
+            @if(auth()->check() && auth()->user()->hasRole('admin'))
             <div class="dashboard-num-cards-container">
                 <div class="card-icon4">
                     <x-svg-icon name="clock2" size="18" color="#E0B610" />
@@ -39,6 +40,16 @@
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Pending Requests</h4>
                     <h3 class="h3-semibold">{{ number_format($mediaCountPending) }}</h3>
+                </div>
+            </div>
+            @endif
+            <div class="dashboard-num-cards-container">
+                <div class="card-icon4">
+                    <x-svg-icon name="clock2" size="18" color="#E0B610" />
+                </div>
+                <div class="card-icon-text">
+                    <h4 class="h6-semibold" style="color:#ADADAD;">Inreview Requests</h4>
+                    <h3 class="h3-semibold">{{ number_format($mediaCountInreview) }}</h3>
                 </div>
             </div>
         </div>

@@ -19,17 +19,32 @@ class DashboardController extends Controller
         try {
             $user = Auth::user();
 
+            // Initialize all variables to avoid undefined variable errors
+            $mediaCountPublished = 0;
+            $mediaCountPending = 0;
+            $mediaCountInreview = 0;
+            $lastPublishedMedia = null;
+
             if ($user->role === 'reviewer') {
                 // For reviewers: get media where they are in assigned_to or status is pending
                 $mediaCountPublished = Media::where('status', 'published')
-                    ->whereJsonContains('assigned_to', $user->id)
+                    ->where(function($query) use ($user) {
+                        $query->whereJsonContains('assigned_to', $user->id);
+                    })
                     ->count();
 
+                // For reviewers, pending = 'inreview' assigned to them, inreview = all 'inreview'
                 $mediaCountPending = Media::where('status', 'inreview')
+                    ->where(function($query) use ($user) {
+                        $query->whereJsonContains('assigned_to', $user->id);
+                    })
                     ->count();
+                $mediaCountInreview = Media::where('status', 'inreview')->count();
 
                 $lastPublishedMedia = Media::whereIn('status', ['published', 'inreview'])
-                    ->whereJsonContains('assigned_to', $user->id)
+                    ->where(function($query) use ($user) {
+                        $query->whereJsonContains('assigned_to', $user->id);
+                    })
                     ->orderBy('created_at', 'desc')
                     ->first();
             } else {
@@ -55,6 +70,7 @@ class DashboardController extends Controller
 
             return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending','mediaCountInreview', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
         } catch (\Exception $e) {
+            \Log::error('Dashboard error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);
         }
     }

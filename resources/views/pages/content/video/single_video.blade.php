@@ -2,15 +2,17 @@
 @section('title', 'HIS | Video - ' . $media->title)
 @section('content')
 
-  @if($media->status === 'pending')
-    @if(auth()->user()->hasRole('reviewer'))
-        @include('pages.content.video.single_video_pending_reviewer')
-    @elseif(auth()->user()->hasRole('admin'))
-        @include('pages.content.video.single_video_pending_admin')
-    @endif
-  @elseif($media->status === 'published')
+@if($media->status === 'published')
     @include('pages.content.video.single_video_published')
-  @else
+@elseif($media->status === 'pending')
+    @include('pages.content.video.single_video_pending')
+@elseif($media->status === 'inreview')
+    @if(auth()->user()->hasRole('admin'))
+        @include('pages.content.video.single_video_inreview_admin')
+    @elseif(auth()->user()->hasRole('reviewer'))
+        @include('pages.content.video.single_video_inreview_reviewer')
+    @endif
+@else
     <section>
     <div class="gap-3 mb-4 d-flex align-items-center">
     <a href="{{ url()->previous() }}" class="arrow-back-btn">
@@ -22,7 +24,7 @@
     </div>
     </div>
     </section>
-  @endif
+@endif
 
 @endsection
 

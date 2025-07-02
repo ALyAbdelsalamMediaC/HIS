@@ -111,8 +111,8 @@
                                 <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}</p>
                             </div>
 
-                            @if($item->status === 'pending')
-                                @if(auth()->user()->hasRole('admin'))
+                            @if($item->status === 'pending' || $item->status === 'inreview')
+                                @if($item->status === 'pending' && auth()->user()->hasRole('admin'))
                                     <div class="gap-3 mt-3 d-flex align-items-center">
                                         <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
                                         @php

@@ -196,7 +196,7 @@ class MediaController extends Controller
                 ->exists();
         }
 
-        if ($status === 'pending') {
+        if ($status === 'inreview') {
             if ($user && $user->role === 'admin') {
                 $adminComments = AdminComment::where('media_id', $id)
                     ->orderBy('created_at', 'desc')
@@ -222,7 +222,7 @@ class MediaController extends Controller
                 $replysCount = $replys->count();
                 $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
                 $assignedReviewersCount = count($assignedReviewers);
-                return view('pages.content.video.single_video_pending_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
+                return view('pages.content.video.single_video_inreview_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
@@ -235,7 +235,7 @@ class MediaController extends Controller
                 $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
                 $replysCount = $replys->count();
                 $commentsCount = $commentsData->count();
-                return view('pages.content.video.single_video_pending_reviewer', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked'));
+                return view('pages.content.video.single_video_pending', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked'));
             }
         } elseif ($status === 'published') {
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));

@@ -66,7 +66,7 @@ class AdminCommentController extends Controller
     public function showReplyForm($media_id, $parent_id)
     {
         // Pass media_id and parent_id to the view
-        return view('pages.content.video.single_video_pending_admin.blade', compact('media_id', 'parent_id'));
+        return view('pages.content.video.single_video_inreview_admin', compact('media_id', 'parent_id'));
     }
 
     public function reply(Request $request, $media_id, $parent_id)
