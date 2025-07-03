@@ -84,9 +84,9 @@ class ArticleController extends Controller
                 'CommentArticle.LikeCommentArticle', // eager load LikeCommentArticle for each CommentArticle
                 'CommentArticle',
                 'likesArticle'
-            ])->withCount(['CommentArticle', 'likesArticle'])->findOrFail($id);
+            ])->withCount(['CommentArticle','CommentArticle.LikeCommentArticle', 'likesArticle'])->findOrFail($id);
 
-            return view('pages.article.show', compact('article'));
+            return view('pages.content.single_article_published', compact('article'));
         } catch (Exception $e) {
             LaravelLog::error('Article getone error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
