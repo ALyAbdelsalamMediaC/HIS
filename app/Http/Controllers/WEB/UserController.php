@@ -127,7 +127,7 @@ class UserController extends Controller
             }
 
             // Retrieve soft-deleted users with pagination
-            $users = $query->select('id', 'name', 'email', 'username', 'phone', 'deleted_at')
+            $users = $query->select('id', 'name', 'email', 'phone', 'deleted_at')
                 ->paginate(10);
 
             // Get total number of deleted users (ignoring search filter)

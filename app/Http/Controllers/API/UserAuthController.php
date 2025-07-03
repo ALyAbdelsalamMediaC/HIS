@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\Log;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -71,7 +72,6 @@ class UserAuthController extends Controller
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|email|unique:users,email',
                 'role'     => 'required|string',
-                'username' => 'nullable',
                 'phone'    => 'required|string|max:20',
                 'password' => 'required|string|min:8|confirmed',
             ]);
@@ -124,59 +124,144 @@ class UserAuthController extends Controller
         }
     }
 
-public function resetPassword(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'current_password' => 'required|string',
-        'password' => 'required|string|min:8|confirmed',
-    ]);
-
-    $user = User::where('email', $request->email)->first();
-
-    if (!$user || !($user->role === 'user')) {
-        Log::create([
-            'user_id' => $user ? $user->id : null,
-            'type' => 'password_reset_error',
-            'description' => "Password reset failed: no user with email {$request->email}",
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        return response()->json([
-            'errors' => ['email' => 'We can\'t find an user with that email address.'],
-        ], 422);
-    }
+        $user = User::where('email', $request->email)->first();
 
-    // Verify current password
-    if (!Hash::check($request->current_password, $user->password)) {
+        if (!$user || !($user->role === 'user')) {
+            Log::create([
+                'user_id' => $user ? $user->id : null,
+                'type' => 'password_reset_error',
+                'description' => "Password reset failed: no user with email {$request->email}",
+            ]);
+
+            return response()->json([
+                'errors' => ['email' => 'We can\'t find an user with that email address.'],
+            ], 422);
+        }
+
+        // Verify current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'password_reset_error',
+                'description' => "Password reset failed: incorrect current password for {$user->email}",
+            ]);
+
+            return response()->json([
+                'errors' => ['current_password' => 'The current password is incorrect.'],
+            ], 422);
+        }
+
+        // Update password directly
+        $user->forceFill([
+            'password' => Hash::make($request->password)
+        ])->setRememberToken(Str::random(60));
+
+        $user->save();
+
+        event(new PasswordReset($user));
+
         Log::create([
             'user_id' => $user->id,
-            'type' => 'password_reset_error',
-            'description' => "Password reset failed: incorrect current password for {$user->email}",
+            'type' => 'password_reset_success',
+            'description' => "Password reset successful for {$user->email}",
         ]);
 
         return response()->json([
-            'errors' => ['current_password' => 'The current password is incorrect.'],
-        ], 422);
+            'message' => 'Password reset successfully.',
+        ], 200);
     }
+     public function editProfile(Request $request)
+    {
+        try {
+            $user = Auth::user();
 
-    // Update password directly
-    $user->forceFill([
-        'password' => Hash::make($request->password)
-    ])->setRememberToken(Str::random(60));
+            if (!$user) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'No authenticated user found',
+                ], 401);
+            }
 
-    $user->save();
+            // Validate input
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'phone' => 'required|string|max:20|unique:users,phone,' . $user->id,
+            ]);
 
-    event(new PasswordReset($user));
+            // Update user profile
+            $user->update($validated);
 
-    Log::create([
-        'user_id' => $user->id,
-        'type' => 'password_reset_success',
-        'description' => "Password reset successful for {$user->email}",
-    ]);
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'profile_update_success',
+                'description' => "Profile updated for {$user->email}",
+            ]);
 
-    return response()->json([
-        'message' => 'Password reset successfully.',
-    ], 200);
-}
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => new UserResource($user),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::create([
+                'user_id' => $user->id ?? null,
+                'type' => 'profile_update_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update profile',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'No authenticated user found',
+                ], 401);
+            }
+
+            // Log the user out
+            Auth::logout();
+
+            // Delete the user account
+            $user->delete();
+
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'account_deletion_success',
+                'description' => "Account deleted for {$user->email}",
+            ]);
+
+            return response()->json([
+                'message' => 'Account deleted successfully',
+            ], 200);
+        } catch (Exception $e) {
+            Log::create([
+                'user_id' => $user->id ?? null,
+                'type' => 'account_deletion_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to delete account',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
     
 }

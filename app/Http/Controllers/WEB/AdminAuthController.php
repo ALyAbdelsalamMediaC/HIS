@@ -143,7 +143,7 @@ class AdminAuthController extends Controller
             Log::create([
                 'user_id' => $user->id,
                 'type' => 'registration',
-                'description' => "New admin registered ({$user->username})",
+                'description' => "New admin registered ({$user->email})",
             ]);
 
             // Auto‐login and redirect with success message
