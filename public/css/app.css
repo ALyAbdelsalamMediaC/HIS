@@ -894,18 +894,12 @@ body {
     outline: none;
 }
 
-.search-list {
-    width: 100%;
-    position: absolute;
-    top: 50px;
-    left: 0;
-    right: 0;
-    background: var(--white-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--main-border-radius-md);
-    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
-    max-height: 100%;
-    padding: 24px;
+.search-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+.search-dropdown::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 2px;
 }
 
 .search-item {
@@ -1068,7 +1062,7 @@ body {
    ======================================================== */
 .dashboard-num-cards {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
 }
 
@@ -1408,6 +1402,7 @@ body {
     padding-top: 12px;
     display: flex;
     justify-content: space-between;
+    width: 100%;
 }
 
 .assign-to-btn {

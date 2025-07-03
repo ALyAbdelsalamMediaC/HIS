@@ -217,8 +217,6 @@
             deleteRoute="AdminComment.delete"
         />
     </div>
-    </div>
-
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
       <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
         @csrf
@@ -236,6 +234,8 @@
         <x-button style="background-color:#f1f9fa; color: #35758c;" type="submit">Next (Published)</x-button>
       </form>
     </div>
+    </div>
+
   </section>
 @endsection
 

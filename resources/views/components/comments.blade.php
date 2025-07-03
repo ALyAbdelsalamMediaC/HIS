@@ -1,6 +1,7 @@
 @props([
     'commentsData' => [],
     'mediaId' => null,
+    'articleId' => null,
     'enableReplies' => true,
     'enableLikes' => true,
     'enableDelete' => true,
@@ -88,7 +89,10 @@
             <!-- Reply input, hidden by default -->
             @if($enableReplies)
             <div class="reply-input-container" id="reply-container-{{ $comment->id }}" style="display:none; margin-top:16px;">
-                <form action="{{ route($replyRoute, ['media_id' => $mediaId, 'parent_id' => $comment->id]) }}" method="POST" class="mb-2">
+                @php
+                    $replyParam = $articleId ? ['article_id' => $articleId, 'parent_id' => $comment->id] : ['media_id' => $mediaId, 'parent_id' => $comment->id];
+                @endphp
+                <form action="{{ route($replyRoute, $replyParam) }}" method="POST" class="mb-2">
                     @csrf
                     <x-comment-input id="reply-comment-{{ $comment->id }}" name="content" placeholder="Reply to this comment..." :value="old('content')" />
                     @error('content')

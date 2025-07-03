@@ -23,7 +23,7 @@
                     <h3 class="h3-semibold">{{ number_format($mediaCountPublished) }}</h3>
                 </div>
             </div>
-            <div class="dashboard-num-cards-container">
+            <!-- <div class="dashboard-num-cards-container">
                 <div class="card-icon3">
                     <x-svg-icon name="message" size="18" color="#01A20C" />
                 </div>
@@ -31,7 +31,7 @@
                     <h4 class="h6-semibold" style="color:#ADADAD;">Total Comments</h4>
                     <h3 class="h3-semibold">{{ number_format($commentsCount) }}</h3>
                 </div>
-            </div>
+            </div> -->
             @if(auth()->check() && auth()->user()->hasRole('admin'))
             <div class="dashboard-num-cards-container">
                 <div class="card-icon4">

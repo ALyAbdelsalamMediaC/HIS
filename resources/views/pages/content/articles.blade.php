@@ -141,22 +141,23 @@
       </div>
       </div>
       </div>
-      </div>
     @empty
       <div class="py-5 text-center" style="grid-column: 1 / -1;">
       <p class="h5-ragular" style="color:#ADADAD;">No articles found</p>
       </div>
     @endforelse
-    </div>
 
-    </div>
-    <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
-    <!-- Table Info and Pagination -->
-    @if($article->count())
-    <x-table-info :paginator="$article" />
-    <x-pagination :paginator="$article" :appends="request()->query()" />
-    @endif
-    </div>
+  </div>
+  </div>
+  <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
+  <!-- Table Info and Pagination -->
+     @if($article->count())
+     <x-table-info :paginator="$article" />
+     <x-pagination :paginator="$article" :appends="request()->query()" />
+     @endif
+  </div>
+
+
 
     <!-- Delete Article Modals -->
     @foreach($article as $item)
@@ -174,6 +175,7 @@
     </div>
     </x-modal>
     @endforeach
+    
   </section>
 
 @endsection

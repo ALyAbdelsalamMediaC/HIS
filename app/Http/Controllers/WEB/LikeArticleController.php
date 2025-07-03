@@ -20,7 +20,7 @@ class LikeArticleController extends Controller
 
             // Check if the user already liked this media
             $existingLike = LikeArticle::where('user_id', Auth::id())
-                ->where('media_id', $mediaId)
+                ->where('article_id', $mediaId)
                 ->first();
 
             if ($existingLike) {
@@ -30,7 +30,7 @@ class LikeArticleController extends Controller
             // Create the like
             $like = LikeArticle::create([
                 'user_id' => Auth::id(),
-                'media_id' => $mediaId,
+                'article_id' => $mediaId,
             ]);
 
             // Log the action
@@ -43,7 +43,7 @@ class LikeArticleController extends Controller
             return back()->with('success', 'Media liked successfully.');
 
         } catch (\Exception $e) {
-            Log::error('Like addition failed: ' . $e->getMessage());
+            \Log::error('Like addition failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to like media: ' . $e->getMessage());
         }
@@ -61,7 +61,7 @@ class LikeArticleController extends Controller
         try {
             // Find the like
             $like = LikeArticle::where('user_id', Auth::id())
-                ->where('media_id', $mediaId)
+                ->where('article_id', $mediaId)
                 ->first();
 
             if (!$like) {
@@ -84,7 +84,7 @@ class LikeArticleController extends Controller
             return back()->with('success', 'Like removed successfully.');
 
         } catch (\Exception $e) {
-            Log::error('Like removal failed: ' . $e->getMessage());
+            \Log::error('Like removal failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }
@@ -122,7 +122,7 @@ class LikeArticleController extends Controller
             return back()->with('success', 'Comment liked successfully.');
 
         } catch (\Exception $e) {
-            Log::error('Like addition failed: ' . $e->getMessage());
+            \Log::error('Like addition failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to like comment: ' . $e->getMessage());
         }
@@ -163,7 +163,7 @@ class LikeArticleController extends Controller
             return back()->with('success', 'Like removed successfully.');
 
         } catch (\Exception $e) {
-            Log::error('Like removal failed: ' . $e->getMessage());
+            \Log::error('Like removal failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }
@@ -183,7 +183,7 @@ class LikeArticleController extends Controller
                 'like_count' => $likeCount,
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to get like count: ' . $e->getMessage());
+            \Log::error('Failed to get like count: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
