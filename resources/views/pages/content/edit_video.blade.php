@@ -206,8 +206,7 @@
 
     <div class="form-infield">
       <x-text_label for="description">Description (optional)</x-text_label>
-      <x-textarea name="description" id="description" placeholder="Enter Description" rows="3"
-      value="{{ $media->description }}" />
+      <x-text-editor name="description" id="description" placeholder="Enter Description">{{ old('description', $media->description) }}</x-text-editor>
     </div>
 
     <div class="form-infield">

@@ -95,7 +95,7 @@
       <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em;">
         {{ $item->title }}
       </h3>
-      <p class="h6-ragular">{{ Str::words($item->description, 15, '...') }}</p>
+      <p class="h6-ragular">{!! Str::words(strip_tags($item->description), 15, '...') !!}</p>
 
       <div class="gap-2 d-flex align-items-center">
         <x-svg-icon name="link" size="12" color="Black" />

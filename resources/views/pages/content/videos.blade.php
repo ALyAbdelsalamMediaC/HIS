@@ -108,7 +108,7 @@
                                 <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em; color:black;">
                                     {{ $item->title }}
                                 </h3>
-                                <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}</p>
+                                <p class="h6-ragular" style="color:black;">{!! Str::words(strip_tags($item->description), 15, '...') !!}</p>
                             </div>
 
                             @if($item->status === 'pending')
@@ -192,49 +192,33 @@
                                     <!-- No plus button here -->
                                 </div>
                             @endif
-                            @if($item->status === 'pending' || $item->status === 'inreview')
-                                <div class="mt-2 dashboard-video-card-content-content-down">
-                                    <div class="gap-2 d-flex align-items-center">
-                                        <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
-                                            @if(!auth()->user()->hasRole('reviewer'))
-                                            <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                            @endif
-                                        </a>
-                                        <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
-                                            data-bs-target="#deleteVideoModal{{ $item->id }}">
-                                            @if(!auth()->user()->hasRole('reviewer'))
-                                            <x-svg-icon name="trash" size="12" color="Black" />
-                                            @endif
-                                        </button>
+                            <div class="dashboard-video-card-content-content-down">
+                                <div class="gap-2 d-flex align-items-center">
+                                    <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
+                                        @if(!auth()->user()->hasRole('reviewer'))
+                                        <x-svg-icon name="edit-pen2" size="12" color="Black" />
+                                        @endif
+                                    </a>
+                                    <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
+                                        data-bs-target="#deleteVideoModal{{ $item->id }}">
+                                        @if(!auth()->user()->hasRole('reviewer'))
+                                        <x-svg-icon name="trash" size="12" color="Black" />
+                                        @endif
+                                    </button>
+                                </div>
+                                @if($item->status === 'published')
+                                <div class="gap-3 d-flex align-items-center">
+                                    <div>
+                                        <x-svg-icon name="eye" size="12" color="Black" />
+                                        <span class="h6-ragular">{{ $item->views}}</span>
+                                    </div>
+                                    <div>
+                                        <x-svg-icon name="message" size="12" color="Black" />
+                                        <span class="h6-ragular">{{ $item->comments_count }}</span>
                                     </div>
                                 </div>
-                            @elseif($item->status === 'published')
-                                <div class="dashboard-video-card-content-content-down">
-                                    <div class="gap-2 d-flex align-items-center">
-                                        <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">
-                                            @if(!auth()->user()->hasRole('reviewer'))
-                                            <x-svg-icon name="edit-pen2" size="12" color="Black" />
-                                            @endif
-                                        </a>
-                                        <button class="btn-nothing delete-video-btn" data-bs-toggle="modal"
-                                            data-bs-target="#deleteVideoModal{{ $item->id }}">
-                                            @if(!auth()->user()->hasRole('reviewer'))
-                                            <x-svg-icon name="trash" size="12" color="Black" />
-                                            @endif
-                                        </button>
-                                    </div>
-                                    <div class="gap-3 d-flex align-items-center">
-                                        <div>
-                                            <x-svg-icon name="eye" size="12" color="Black" />
-                                            <span class="h6-ragular">{{ $item->views}}</span>
-                                        </div>
-                                        <div>
-                                            <x-svg-icon name="message" size="12" color="Black" />
-                                            <span class="h6-ragular">{{ $item->comments_count }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @empty

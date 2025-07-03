@@ -96,7 +96,7 @@
 
             <div class="form-infield">
                 <x-text_label for="description">Description (optional)</x-text_label>
-                <x-textarea name="description" id="description" placeholder="Enter Description" rows="3" />
+                <x-text-editor name="description" id="description" placeholder="Enter Description" />
             </div>
 
             <div class="form-infield">

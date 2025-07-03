@@ -40,8 +40,8 @@
     </div>
 
     <!-- Video Description -->
-    <div class="mt-3">
-    <p class="h5-ragular">{{ $media->description }}</p>
+    <div class="mt-3 single-discription">
+    <div class="h5-ragular quill-content">{!! $media->description !!}</div>
     </div>
 
     <!-- Video Mentions  -->
