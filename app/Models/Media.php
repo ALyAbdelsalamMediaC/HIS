@@ -78,4 +78,5 @@ class Media extends Model
     {
         return $value ? url('/storage/uploads/' . $value) : null;
     }
+
 }

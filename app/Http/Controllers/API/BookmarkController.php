@@ -156,7 +156,8 @@ class BookmarkController extends Controller
         $userId = $request->input('user_id');
         
         $bookmarks = Bookmark::where('user_id', $userId)
-            ->with(['article', 'media'])
+            ->with(['article', 'media' ,'media.likes','media.comments', 'article.likesArticle', 'article.CommentArticle'])
+            ->withCount(['media.likes','media.comments', 'article.likesArticle', 'article.CommentArticle'])
             ->get()
             ->map(function ($bookmark) {
                 $item = null;

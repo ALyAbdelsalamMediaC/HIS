@@ -181,8 +181,12 @@ class UserAuthController extends Controller
     public function editProfile(Request $request)
     {
         try {
-            $user = $request->user();
-
+            $validated = $request->validate([
+                'user_id' => 'required',
+                'email' => 'required',
+            ]);
+            
+            $user = User::where('email', $validated['email'])->where('id', $validated['user_id'])->first();
             if (!$user) {
                 return response()->json([
                     'error' => 'Unauthorized',
