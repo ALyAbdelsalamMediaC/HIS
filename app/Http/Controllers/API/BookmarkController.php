@@ -159,7 +159,7 @@
                 ->get();
 
             $articleLikes = Article::where('user_id', $userId)
-                ->withCount(['likes', 'comments'])
+                ->withCount(['likesarticle', 'commentarticle'])
                 ->get();
                 
             $bookmarks = Bookmark::where('user_id', $userId)
@@ -170,7 +170,7 @@
                         $query->with(['likes', 'comments']);
                     },
                     'article' => function ($query) {
-                        $query->with(['likesArticle', 'CommentArticle']);
+                        $query->with(['likesarticle', 'commentarticle']);
                     }
                 ])
                 ->get();
