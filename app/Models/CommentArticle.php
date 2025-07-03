@@ -9,7 +9,7 @@ class CommentArticle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'aticle_id', 'parent_id', 'content'];
+    protected $fillable = ['user_id', 'article_id', 'parent_id', 'content'];
 
     public function user()
     {
@@ -31,7 +31,7 @@ class CommentArticle extends Model
         return $this->hasMany(CommentArticle::class, 'parent_id');
     }
 
-    public function likeCommentArticles()
+    public function likecommentarticles()
     {
         return $this->hasMany(LikeCommentArticle::class);
     }

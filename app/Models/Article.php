@@ -29,11 +29,11 @@ class Article extends Model
     {
         return $this->belongsTo(User::class);
     }
-     public function CommentArticle()
+     public function commentarticle()
     {
         return $this->hasMany(CommentArticle::class);
     }
-    public function likesArticle()
+    public function likesarticle()
     {
         return $this->hasMany(LikeArticle::class);
     }
