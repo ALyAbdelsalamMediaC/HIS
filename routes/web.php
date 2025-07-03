@@ -75,7 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/content/articles/add', [ArticleController::class, 'store'])->name('articles.store');
     Route::get('content/articles/{id}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('content/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
-    Route::get('/article/getone/{id}', [ArticleController::class, 'getone']);
+    Route::get('/article/{id}', [ArticleController::class, 'getone'])->name('content.article');
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
 
 

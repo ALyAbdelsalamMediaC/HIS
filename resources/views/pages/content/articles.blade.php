@@ -74,7 +74,9 @@
       <div class="content-container-card">
       <div class="d-flex justify-content-between align-items-end w-100">
       <div>
+      <a href="{{ route('content.article', ['id' => $item->id]) }}" class="w-100" style="color:#000;">
       <h2 class="h4-semibold">{{ $item->user->name  }}</h2>
+    </a>
       <span class="h6-ragular" style="color:#ADADAD;">Published
         {{ $item->created_at->diffForHumans() }}</span>
       </div>
@@ -85,17 +87,25 @@
       </div>
       </div>
 
-      <div class="mt-3 content-container-card-img">
-      <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}">
-      <span class="c-v-span">Article</span>
-      </div>
+      @if(!empty($item->thumbnail_path))
+      
+      <a  href="{{ route('content.article', ['id' => $item->id]) }}" class="w-100">
+        <div class="mt-3 content-container-card-img">
+          <img src="{{ $item->thumbnail_path}}" alt="{{ $item->title }}">
+          <span class="c-v-span">Article</span>
+        </div>
+    </a>
+      @endif
 
       <div class="video-card-content-content">
       <div class="dashboard-video-card-content-content-top">
-      <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em;">
-        {{ $item->title }}
-      </h3>
-      <p class="h6-ragular">{!! Str::words(strip_tags($item->description), 15, '...') !!}</p>
+      <a href="{{ route('content.article', ['id' => $item->id]) }}" class="w-100">
+        <h3 class="h5-semibold" style="margin-top:12px; line-height: 1.5em; color:#000;">
+          {{ $item->title }}
+        </h3>
+        <p class="h6-ragular" style="color:#000;">{!! Str::words(strip_tags($item->description), 15, '...') !!}</p>
+    </a>
+      </div>
 
       <div class="gap-2 d-flex align-items-center">
         <x-svg-icon name="link" size="12" color="Black" />

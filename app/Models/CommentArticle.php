@@ -30,4 +30,9 @@ class CommentArticle extends Model
     {
         return $this->hasMany(CommentArticle::class, 'parent_id');
     }
+
+    public function likeCommentArticles()
+    {
+        return $this->hasMany(LikeCommentArticle::class);
+    }
 }

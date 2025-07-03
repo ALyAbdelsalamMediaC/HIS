@@ -90,7 +90,7 @@ class ArticleController extends Controller
             $replys = CommentArticle::where('aticle_id', $id)->whereNotNull('parent_id')->get();
             $replysCount = $replys->count();
 
-            return view('pages.content.single_article_published', compact('article', 'replysCount'));
+            return view('pages.content.article.single_article_published', compact('article', 'replysCount'));
         } catch (Exception $e) {
             LaravelLog::error('Article getone error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
