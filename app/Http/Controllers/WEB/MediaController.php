@@ -76,7 +76,7 @@ class MediaController extends Controller
         if ($user->role === 'reviewer') {
             // For reviewers: get media where they are in assigned_to and status is pending or published
             $query->whereJsonContains('assigned_to', $user->id)
-                  ->whereIn('status', ['inreview', 'published']);
+                  ->whereIn('status', ['inreview', 'published','declined']);
         } else {
             // For admins: apply status filter only if provided, otherwise get all media
             if ($request->filled('status')) {
@@ -222,7 +222,11 @@ class MediaController extends Controller
                 $replysCount = $replys->count();
                 $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
                 $assignedReviewersCount = count($assignedReviewers);
-                return view('pages.content.video.single_video_inreview_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount'));
+                // Fetch admin's own rate
+                $myRate = Rate::where('media_id', $id)
+                    ->where('user_id', $user->id)
+                    ->value('rate');
+                return view('pages.content.video.single_video_inreview_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
@@ -235,13 +239,60 @@ class MediaController extends Controller
                 $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
                 $replysCount = $replys->count();
                 $commentsCount = $commentsData->count();
-                return view('pages.content.video.single_video_pending', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked'));
+                // Fetch reviewer's own rate
+                $myRate = Rate::where('media_id', $id)
+                    ->where('user_id', $user->id)
+                    ->value('rate');
+                return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked', 'myRate'));
             }
         } elseif ($status === 'published') {
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         }
         elseif ($status === 'pending') {
-            return view('pages.content.video.single_video_pending', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
+            $adminComments = AdminComment::where('media_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+                $assignedReviewerIds = json_decode($media->assigned_to, true) ?? [];
+                $assignedReviewers = User::whereIn('id', $assignedReviewerIds)->get();
+
+            // Get all users with role 'reviewer'
+            $reviewers = User::where('role', 'reviewer')->get();
+
+            return view('pages.content.video.single_video_pending', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
+        }
+        elseif ($status === 'declined') {
+            $user = Auth::user();
+            $adminComments = AdminComment::where('media_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $assignedReviewerIds = json_decode($media->assigned_to, true) ?? [];
+            $assignedReviewers = User::whereIn('id', $assignedReviewerIds)->get();
+
+            // Get all users with role 'reviewer'
+            $reviewers = User::where('role', 'reviewer')->get();
+
+            if ($user && $user->role === 'reviewer') {
+                $commentsData = Review::where('media_id', $id)
+                    ->whereNull('parent_id')
+                    ->with(['replies' => function ($query) {
+                        $query->orderBy('created_at', 'desc')
+                            ->with('user');
+                    }, 'user'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replysCount = $replys->count();
+                $commentsCount = $commentsData->count();
+                $myRate = Rate::where('media_id', $id)
+                    ->where('user_id', $user->id)
+                    ->value('rate');
+                return view('pages.content.video.single_video_declined_reviwer', compact('media', 'replys','replysCount','commentsCount', 'commentsData', 'myRate'));
+            }
+
+            // Default: admin view
+            return view('pages.content.video.single_video_declined', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
         }
 
         // Default fallback
@@ -547,6 +598,14 @@ class MediaController extends Controller
                 $imagePath = 'https://lh3.googleusercontent.com/d/' . $imagePath . '=w1000?authuser=0';
             }
 
+            // Determine new status
+            $newStatus = $media->status;
+            if ($media->status === 'published') {
+                $newStatus = 'inreview';
+            } elseif ($request->has('status')) {
+                $newStatus = $request->input('status', $media->status);
+            }
+
             // Update database
             $media->update([
                 'category_id' => $category->id,
@@ -555,7 +614,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
-                'status' => 'pending',
+                'status' => $newStatus,
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
@@ -683,5 +742,23 @@ class MediaController extends Controller
             LaravelLog::error('Media streaming error: ' . $e->getMessage());
             abort(500, 'Error streaming video.');
         }
+    }
+
+    public function changeStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,inreview,published,declined',
+        ]);
+        $media = Media::findOrFail($id);
+        $currentStatus = $media->status;
+        $newStatus = $request->input('status');
+        $assignedReviewerIds = json_decode($media->assigned_to, true) ?? [];
+        if (in_array($currentStatus, ['pending', 'declined']) && $newStatus === 'inreview' && count($assignedReviewerIds) < 1) {
+            return back()->with('error', 'You must assign at least one reviewer before moving to In Review.');
+        }
+        $media->status = $newStatus;
+        $media->save();
+        return redirect()->route('content.video', ['id' => $media->id, 'status' => $media->status])
+            ->with('success', 'Status updated successfully.');
     }
 }

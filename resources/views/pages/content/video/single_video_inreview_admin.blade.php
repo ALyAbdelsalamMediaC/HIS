@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'HIS | Video - Pending Review')
+@section('title', 'HIS | Video - In review')
 @section('content')
 
   <div class="gap-3 mb-4 d-flex align-items-center">
@@ -7,7 +7,7 @@
     <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
     </a>
     <div>
-    <h2 class="h2-semibold" style="color:#35758C;">Pending Video Review</h2>
+    <h2 class="h2-semibold" style="color:#35758C;">In review Video</h2>
     <p class="h5-ragular" style="color:#ADADAD;">Review and manage pending video content</p>
     </div>
   </div>
@@ -194,12 +194,12 @@
 
     <!-- Admin`s Rating -->
     <div class="mt-4">
-      <h3 class="mb-2 h4-semibold">Admin's Rating : ( 0 - 10 )</h3>
+      <h3 class="mb-2 h4-semibold">Admin's Rating : ( 1 - 10 )</h3>
       <form action="{{ route('admins.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
         @csrf
         <input type="hidden" name="media_id" value="{{ $media->id }}">
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-        <x-text_input type="number" id="rate" name="rate" placeholder="0 - 10" />
+        <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
       </form>
     </div>
 
@@ -217,6 +217,24 @@
             deleteRoute="AdminComment.delete"
         />
     </div>
+    </div>
+
+    <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
+      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
+        @csrf
+        <input type="hidden" name="status" value="declined">
+        <x-button class="bg-danger" type="submit">Declined</x-button>
+      </form>
+      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
+        @csrf
+        <input type="hidden" name="status" value="pending">
+        <x-button style="color: #e0b610; background-color: #fbfdd0;" type="submit">Previous (Pending)</x-button>
+      </form>
+      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
+        @csrf
+        <input type="hidden" name="status" value="published">
+        <x-button style="background-color:#f1f9fa; color: #35758c;" type="submit">Next (Published)</x-button>
+      </form>
     </div>
   </section>
 @endsection

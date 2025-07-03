@@ -146,6 +146,15 @@
     />
     </div>
 
+    <!-- Status Change Button -->
+    <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
+      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
+        @csrf
+        <input type="hidden" name="status" value="inreview">
+        <x-button type="submit">Revert to In Review</x-button>
+      </form>
+    </div>
+
   </section>
 
 @endsection

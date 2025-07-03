@@ -56,7 +56,7 @@
       <p class="mb-2 h6-ragular" style="color:#676767;">
       <strong>Status:</strong>
       <span
-        class="badge bg-{{ $media->status === 'published' ? 'success' : ($media->status === 'pending' ? 'warning' : 'danger') }}">
+        class="card-status {{ $media->status }}">
         {{ ucfirst($media->status) }}
       </span>
       </p>
@@ -156,6 +156,19 @@
       </div>
     @endif
     </div>
+
+        <!-- Status Select -->
+        <div class="form-infield">
+      <x-text_label for="status" :required="true">Status</x-text_label>
+      <x-select id="status" name="status"
+        :options="['pending' => 'Pending', 'inreview' => 'In Review', 'published' => 'Published', 'declined' => 'Declined']"
+        :selected="old('status', $media->status)"
+        placeholder="Select Status" data-required="true" data-name="Status" />
+      <div id="status-error-container">
+        <x-input-error :messages="$errors->get('status')" class="mt-2" />
+      </div>
+    </div>
+    
     <div class="form-infield">
       <x-text_label for="year" :required="true">Year</x-text_label>
       <x-select id="year" name="year"
@@ -284,8 +297,7 @@
     });
 
     const style = document.createElement('style');
-    style.textContent = `
-      input[type="file"]::-webkit-file-upload-button,
+    style.textContent = `      input[type="file"]::-webkit-file-upload-button,
       input[type="file"]::file-selector-button {
       display: none;
       }
