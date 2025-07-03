@@ -8,6 +8,7 @@ use App\Http\Controllers\WEB\ArticleController;
 use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\CommentArticleController;
 use App\Http\Controllers\WEB\DashboardController;
+use App\Http\Controllers\WEB\GlobalController;
 use App\Http\Controllers\WEB\LikeArticleController;
 use App\Http\Controllers\WEB\MediaController;
 use App\Http\Controllers\WEB\PolicyController;
@@ -77,7 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::put('content/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
     Route::get('/article/{id}', [ArticleController::class, 'getone'])->name('content.article');
     Route::get('/article/recently_Added', [ArticleController::class, 'recently_Added']);
-
+    Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
 
     Route::get('/users/', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');

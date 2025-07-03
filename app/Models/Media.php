@@ -55,6 +55,10 @@ class Media extends Model
     {
         return $this->hasMany(Like::class);
     }
+    public function bookMarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

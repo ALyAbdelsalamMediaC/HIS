@@ -57,7 +57,7 @@ class Bookmark extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function media(): BelongsTo
+    public function media()
     {
         return $this->belongsTo(Media::class)->withDefault();
     }

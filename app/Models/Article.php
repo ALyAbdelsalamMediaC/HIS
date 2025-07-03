@@ -38,4 +38,8 @@ class Article extends Model
         return $this->hasMany(LikeArticle::class);
     }
     
+    public function bookMarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 }

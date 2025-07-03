@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\CommentArticle;
+use App\Models\LikeCommentArticle;
 use Illuminate\Http\Request;
 use App\Models\Log;
 use App\Models\SubCategory;
@@ -82,15 +83,16 @@ class ArticleController extends Controller
         try {
             $article = Article::with([
                 'category',
-                'CommentArticle.LikeCommentArticle', // eager load LikeCommentArticle for each CommentArticle
+                'CommentArticle', // eager load LikeCommentArticle for each CommentArticle
                 'CommentArticle',
                 'likesArticle'
             ])->withCount(['CommentArticle', 'CommentArticle.LikeCommentArticle', 'likesArticle'])->findOrFail($id);
-
+            
+            $LikeCommentArticle = CommentArticle::where('article_id', $id)->with('likeCommentArticles')->withCount('likeCommentArticles')->get();
             $replys = CommentArticle::where('aticle_id', $id)->whereNotNull('parent_id')->get();
             $replysCount = $replys->count();
 
-            return view('pages.content.article.single_article_published', compact('article', 'replysCount'));
+            return view('pages.content.article.single_article_published', compact('article', 'replysCount','LikeCommentArticle'));
         } catch (Exception $e) {
             LaravelLog::error('Article getone error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');
