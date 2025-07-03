@@ -80,6 +80,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like.add');
     Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.like.remove');
 
+    Route::post('/media/{id}/status', [\App\Http\Controllers\WEB\MediaController::class, 'changeStatus'])->name('media.changeStatus');
+
     Route::post('/comments/{commentId}/like', [LikesController::class, 'addLikeComment'])->name('comments.like.add');
     Route::delete('/comments/{commentId}/like', [LikesController::class, 'removeLikeComment'])->name('comments.like.remove');
     Route::get('/comments/{commentId}/likes/count', [LikesController::class, 'getLikesCommentCount'])->name('comments.like.count');

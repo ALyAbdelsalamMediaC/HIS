@@ -1369,7 +1369,7 @@ body {
     color: #35758c;
     background-color: #f1f9fa;
 }
-.card-status.decline {
+.card-status.declined {
     color: #bb1313;
     background-color: #fff3f3;
 }

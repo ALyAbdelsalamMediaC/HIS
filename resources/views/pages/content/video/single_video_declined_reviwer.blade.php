@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'HIS | Video - Reviewer Review')
+@section('title', 'HIS | Video - Reviewer Review (Declined)')
 @section('content')
 
   <div class="gap-3 mb-4 d-flex align-items-center">
@@ -7,8 +7,8 @@
     <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
     </a>
     <div>
-    <h2 class="h2-semibold" style="color:#35758C;">Video Reviewer Review</h2>
-    <p class="h5-ragular" style="color:#ADADAD;">Review the video and leave comments if needed</p>
+    <h2 class="h2-semibold" style="color:#35758C;">Video Reviewer Review (Declined)</h2>
+    <p class="h5-ragular" style="color:#ADADAD;">This video has been declined. You can view your rating and comments below.</p>
     </div>
   </div>
 
@@ -48,7 +48,6 @@
     <!-- Video Mentions  -->
      <div class="gap-4 mt-3 d-flex align-items-center">
       <h3 class="h5-semibold">Mentioned to :</h3>
-
       <div class="flex-wrap gap-3 d-flex align-items-center">
         @if($media->mention && is_array(json_decode($media->mention, true)))
           @foreach(json_decode($media->mention, true) as $mentionedUser)
@@ -102,27 +101,17 @@
     @endif
     </div>
 
-    <!-- Reviwer`s Rating -->
+    <!-- Reviwer`s Rating (Read Only) -->
     <div class="mt-4">
-      <h3 class="mb-2 h4-semibold">Reviewer Rating : ( 1 - 10 )</h3>
-      <form action="{{ route('reviews.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
-        @csrf
-        <input type="hidden" name="media_id" value="{{ $media->id }}">
-        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-        <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
-      </form>
+      <h3 class="mb-2 h4-semibold">Your Rating : ( 1 - 10 )</h3>
+      <div class="gap-3 d-flex align-items-center w-100">
+        <span class="h4-semibold" style="color:#35758C;">{{ $myRate ?? 'No rating given' }}</span>
+      </div>
     </div>
 
-    <!-- Comments -->
+    <!-- Comments (Read Only) -->
     <div class="mt-4">
     <h3 class="mb-2 h4-semibold">Reviewer Comment</h3>
-    <!-- Add Comment Form -->
-    <form action="{{ route('reviews.add', ['media_id' => $media->id]) }}" method="POST" class="mb-3">
-        @csrf
-        <x-comment-input id="comment" name="content" placeholder="Add new comment..." :value="old('content')" />
-    </form>
-
-    <!-- Comments List -->
     @foreach($commentsData as $comment)
       <div class="comment-container">
         <div class="gap-3 d-flex align-items-start">
@@ -141,30 +130,7 @@
             </div>
             @php
               $reviewReplies = $replys->where('parent_id', $comment->id);
-              $hasAdminReply = $reviewReplies->contains(function($r) { return isset($r->user) && $r->user->role === 'admin'; });
             @endphp
-            @if(auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id && !$hasAdminReply)
-              <div class="mt-2 d-flex align-items-center">
-                <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $comment->id }}">
-                  <x-svg-icon name="trash" size="20" color="#BB1313" />
-                </button>
-              </div>
-              <!-- Delete Modal for Review -->
-              <x-modal id="deleteReviewModal{{ $comment->id }}" title="Delete Review">
-                <div class="my-3">
-                  <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this review?</p>
-                  <p class="h5-ragular" style="color:#ADADAD;">This will also delete all replies to this review.</p>
-                </div>
-                <div class="modal-footer">
-                  <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-                  <form action="{{ route('reviews.delete', ['comment_id' => $comment->id]) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
-                  </form>
-                </div>
-              </x-modal>
-            @endif
             @if($reviewReplies->count() > 0)
               <div class="mt-2 replies-container" style="margin-left: 40px;">
                 @foreach($reviewReplies as $reply)
@@ -181,23 +147,3 @@
   </section>
 
 @endsection
-
-@push('scripts')
-<script src="{{ asset('js/validations.js') }}"></script>
-<script>
-  document.querySelectorAll('.reply-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var replyId = this.getAttribute('data-reply-id');
-      var replyInput = document.getElementById('reply-container-' + replyId);
-      if (replyInput.style.display === 'none' || replyInput.style.display === '') {
-        replyInput.style.display = 'block';
-        var inputField = replyInput.querySelector('input, textarea');
-        if (inputField) inputField.focus();
-      } else {
-        replyInput.style.display = 'none';
-      }
-    });
-  });
-</script>
-@endpush
-

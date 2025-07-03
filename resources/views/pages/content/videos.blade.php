@@ -111,48 +111,88 @@
                                 <p class="h6-ragular" style="color:black;">{{ Str::words($item->description, 15, '...') }}</p>
                             </div>
 
-                            @if($item->status === 'pending' || $item->status === 'inreview')
-                                @if($item->status === 'pending' && auth()->user()->hasRole('admin'))
-                                    <div class="gap-3 mt-3 d-flex align-items-center">
-                                        <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
-                                        @php
-                                            $reviewers_list = $item->assigned_reviewers;
-                                            $total_reviewers = $reviewers_list->count();
-                                            $visible_reviewers = $reviewers_list->take(2);
-                                            $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
-                                        @endphp
-                                        <div class="gap-1 d-flex align-items-center">
-                                            @foreach($visible_reviewers as $reviewer)
-                                                <img
-                                                    src="{{ $reviewer->profile_image ?? asset('images/global/user-placeholder.png') }}"
-                                                    class="user-profile-img"
-                                                    style="width:40px;height:40px;border-radius:50%;object-fit:cover; border:2px solid #fff; box-shadow:0 0 2px #35758C;"
-                                                    alt="{{ $reviewer->name }}"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-placement="top"
-                                                    title="{{ $reviewer->name }}"
-                                                />
-                                            @endforeach
-                                            @if($hidden_reviewers_count > 0)
-                                                @php
-                                                    $hidden_reviewers = $reviewers_list->slice(2);
-                                                    $hidden_names = $hidden_reviewers->pluck('name')->implode(', ');
-                                                @endphp
-                                                <span
-                                                    class="badge rounded-pill bg-secondary"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-placement="top"
-                                                    title="{{ $hidden_names }}"
-                                                    style="cursor:pointer;"
-                                                >+{{ $hidden_reviewers_count }} more</span>
-                                            @endif
-                                        </div>
+                            @if($item->status === 'pending')
+                                <div class="gap-3 mt-3 d-flex align-items-center">
+                                    <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
+                                    @php
+                                        $reviewers_list = $item->assigned_reviewers;
+                                        $total_reviewers = $reviewers_list->count();
+                                        $visible_reviewers = $reviewers_list->take(2);
+                                        $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
+                                    @endphp
+                                    <div class="gap-1 d-flex align-items-center">
+                                        @foreach($visible_reviewers as $reviewer)
+                                            <img
+                                                src="{{ $reviewer->profile_image ?? asset('images/global/user-placeholder.png') }}"
+                                                class="user-profile-img"
+                                                style="width:40px;height:40px;border-radius:50%;object-fit:cover; border:2px solid #fff; box-shadow:0 0 2px #35758C;"
+                                                alt="{{ $reviewer->name }}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $reviewer->name }}"
+                                            />
+                                        @endforeach
+                                        @if($hidden_reviewers_count > 0)
+                                            @php
+                                                $hidden_reviewers = $reviewers_list->slice(2);
+                                                $hidden_names = $hidden_reviewers->pluck('name')->implode(', ');
+                                            @endphp
+                                            <span
+                                                class="badge rounded-pill bg-secondary"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $hidden_names }}"
+                                                style="cursor:pointer;"
+                                            >+{{ $hidden_reviewers_count }} more</span>
+                                        @endif
+                                    </div>
+                                    @if(auth()->user()->hasRole('admin'))
                                         <div class="assign-to-btn" data-bs-toggle="modal"
                                             data-bs-target="#assignReviewerModal{{ $item->id }}" onclick="event.stopPropagation();">
                                             <x-svg-icon name="plus" size="12" color="#35758C" />
                                         </div>
+                                    @endif
+                                </div>
+                            @endif
+                            @if($item->status === 'inreview' && $item->assigned_reviewers->count())
+                                <div class="gap-3 mt-3 d-flex align-items-center">
+                                    <h3 class="h5-semibold" style="color:black;">Assigned to :</h3>
+                                    @php
+                                        $reviewers_list = $item->assigned_reviewers;
+                                        $total_reviewers = $reviewers_list->count();
+                                        $visible_reviewers = $reviewers_list->take(2);
+                                        $hidden_reviewers_count = $total_reviewers - $visible_reviewers->count();
+                                    @endphp
+                                    <div class="gap-1 d-flex align-items-center">
+                                        @foreach($visible_reviewers as $reviewer)
+                                            <img
+                                                src="{{ $reviewer->profile_image ?? asset('images/global/user-placeholder.png') }}"
+                                                class="user-profile-img"
+                                                style="width:40px;height:40px;border-radius:50%;object-fit:cover; border:2px solid #fff; box-shadow:0 0 2px #35758C;"
+                                                alt="{{ $reviewer->name }}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $reviewer->name }}"
+                                            />
+                                        @endforeach
+                                        @if($hidden_reviewers_count > 0)
+                                            @php
+                                                $hidden_reviewers = $reviewers_list->slice(2);
+                                                $hidden_names = $hidden_reviewers->pluck('name')->implode(', ');
+                                            @endphp
+                                            <span
+                                                class="badge rounded-pill bg-secondary"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $hidden_names }}"
+                                                style="cursor:pointer;"
+                                            >+{{ $hidden_reviewers_count }} more</span>
+                                        @endif
                                     </div>
-                                @endif
+                                    <!-- No plus button here -->
+                                </div>
+                            @endif
+                            @if($item->status === 'pending' || $item->status === 'inreview')
                                 <div class="mt-2 dashboard-video-card-content-content-down">
                                     <div class="gap-2 d-flex align-items-center">
                                         <a href="{{ route('content.edit', $item->id) }}" onclick="event.stopPropagation();">

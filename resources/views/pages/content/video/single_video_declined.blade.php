@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'HIS | Video - Pending Review')
+@section('title', 'HIS | Video - Declined')
 @section('content')
 
-  <div class="gap-3 mb-4 d-flex align-items-center">
+<div class="gap-3 mb-4 d-flex align-items-center">
     <a href="{{ url()->previous() }}" class="arrow-back-btn">
     <x-svg-icon name="arrow-left2" size="16" color="#35758C" />
     </a>
     <div>
-    <h2 class="h2-semibold" style="color:#35758C;">Video Details (Pending Review)</h2>
+    <h2 class="h2-semibold" style="color:#35758C;">Video Details (Declined Review)</h2>
     <p class="h5-ragular" style="color:#ADADAD;">Review the video and leave comments if needed</p>
     </div>
   </div>
@@ -189,20 +189,15 @@
             deleteRoute="AdminComment.delete"
         />
     </div>
-
+    
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
-      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
-        @csrf
-        <input type="hidden" name="status" value="declined">
-        <x-button class="bg-danger" type="submit">Declined</x-button>
-      </form>
       <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
         @csrf
         <input type="hidden" name="status" value="inreview">
         <x-button type="submit">Next (In Review)</x-button>
       </form>
     </div>
-  </section>
+</section>
 
 @endsection
 
@@ -299,5 +294,3 @@
   });
 </script>
 @endpush
-
-
