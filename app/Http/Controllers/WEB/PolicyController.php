@@ -20,7 +20,7 @@ class PolicyController extends Controller
     {
         $categories = PolicyCategory::with([
             'policies' => function ($query) {
-                $query->with('addedBy:id,name,username')->orderBy('id');
+                $query->with('addedBy:id,name,email')->orderBy('id');
             }
         ])->get();
 

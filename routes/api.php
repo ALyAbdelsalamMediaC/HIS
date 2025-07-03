@@ -7,6 +7,7 @@ use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\BookmarkController;
 use App\Http\Controllers\API\LikesController;
+use App\Http\Controllers\API\PolicyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Http\Request;
@@ -48,3 +49,20 @@ Route::post('/login', [UserAuthController::class, 'login']);
 
 Route::post('login/google', [SocialAuthController::class, 'handleGoogleLoginApi'])->name('api.social.google.login');
 Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
+    Route::put('/profile', [UserAuthController::class, 'editProfile'])->name('profile.update');
+    Route::delete('/profile', [UserAuthController::class, 'deleteAccount'])->name('profile.delete');
+
+Route::prefix('settings/policies')->group(function () {
+    Route::get('/', [PolicyController::class, 'index'])->name('policies.index');
+    Route::get('/create', [PolicyController::class, 'create'])->name('policies.create');
+    Route::post('/', [PolicyController::class, 'store'])->name('policies.store');
+    Route::get('/{policy}', [PolicyController::class, 'show'])->name('policies.show');
+    Route::get('/{policy}/edit', [PolicyController::class, 'edit'])->name('policies.edit');
+    Route::put('/{policy}', [PolicyController::class, 'update'])->name('policies.update');
+    Route::delete('/{policy}', [PolicyController::class, 'destroy'])->name('policies.destroy');
+
+    Route::post('/categories', [PolicyController::class, 'storeCategory'])->name('policies.categories.store');
+    Route::get('/categories/{category}', [PolicyController::class, 'showCategory'])->name('policies.categories.show');
+    Route::put('/categories/{category}', [PolicyController::class, 'updateCategory'])->name('policies.categories.update');
+    Route::delete('/categories/{category}', [PolicyController::class, 'destroyCategory'])->name('policies.categories.destroy');
+});
