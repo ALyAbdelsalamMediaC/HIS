@@ -78,8 +78,19 @@ class ArticleController extends Controller
 
     public function getone($id)
     {
-        $article = Article::with(['category', 'comments'])->findOrFail($id);
-        return view('pages.article.show', compact('article'));
+        try {
+            $article = Article::with([
+                'category',
+                'CommentArticle.LikeCommentArticle', // eager load LikeCommentArticle for each CommentArticle
+                'CommentArticle',
+                'likesArticle'
+            ])->withCount(['CommentArticle', 'likesArticle'])->findOrFail($id);
+
+            return view('pages.article.show', compact('article'));
+        } catch (Exception $e) {
+            LaravelLog::error('Article getone error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to fetch article.');
+        }
     }
 
 
@@ -111,7 +122,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-           
+
 
             $pdf = null;
             if ($request->hasFile('pdf')) {
@@ -123,7 +134,7 @@ class ArticleController extends Controller
                 }
             }
 
-           
+
 
 
             $thumbnail_path = null;
@@ -191,7 +202,7 @@ class ArticleController extends Controller
 
             // Validate input
             $validated = $request->validate([
-               
+
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
@@ -210,7 +221,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-           
+
 
             // Update PDF file on Google Drive
             $pdf = $article->pdf;

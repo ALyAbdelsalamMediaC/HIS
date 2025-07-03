@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+// article like model
 class LikeArticle extends Model
 {
     use HasFactory;
@@ -16,8 +16,8 @@ class LikeArticle extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function media()
+    public function article()
     {
-        return $this->belongsTo(Media::class);
+        return $this->belongsTo(Article::class);
     }
 }
