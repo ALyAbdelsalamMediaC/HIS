@@ -178,10 +178,10 @@ class UserAuthController extends Controller
             'message' => 'Password reset successfully.',
         ], 200);
     }
-     public function editProfile(Request $request)
+    public function editProfile(Request $request)
     {
         try {
-            $user = Auth::user();
+            $user = $request->user();
 
             if (!$user) {
                 return response()->json([
@@ -226,33 +226,35 @@ class UserAuthController extends Controller
     public function deleteAccount(Request $request)
     {
         try {
-            $user = $request->user();
-
-            if (!$user) {
-                return response()->json([
-                    'error' => 'Unauthorized',
-                    'message' => 'No authenticated user found',
-                ], 401);
-            }
-
-            // Log the user out
-            Auth::logout();
-
-            // Delete the user account
-            $user->delete();
-
-            Log::create([
-                'user_id' => $user->id,
-                'type' => 'account_deletion_success',
-                'description' => "Account deleted for {$user->email}",
+            // Validate request data
+            $validated = $request->validate([
+                'user_id' => 'required',
+                'email' => 'required',
             ]);
 
-            return response()->json([
-                'message' => 'Account deleted successfully',
-            ], 200);
-        } catch (Exception $e) {
+            $user = User::where('email', $validated['email'])->where('id', $validated['user_id'])->first();
+            if (!$user) {
+                return response()->json([
+                    'error' => 'User not found',
+                ], 404);
+            }
+
+            if ($user->id == $validated['user_id'] || $user->email == $validated['email']) {
+                $user->delete();
+
+                Log::create([
+                    'user_id' => $validated['user_id'],
+                    'type' => 'account_deletion_success',
+                    'description' => "Account deleted for {$validated['email']}",
+                ]);
+
+                return response()->json([
+                    'message' => 'Account deleted successfully',
+                ], 200);
+            }
+        } catch (\Exception $e) {
             Log::create([
-                'user_id' => $user->id ?? null,
+                'user_id' => $request->input('user_id'),
                 'type' => 'account_deletion_error',
                 'description' => $e->getMessage(),
             ]);
@@ -263,5 +265,4 @@ class UserAuthController extends Controller
             ], 500);
         }
     }
-    
 }
