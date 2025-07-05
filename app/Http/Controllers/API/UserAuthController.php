@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Log;
 use App\Models\User;
+use App\Services\GoogleDriveServiceImageProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
@@ -73,6 +74,7 @@ class UserAuthController extends Controller
                 'email'    => 'required|email|unique:users,email',
                 'role'     => 'required|string',
                 'phone'    => 'required|string|max:20',
+                'profile_image' => 'nullable|image|max:2048',
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
@@ -94,6 +96,17 @@ class UserAuthController extends Controller
                 ], 200); // 409 Conflict
             }
 
+             $profile_image = null;
+
+        if ($request->hasFile('profile_image')) {
+            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+            if ($request->file('profile_image')->isValid()) {
+                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            }
+        }
+        $validated['profile_image'] = $profile_image;
             // Create user
             $user = User::create($validated);
 
@@ -185,7 +198,7 @@ class UserAuthController extends Controller
                 'user_id' => 'required',
                 'email' => 'required',
             ]);
-            
+
             $user = User::where('email', $validated['email'])->where('id', $validated['user_id'])->first();
             if (!$user) {
                 return response()->json([
