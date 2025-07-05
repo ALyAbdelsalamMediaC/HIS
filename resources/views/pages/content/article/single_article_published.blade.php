@@ -56,7 +56,15 @@
 
     <!-- Article Description -->
     <div class="mt-3 single-discription">
-      <div class="h5-ragular quill-content">{!! $article->description !!}</div>
+        <div class="h5-ragular description-content-wrapper quill-content" id="description-content-{{ $article->id }}">
+            <div class="description-text" id="description-text-{{ $article->id }}" style="white-space: pre-wrap;">{!! $article->description !!}</div>
+            <button class="btn-nothing read-more-btn" id="read-more-desc-{{ $article->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Read more
+            </button>
+            <button class="btn-nothing read-less-btn" id="read-less-desc-{{ $article->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Show less
+            </button>
+        </div>
     </div>
 
     <!-- Article Mentions  -->
@@ -120,4 +128,5 @@
 
 @push('scripts')
 <script src="{{ asset('js/validations.js') }}"></script>
+<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
 @endpush

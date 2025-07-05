@@ -466,6 +466,18 @@ body {
     transform: translate(-50%, -50%);
 }
 
+.input-icon textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 60px;
+    max-height: 120px;
+}
+
+.input-icon textarea::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
 .forget-pass {
     width: 100%;
     display: flex;
@@ -1695,6 +1707,85 @@ body {
     object-fit: cover;
 }
 
+.comment-content-wrapper {
+    position: relative;
+}
+
+.comment-text {
+    transition: max-height 0.3s ease, overflow 0.3s ease;
+    word-wrap: break-word;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+.read-more-btn,
+.read-less-btn {
+    font-size: 14px !important;
+    text-decoration: none !important;
+    border: none !important;
+    background: none !important;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.read-more-btn:hover,
+.read-less-btn:hover {
+    color: var(--hover-button) !important;
+    text-decoration: underline !important;
+}
+
+/* Ensure smooth transitions for the read more functionality */
+.comment-text.collapsed {
+    max-height: 60px;
+    overflow: hidden;
+    position: relative;
+}
+
+.comment-text.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}
+
+/* ========================================================
+   Description Read More Styles
+   ======================================================== */
+.description-content-wrapper {
+    position: relative;
+}
+
+.description-text {
+    transition: max-height 0.3s ease, overflow 0.3s ease;
+    word-wrap: break-word;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ensure smooth transitions for the description read more functionality */
+.description-text.collapsed {
+    max-height: 80px;
+    overflow: hidden;
+    position: relative;
+}
+
+.description-text.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}
+
 .input-icon-send {
     position: absolute;
     cursor: pointer;
@@ -1754,6 +1845,8 @@ body {
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
     padding: 24px;
     margin-top: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Optimize replies container */
