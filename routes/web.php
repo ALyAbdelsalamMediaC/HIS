@@ -50,9 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
 
     // Article comments
-    Route::post('/article-comments/add/{article_id}', [CommentArticleController::class, 'addComment'])->name('article.comments.add');
-    Route::get('/article-comments/reply/{article_id}/{parent_id}', [CommentArticleController::class, 'showReplyForm'])->name('article.comments.reply.form');
-    Route::post('/article-comments/reply/{article_id}/{parent_id}', [CommentArticleController::class, 'reply'])->name('article.comments.reply');
+    Route::post('/article-comments/add/{media_id}', [CommentArticleController::class, 'addComment'])->name('article.comments.add');
+    Route::get('/article-comments/reply/{media_id}/{parent_id}', [CommentArticleController::class, 'showReplyForm'])->name('article.comments.reply.form');
+    Route::post('/article-comments/reply/{media_id}/{parent_id}', [CommentArticleController::class, 'reply'])->name('article.comments.reply');
     Route::delete('/article-comments/{comment_id}', [CommentArticleController::class, 'deleteComment'])->name('article.comments.delete');
 
     Route::post('/AdminComment/add/{media_id}', [AdminCommentController::class, 'addComment'])->name('AdminComment.add');
