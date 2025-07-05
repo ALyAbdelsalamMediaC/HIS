@@ -82,13 +82,24 @@ class ArticleController extends Controller
     public function getone($id)
     {
         try {
-            $article = Article::with(['likesarticle','commentarticle'])->withCount('likesarticle','commentarticle')->findOrFail($id);
+            $article = Article::with(['category', 'likesarticle', 'commentarticle'])->withCount('likesarticle','commentarticle')->findOrFail($id);
+
+            // Get count of likes
+            $likesCount = $article->likesarticle ? $article->likesarticle->count() : 0;
+
+            $user = Auth::user();
+            $userLiked = false;
+            if ($user) {
+                $userLiked = \App\Models\LikeArticle::where('user_id', $user->id)
+                    ->where('article_id', $article->id)
+                    ->exists();
+            }
 
             $CommentArticle = CommentArticle::where('article_id', $id)->get();
             $replys = CommentArticle::where('article_id', $id)->whereNotNull('parent_id')->get();
             $replysCount = $replys->count();
 
-            return view('pages.content.article.single_article_published', compact('article', 'replysCount', 'CommentArticle'));
+            return view('pages.content.article.single_article_published', compact('article', 'replysCount', 'CommentArticle', 'likesCount', 'userLiked'));
         } catch (Exception $e) {
             LaravelLog::error('Article getone error: ' . $e->getMessage());
             return back()->with('error', 'Failed to fetch article.');

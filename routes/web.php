@@ -49,13 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
 
-
-    Route::post('/comments/add/{media_id}', [CommentArticleController::class, 'addComment'])->name('comments.add');
-    Route::get('/comments/reply/{media_id}/{parent_id}', [CommentArticleController::class, 'showReplyForm'])->name('comments.reply.form');
-    Route::post('/comments/reply/{media_id}/{parent_id}', [CommentArticleController::class, 'reply'])->name('comments.reply');
-    Route::delete('/comments/{comment_id}', [CommentArticleController::class, 'deleteComment'])->name('comments.delete');
-
-
+    // Article comments
+    Route::post('/article-comments/add/{article_id}', [CommentArticleController::class, 'addComment'])->name('article.comments.add');
+    Route::get('/article-comments/reply/{article_id}/{parent_id}', [CommentArticleController::class, 'showReplyForm'])->name('article.comments.reply.form');
+    Route::post('/article-comments/reply/{article_id}/{parent_id}', [CommentArticleController::class, 'reply'])->name('article.comments.reply');
+    Route::delete('/article-comments/{comment_id}', [CommentArticleController::class, 'deleteComment'])->name('article.comments.delete');
 
     Route::post('/AdminComment/add/{media_id}', [AdminCommentController::class, 'addComment'])->name('AdminComment.add');
     Route::get('/AdminComment/reply/{media_id}/{parent_id}', [AdminCommentController::class, 'showReplyForm'])->name('AdminComment.reply.form');
@@ -98,11 +96,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/{commentId}/likes/count', [LikesController::class, 'getLikesCommentCount'])->name('comments.like.count');
 
 
-    Route::post('/article/{mediaId}/like', [LikeArticleController::class, 'addLike'])->name('media.like.add');
-    Route::delete('/article/{mediaId}/like', [LikeArticleController::class, 'removeLike'])->name('media.like.remove');
-    Route::post('/articleCmments/{commentId}/like', [LikeArticleController::class, 'addLikeComment'])->name('comments.like.add');
-    Route::delete('/articleCmments/{commentId}/like', [LikeArticleController::class, 'removeLikeComment'])->name('comments.like.remove');
-    Route::get('/articleCmments/{commentId}/likes/count', [LikeArticleController::class, 'getLikesCommentCount'])->name('comments.like.count');
+    Route::post('/article/{mediaId}/like', [LikeArticleController::class, 'addLike'])->name('article.like.add');
+    Route::delete('/article/{mediaId}/like', [LikeArticleController::class, 'removeLike'])->name('article.like.remove');
+    Route::post('/articleCmments/{commentId}/like', [LikeArticleController::class, 'addLikeComment'])->name('article.comments.like.add');
+    Route::delete('/articleCmments/{commentId}/like', [LikeArticleController::class, 'removeLikeComment'])->name('article.comments.like.remove');
+    Route::get('/articleCmments/{commentId}/likes/count', [LikeArticleController::class, 'getLikesCommentCount'])->name('article.comments.like.count');
 
 
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');

@@ -14,20 +14,38 @@ class GlobalController extends Controller
         try {
             $searchTerm = $request->input('search');
 
-            // Search in Article and Media models by title
-            $article = Article::where('title', 'like', '%' . $searchTerm . '%')->first();
-            if ($article) {
-                return redirect()->route('content.article', ['id' => $article->id]);
+            $articles = \App\Models\Article::where('title', 'like', '%' . $searchTerm . '%')->get();
+            $videos = \App\Models\Media::where('title', 'like', '%' . $searchTerm . '%')->get();
+
+            if ($request->has('ajax')) {
+                $articlesArr = $articles->map(function($a) {
+                    return [
+                        'id' => $a->id,
+                        'title' => $a->title,
+                        'thumbnail' => $a->thumbnail ?? $a->thumbnail_path ?? null,
+                        'created_at' => optional($a->created_at)->toDateString(),
+                    ];
+                });
+                $videosArr = $videos->map(function($v) {
+                    return [
+                        'id' => $v->id,
+                        'title' => $v->title,
+                        'thumbnail' => $v->thumbnail ?? $v->thumbnail_path ?? null,
+                        'created_at' => optional($v->created_at)->toDateString(),
+                        'status' => $v->status ?? 'published',
+                    ];
+                });
+                return response()->json([
+                    'articles' => $articlesArr,
+                    'videos' => $videosArr,
+                ]);
             }
 
-            $media = Media::where('title', 'like', '%' . $searchTerm . '%')->first();
-            if ($media) {
-                // Assuming 'published' as default status, adjust as needed
-                return redirect()->route('content.video', ['id' => $media->id, 'status' => $media->status ?? 'published']);
-            }
-
-            // If not found, return to search with a message
-            return redirect()->back()->with('error', 'No results found.');
+            return view('pages.search.results', [
+                'articles' => $articles,
+                'videos' => $videos,
+                'searchTerm' => $searchTerm,
+            ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'An error occurred during search.');
         }
