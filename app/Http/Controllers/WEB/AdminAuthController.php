@@ -147,7 +147,6 @@ class AdminAuthController extends Controller
             ]);
 
             // Auto‐login and redirect with success message
-            Auth::login($user);
             return redirect()->route('users.index')
                 ->with('success', 'Registration successful! Welcome, ' . $user->name . '.');
         } catch (\Exception $e) {
