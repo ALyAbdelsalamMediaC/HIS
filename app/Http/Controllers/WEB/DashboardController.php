@@ -64,11 +64,9 @@ class DashboardController extends Controller
             }
 
             $usersCount = User::count();
-            $commentsVideo = Comment::count();
-            $commentsArticleCount = CommentArticle::count();
-            $commentsCount = $commentsVideo + $commentsArticleCount;
+            $articlesCount = Article::count();
 
-            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending','mediaCountInreview', 'usersCount', 'commentsCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
+            return view('pages.admin.dashboard', compact('mediaCountPublished', 'mediaCountPending','mediaCountInreview', 'usersCount', 'articlesCount', 'lastPublishedMedia', 'lastPublishedMediaCommentsCount'));
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => 'Failed to retrieve dashboard data.']);

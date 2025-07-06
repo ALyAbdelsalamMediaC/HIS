@@ -13,11 +13,18 @@
   </div>
 
   <section class="single-video-container">
+    <!-- Thumbnail -->
+    @if(!empty($item->thumbnail_path))
+    <div class="article-thumbnail">
+      <img src="{{ $article->thumbnail_path }}" alt="{{ $article->title }}">
+    </div>
+    @endif
+
     <!-- Article Title -->
     <div class="gap-3 mt-3 d-flex align-items-center">
       <h2 class="h3-semibold">{{ $article->title }}</h2>
-      <h4 class="h6-ragular card-status">
-        {{ ucfirst($article->status ?? 'published') }}
+      <h4 class="h6-ragular card-status published">
+      Published
       </h4>
     </div>
 

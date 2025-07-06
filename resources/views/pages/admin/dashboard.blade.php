@@ -6,7 +6,7 @@
             @if(auth()->check() && auth()->user()->hasRole('admin'))
                 <div class="dashboard-num-cards-container">
                     <div class="card-icon1">
-                        <x-svg-icon name="user" size="18" color="#8D44CC" />
+                        <x-svg-icon name="user" size="21" color="#8D44CC" />
                     </div>
                     <div class="card-icon-text">
                         <h4 class="h6-semibold" style="color:#ADADAD;">Total Users</h4>
@@ -16,36 +16,27 @@
             @endif
             <div class="dashboard-num-cards-container">
                 <div class="card-icon2">
-                    <x-svg-icon name="content" size="18" color="#337FE8" />
+                    <x-svg-icon name="content" size="21" color="#337FE8" />
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Active Videos</h4>
                     <h3 class="h3-semibold">{{ number_format($mediaCountPublished) }}</h3>
                 </div>
             </div>
-            <!-- <div class="dashboard-num-cards-container">
-                <div class="card-icon3">
-                    <x-svg-icon name="message" size="18" color="#01A20C" />
-                </div>
-                <div class="card-icon-text">
-                    <h4 class="h6-semibold" style="color:#ADADAD;">Total Comments</h4>
-                    <h3 class="h3-semibold">{{ number_format($commentsCount) }}</h3>
-                </div>
-            </div> -->
             @if(auth()->check() && auth()->user()->hasRole('admin'))
             <div class="dashboard-num-cards-container">
-                <div class="card-icon4">
-                    <x-svg-icon name="clock2" size="18" color="#E0B610" />
+                <div class="card-icon3">
+                    <x-svg-icon name="article" size="21" color="#01A20C" />
                 </div>
                 <div class="card-icon-text">
-                    <h4 class="h6-semibold" style="color:#ADADAD;">Pending Requests</h4>
-                    <h3 class="h3-semibold">{{ number_format($mediaCountPending) }}</h3>
+                    <h4 class="h6-semibold" style="color:#ADADAD;">Total Articles</h4>
+                    <h3 class="h3-semibold">{{ number_format($articlesCount) }}</h3>
                 </div>
             </div>
             @endif
             <div class="dashboard-num-cards-container">
                 <div class="card-icon4">
-                    <x-svg-icon name="clock2" size="18" color="#E0B610" />
+                    <x-svg-icon name="eye" size="21" color="#F1862F" />
                 </div>
                 <div class="card-icon-text">
                     <h4 class="h6-semibold" style="color:#ADADAD;">Inreview Requests</h4>

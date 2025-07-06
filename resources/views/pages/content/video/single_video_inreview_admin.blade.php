@@ -207,7 +207,12 @@
         @csrf
         <input type="hidden" name="media_id" value="{{ $media->id }}">
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-        <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
+        <div class="input-icon w-100">
+          <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
+          <div class="input-icon-send" style="cursor:pointer" onclick="this.closest('form').submit();">
+            <x-svg-icon name="send" size="14" color="#fff" />
+          </div>
+        </div>
       </form>
     </div>
 
