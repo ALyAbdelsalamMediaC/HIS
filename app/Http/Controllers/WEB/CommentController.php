@@ -255,7 +255,6 @@ class CommentController extends Controller
                     ->withErrors($validator)
                     ->withInput();
             }
-
             // Find the comment
             $comment = Comment::findOrFail($comment_id);
 

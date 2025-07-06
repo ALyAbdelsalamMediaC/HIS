@@ -18,28 +18,28 @@ class CommentArticleController extends Controller
             $validator = Validator::make($request->all(), [
                 'content' => 'required|string|min:1|max:5000',
             ]);
-
+            
             if ($validator->fails()) {
                 return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                ->withErrors($validator)
+                ->withInput();
             }
-
+            
             // Get the authenticated user
             $user = auth()->user();
             if (!$user || empty($user->email)) {
                 return redirect()->back()
-                    ->with('error', 'You must be logged in with a valid email address to comment.')
-                    ->withInput();
+                ->with('error', 'You must be logged in with a valid email address to comment.')
+                ->withInput();
             }
-
+            
             // Verify media exists
             if (!Media::find($article_id)) {
                 return redirect()->back()
-                    ->with('error', 'The specified media does not exist.')
-                    ->withInput();
+                ->with('error', 'The specified media does not exist.')
+                ->withInput();
             }
-
+            
             // Create the comment
             CommentArticle::create([
                 'user_id' => $user->id,
@@ -47,10 +47,10 @@ class CommentArticleController extends Controller
                 'parent_id' => null,
                 'content' => $request->content,
             ]);
-
+            
             return redirect()->back()
-                ->with('success', 'Comment added successfully.');
-
+            ->with('success', 'Comment added successfully.');
+            
         } catch (ModelNotFoundException $e) {
             return redirect()->back()
                 ->with('error', 'Media not found.')
@@ -240,18 +240,18 @@ class CommentArticleController extends Controller
         try {
             // Validate the comment_id
             $validator = Validator::make(['comment_id' => $comment_id], [
-                'comment_id' => 'required|exists:comments,id',
+                'comment_id' => 'required|exists:Comment_articles,id',
             ]);
-
+            
             if ($validator->fails()) {
                 return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                ->withErrors($validator)
+                ->withInput();
             }
-
+            
             // Find the comment
-            $comment = CommentArticle::findOrFail($comment_id);
-
+            $comment = CommentArticle::where('id',$comment_id)->first();
+            
             // Check if the authenticated user is the owner of the comment
             if (auth()->user()->id !== $comment->user_id) {
                 return redirect()->back()

@@ -105,8 +105,7 @@ class LikeArticleController extends Controller
                 return back()->with('error', 'You have already liked this comment.');
             }
             
-            dd($commentId);
-            // Create the like
+             // Create the like
             $like = LikeCommentArticle::create([
                 'user_id' => Auth::id(),
                 'comment_id' => $commentId,
