@@ -90,7 +90,7 @@ class ArticleController extends Controller
                 ->exists();
             }
             
-            $CommentArticle = CommentArticle::where('article_id', $id)->get();
+            $CommentArticle = CommentArticle::where('article_id', $id)->whereNull('parent_id')->get();
             $replys = CommentArticle::where('article_id', $id)->whereNotNull('parent_id')->get();
             $replysCount = $replys->count();
             

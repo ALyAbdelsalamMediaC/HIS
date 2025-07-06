@@ -96,16 +96,16 @@ class LikeArticleController extends Controller
         try {
             // Find the comment
             $comment = CommentArticle::findOrFail($commentId);
-
             // Check if the user already liked this comment
             $existingLike = LikeCommentArticle::where('user_id', Auth::id())
-                ->where('comment_id', $commentId)
-                ->first();
-
+            ->where('comment_id', $commentId)
+            ->first();
+            
             if ($existingLike) {
                 return back()->with('error', 'You have already liked this comment.');
             }
-
+            
+            dd($commentId);
             // Create the like
             $like = LikeCommentArticle::create([
                 'user_id' => Auth::id(),
@@ -122,7 +122,7 @@ class LikeArticleController extends Controller
             return back()->with('success', 'Comment liked successfully.');
 
         } catch (\Exception $e) {
-            \Log::error('Like addition failed: ' . $e->getMessage());
+            //Log::error('Like addition failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to like comment: ' . $e->getMessage());
         }
