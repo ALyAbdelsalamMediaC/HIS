@@ -58,16 +58,8 @@ class MediaController extends Controller
         $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
 
-    public function subCategories($category_id)
-    {
-        try {
-            $subCategory = SubCategory::where('category_id', $category_id)->get();
-            return view('pages.content.videos', compact('subCategory'));
-        } catch (Exception $e) {
-            LaravelLog::error('Fetch subcategories error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to fetch subcategories.');
-        }
-    }
+
+
 
     public function getall(Request $request)
     {
@@ -75,7 +67,16 @@ class MediaController extends Controller
             $user = Auth::user();
 
             $categories = Category::all();
-
+            $subCategories = collect(); // Default to empty collection
+            if ($request->filled('category')) {
+                $category = Category::where('name', $request->input('category'))->first();
+                if ($category) {
+                    $subCategories = SubCategory::where('category_id', $category->id)->get();
+                }
+            } else {
+                // Optionally, fetch all subcategories if no category is selected
+                $subCategories = SubCategory::all();
+            }
             if ($this->client->isAccessTokenExpired()) {
                 return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
             }
