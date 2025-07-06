@@ -266,19 +266,29 @@ class ArticleController extends Controller
 
 
             $thumbnail_path = $article->thumbnail_path;
-            if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
-                // Delete old PDF from Google Drive if exists
-
+            
+            // Check if user wants to delete the current thumbnail
+            if ($request->has('delete_thumbnail') && $request->input('delete_thumbnail') == '1') {
+                // Delete old thumbnail from Google Drive if exists
                 if ($article->thumbnail_path) {
                     $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->thumbnail_path);
                     if ($fileId) {
                         $this->driveServiceThumbnail->deleteFile($fileId);
                     }
                 }
-                // Upload new PDF
+                $thumbnail_path = null;
+            } elseif ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
+                // Delete old thumbnail from Google Drive if exists
+                if ($article->thumbnail_path) {
+                    $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->thumbnail_path);
+                    if ($fileId) {
+                        $this->driveServiceThumbnail->deleteFile($fileId);
+                    }
+                }
+                // Upload new thumbnail
                 $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
                 $thumbnail_path = $this->driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                $thumbnail_path = 'https://drive.google.com/file/d/' . $thumbnail_path . '/preview';
+                $thumbnail_path = 'https://lh3.googleusercontent.com/d/' . $thumbnail_path . '=w1000?authuser=0';
             }
 
 
