@@ -29,8 +29,14 @@
       </div>
       </div>
       @if($article->thumbnail_path)
-      <div class="mt-2">
-      <img src="{{ $article->thumbnail_path }}" alt="Current thumbnail" style="max-width: 200px;">
+      <div class="mt-2" id="current-thumbnail-container">
+        <div style="position: relative; display: inline-block;">
+          <img src="{{ $article->thumbnail_path }}" alt="Current thumbnail" style="max-width: 200px; border-radius: 8px;">
+          <button type="button" class="btn btn-danger btn-sm" style="position: absolute; top: -4px; right: -8px; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 1;" onclick="deleteCurrentThumbnail()">
+            ×
+          </button>
+        </div>
+        <input type="hidden" name="delete_thumbnail" id="delete_thumbnail" value="0">
       </div>
     @endif
       <!-- New Thumbnail Preview -->
@@ -177,6 +183,31 @@
       };
       reader.readAsDataURL(file);
     }
+    }
+
+    function deleteCurrentThumbnail() {
+      const container = document.getElementById('current-thumbnail-container');
+      const deleteInput = document.getElementById('delete_thumbnail');
+      
+      if (container && deleteInput) {
+        container.style.display = 'none';
+        deleteInput.value = '1';
+        
+        // Clear any file input
+        const fileInput = document.getElementById('thumbnail_path');
+        if (fileInput) {
+          fileInput.value = '';
+          fileInput.setAttribute('data-placeholder', 'Choose an thumbnail from your gallery');
+        }
+        
+        // Hide preview if it's showing
+        const preview = document.getElementById('thumbnail-preview');
+        if (preview) {
+          preview.style.display = 'none';
+        }
+        
+        showToast('Thumbnail will be removed when you save the article', 'info');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function () {

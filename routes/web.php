@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/content/assigned/{id}', [MediaController::class, 'assignTo'])->name('content.assignTo');
     
     Route::get('/content/subcategories', [MediaController::class, 'getSubcategoriesByCategory'])->name('content.subcategories');
+    Route::get('/content/months-by-year', [MediaController::class, 'getMonthsByYear'])->name('content.monthsByYear');
 
     // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
@@ -102,9 +103,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/article/{mediaId}/like', [LikeArticleController::class, 'addLike'])->name('article.like.add');
     Route::delete('/article/{mediaId}/like', [LikeArticleController::class, 'removeLike'])->name('article.like.remove');
-    Route::post('/articleCmments/{commentId}/like', [LikeArticleController::class, 'addLikeComment'])->name('article.comments.like.add');
-    Route::delete('/articleCmments/{commentId}/like', [LikeArticleController::class, 'removeLikeComment'])->name('article.comments.like.remove');
-    Route::get('/articleCmments/{commentId}/likes/count', [LikeArticleController::class, 'getLikesCommentCount'])->name('article.comments.like.count');
+    Route::post('/articleComments/{commentId}/like', [LikeArticleController::class, 'addLikeComment'])->name('article.comments.like.add');
+    Route::delete('/articleComments/{commentId}/like', [LikeArticleController::class, 'removeLikeComment'])->name('article.comments.like.remove');
+    Route::get('/articleComments/{commentId}/likes/count', [LikeArticleController::class, 'getLikesCommentCount'])->name('article.comments.like.count');
 
 
     Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');

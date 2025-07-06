@@ -68,8 +68,16 @@ class MediaController extends Controller
 
             $categories = Category::all();
             $subCategories = collect(); // Default to empty collection
-            if ($request->filled('category')) {
-                $category = Category::where('name', $request->input('category'))->first();
+            
+            // Get all subcategories grouped by category for frontend use
+            $allSubCategories = SubCategory::with('category')->get();
+            $subCategoriesByCategory = $allSubCategories->groupBy('category_id');
+            
+            // Handle both 'year' and 'category' parameters for backward compatibility
+            $yearOrCategory = $request->input('year') ?? $request->input('category');
+            
+            if ($yearOrCategory) {
+                $category = Category::where('name', $yearOrCategory)->first();
                 if ($category) {
                     $subCategories = SubCategory::where('category_id', $category->id)->get();
                 }
@@ -81,7 +89,7 @@ class MediaController extends Controller
                 return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
             }
 
-            $query = Media::with('category', 'comments')
+            $query = Media::with('category', 'subCategory', 'comments')
                 ->withCount('comments');
 
             // Apply role-based filtering
@@ -101,17 +109,19 @@ class MediaController extends Controller
                 $query->where('title', 'like', '%' . $request->input('search') . '%');
             }
 
-            // Filter by category name
-            if ($request->filled('category')) {
-                $query->whereHas('category', function ($q) use ($request) {
-                    $q->where('name', $request->input('category'));
+            // Filter by category name (handle both 'year' and 'category' parameters)
+            $yearOrCategory = $request->input('year') ?? $request->input('category');
+            if ($yearOrCategory) {
+                $query->whereHas('category', function ($q) use ($yearOrCategory) {
+                    $q->where('name', $yearOrCategory);
                 });
             }
 
-            // Filter by sub categories name
-            if ($request->filled('sub_categories')) {
-                $query->whereHas('sub_categories', function ($q) use ($request) {
-                    $q->where('name', $request->input('sub_categories'));
+            // Filter by sub categories name (handle both 'month' and 'sub_categories' parameters)
+            $monthOrSubCategory = $request->input('month') ?? $request->input('sub_categories');
+            if ($monthOrSubCategory) {
+                $query->whereHas('subCategory', function ($q) use ($monthOrSubCategory) {
+                    $q->where('name', $monthOrSubCategory);
                 });
             }
 
@@ -129,10 +139,10 @@ class MediaController extends Controller
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
 
-            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories'));
+            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory'));
         } catch (Exception $e) {
-            \Log::error('Media getall error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to fetch media.');
+            \Log::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }
     public function assignTo(Request $request, $id)

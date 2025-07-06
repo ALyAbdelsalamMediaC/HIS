@@ -33,6 +33,11 @@ class Media extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class);
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);

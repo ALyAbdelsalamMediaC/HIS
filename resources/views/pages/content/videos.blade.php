@@ -50,14 +50,7 @@
                     <div class="gap-2 d-flex align-items-center">
                         @php
                             $filters = [
-                                'year' => [
-                                    'placeholder' => '-- Select year --',
-                                    'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
-                                ],
-                                'month' => [
-                                    'placeholder' => '-- Select month --',
-                                    'options' => $subCategories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
-                                ],
+          
                                 'status' => [
                                     'placeholder' => '-- Select status --',
                                     'options' => [
@@ -67,6 +60,10 @@
                                         'inreview' => 'In review',
                                     ]
                                 ],
+                                'year' => [
+                                    'placeholder' => '-- Select year --',
+                                    'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
+                                ],
                             ];
                         @endphp
 
@@ -75,6 +72,16 @@
                                 placeholder="{{ $data['placeholder'] }}" :selected="request($name)">
                             </x-filter_select>
                         @endforeach
+
+                        <!-- Month filter - hidden by default, shown when year is selected -->
+                        <div id="month-filter-container" class="month-filter-container" style="display: none;">
+                            <select name="month" class="form-control-select filter-select" data-placeholder="-- Select month --">
+                                <option value="">-- Select month --</option>
+                                @if(request('month'))
+                                    <option value="{{ request('month') }}" selected>{{ ucwords(request('month')) }}</option>
+                                @endif
+                            </select>
+                        </div>
 
                         <x-button id="reset-filters">
                             <x-svg-icon name="refresh" size="16" /> Reset
@@ -305,7 +312,116 @@
     <script src="{{ asset('js/validations.js') }}"></script>
     <script src="{{ asset('js/tooltips.js') }}"></script>
     <script>
+        // Pass PHP data to JavaScript
+        const subCategoriesByCategory = @json($subCategoriesByCategory);
+        const categories = @json($categories);
+        
         $(document).ready(function () {
+            // Function to format month number to month name with number
+            function formatMonthName(monthNumber) {
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                // Convert to number and get month name (subtract 1 for array index)
+                const monthIndex = parseInt(monthNumber) - 1;
+                if (monthIndex >= 0 && monthIndex < 12) {
+                    return `${monthNames[monthIndex]} (${monthNumber})`;
+                }
+                
+                // Fallback if not a valid month number
+                return monthNumber.charAt(0).toUpperCase() + monthNumber.slice(1);
+            }
+            
+            // Handle year/month filter dynamic behavior
+            function handleYearMonthFilter() {
+                const yearSelect = $('select[name="year"]');
+                const monthContainer = $('#month-filter-container');
+                const monthSelect = monthContainer.find('select[name="month"]');
+                
+                // Show/hide month filter based on year selection
+                yearSelect.on('change', function() {
+                    const selectedYear = $(this).val();
+                    
+                    if (selectedYear) {
+                        // Find the category ID for the selected year
+                        const selectedCategory = categories.find(cat => cat.name === selectedYear);
+                        
+                        if (selectedCategory) {
+                            // Get subcategories for this category
+                            const subCategories = subCategoriesByCategory[selectedCategory.id] || [];
+                            
+                            // Clear existing options
+                            monthSelect.empty();
+                            monthSelect.append('<option value="">-- Select month --</option>');
+                            
+                            // Add new options with formatted month names
+                            subCategories.forEach(function(subCat) {
+                                const formattedName = formatMonthName(subCat.name);
+                                monthSelect.append(`<option value="${subCat.name}">${formattedName}</option>`);
+                            });
+                            
+                            // Show month filter
+                            monthContainer.show();
+                            
+                            // Reinitialize Select2 for the month filter
+                            if (monthSelect.hasClass('select2-hidden-accessible')) {
+                                monthSelect.select2('destroy');
+                            }
+                            monthSelect.select2({
+                                placeholder: '-- Select month --',
+                                width: '100%',
+                                minimumResultsForSearch: 8,
+                                dropdownCssClass: 'select2-dropdown-custom',
+                                selectionCssClass: 'select2-selection-custom'
+                            });
+                        }
+                        
+                        // Clear month selection when year changes
+                        monthSelect.val('').trigger('change');
+                    } else {
+                        // Hide month filter when no year is selected
+                        monthContainer.hide();
+                        monthSelect.val('').trigger('change');
+                    }
+                });
+                
+                // Initialize on page load
+                const initialYear = yearSelect.val();
+                const initialMonth = monthSelect.val();
+                
+                if (initialYear) {
+                    // Trigger change event to populate month filter
+                    yearSelect.trigger('change');
+                    
+                    // If there was a month selected, restore it after populating options
+                    if (initialMonth) {
+                        setTimeout(function() {
+                            monthSelect.val(initialMonth).trigger('change');
+                            // Update the display text for the selected month
+                            const formattedName = formatMonthName(initialMonth);
+                            monthSelect.next('.select2-container').find('.select2-selection__rendered').text(formattedName);
+                        }, 300);
+                    }
+                }
+                
+                // Handle month filter change to update placeholder
+                monthSelect.on('change', function() {
+                    const selectedMonth = $(this).val();
+                    if (selectedMonth) {
+                        const formattedName = formatMonthName(selectedMonth);
+                        // Update the Select2 placeholder to show selected month
+                        $(this).next('.select2-container').find('.select2-selection__rendered').text(formattedName);
+                    }
+                });
+            }
+            
+            // Initialize year/month filter behavior
+            handleYearMonthFilter();
+
+
+            
             // Initialize Select2 for reviewer assignment with better modal handling
             function initializeReviewerSelect2(modalId) {
                 $(`#${modalId} .select2-reviewers`).select2({

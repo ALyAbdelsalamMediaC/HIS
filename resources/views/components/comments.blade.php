@@ -50,10 +50,14 @@
                         <div class="gap-3 mt-3 d-flex align-items-center">
                             <div>
                                 @php
-                                    $userLikedComment = \App\Models\LikeComment::where('user_id', auth()->id())
+                                    // Check if this is an article comment or video comment based on the route
+                                    $isArticleComment = str_contains($commentRoute, 'article');
+                                    $likeModel = $isArticleComment ? '\App\Models\LikeCommentArticle' : '\App\Models\LikeComment';
+                                    
+                                    $userLikedComment = $likeModel::where('user_id', auth()->id())
                                         ->where('comment_id', $comment->id)
                                         ->exists();
-                                    $commentLikesCount = \App\Models\LikeComment::where('comment_id', $comment->id)->count();
+                                    $commentLikesCount = $likeModel::where('comment_id', $comment->id)->count();
                                 @endphp
                                 @if($userLikedComment)
                                     <form action="{{ route($likeRemoveRoute, ['commentId' => $comment->id]) }}" method="POST" style="display:inline;">
@@ -144,10 +148,14 @@
                                         <div class="gap-3 mt-3 d-flex align-items-center">
                                             <div>
                                                 @php
-                                                    $userLikedReply = \App\Models\LikeComment::where('user_id', auth()->id())
+                                                    // Check if this is an article comment or video comment based on the route
+                                                    $isArticleComment = str_contains($commentRoute, 'article');
+                                                    $likeModel = $isArticleComment ? '\App\Models\LikeCommentArticle' : '\App\Models\LikeComment';
+                                                    
+                                                    $userLikedReply = $likeModel::where('user_id', auth()->id())
                                                         ->where('comment_id', $reply->id)
                                                         ->exists();
-                                                    $replyLikesCount = \App\Models\LikeComment::where('comment_id', $reply->id)->count();
+                                                    $replyLikesCount = $likeModel::where('comment_id', $reply->id)->count();
                                                 @endphp
                                                 @if($userLikedReply)
                                                     <form action="{{ route($likeRemoveRoute, ['commentId' => $reply->id]) }}" method="POST" style="display:inline;">
