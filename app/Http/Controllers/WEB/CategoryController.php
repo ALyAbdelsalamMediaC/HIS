@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\WEB;
 
 use App\Http\Controllers\Controller;
-
-
+use App\Models\Article;
+use App\Models\Bookmark;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Log;
+use App\Models\Media;
 use Illuminate\Support\Facades\Log as LaravelLog; // for system logs if needed
-
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -35,32 +36,32 @@ class CategoryController extends Controller
     }
 
     // Store new category
-public function store(Request $request)
-{
-    $user = Auth::user();
+    public function store(Request $request)
+    {
+        $user = Auth::user();
 
-    try {
-        if ($user->role === 'admin') {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-            ]);
+        try {
+            if ($user->role === 'admin') {
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'description' => 'nullable|string',
+                ]);
 
-            Category::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'user_id' => $user->id,
-            ]);
+                Category::create([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'user_id' => $user->id,
+                ]);
 
-            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
-        } else {
-            return back()->with('error', 'You do not have permission to create a category.');
+                return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+            } else {
+                return back()->with('error', 'You do not have permission to create a category.');
+            }
+        } catch (Exception $e) {
+            \Log::error('Failed to create category: ' . $e->getMessage() . ' in ' . $e->getFile() . ' at line ' . $e->getLine());
+            return back()->withInput()->with('error', 'Failed to create category: ' . $e->getMessage());
         }
-    } catch (Exception $e) {
-        \Log::error('Failed to create category: ' . $e->getMessage() . ' in ' . $e->getFile() . ' at line ' . $e->getLine());
-        return back()->withInput()->with('error', 'Failed to create category: ' . $e->getMessage());
     }
-}
 
     // Show form to edit an existing category
     public function edit(Category $category)
@@ -124,5 +125,39 @@ public function store(Request $request)
             'type' => $type,
             'description' => $description,
         ]);
+    }
+
+
+    public function getBookmarks($userId)
+    {
+        $mediaLikes = Media::where('user_id', $userId)
+            ->withCount(['likes', 'comments'])
+            ->get();
+
+        $articleLikes = Article::where('user_id', $userId)
+            ->withCount(['likesarticle', 'commentarticle'])
+            ->get();
+
+        $bookmarks = Bookmark::where('user_id', $userId)
+            ->with([
+                'article',
+                'media',
+                'media' => function ($query) {
+                    $query->with(['likes', 'comments']);
+                },
+                'article' => function ($query) {
+                    $query->with(['likesarticle', 'commentarticle']);
+                }
+            ])
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'bookmarks' => $bookmarks,
+                'mediaLikes' => $mediaLikes,
+                'articleLikes' => $articleLikes,
+            ]
+        ], 200);
     }
 }

@@ -248,9 +248,16 @@ class MediaController extends Controller
             ], 500);
         }
     }
-    public function recently_Added()
+    public function recently_Added(Request $request)
     {
         try {
+            $token_id = $request->input('token_id');
+            if (!$token_id) {
+            $contents = Category::with(['media' => function ($query) {
+                $query->withCount('comments')
+                      ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at']);
+            }])->orderBy('created_at', 'desc')->take(10)->get();
+            }
             $contents = Category::with(['media' => function ($query) {
                 $query->withCount('comments', 'likes');
             }])->orderBy('created_at', 'desc')->take(10)->get();

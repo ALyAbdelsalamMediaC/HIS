@@ -40,9 +40,9 @@ Route::get('/categories', [MediaController::class, 'categories']);
 Route::get('/api/media/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
 Route::post('/media/admin-comment/reply', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
 
+Route::get('/bookmarks/{id}', [BookmarkController::class, 'getBookmarks']);
 Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
 Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);
-Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
 
 Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
 

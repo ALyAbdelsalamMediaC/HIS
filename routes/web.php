@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\BookmarkController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\WEB\CommentController;
@@ -116,6 +117,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
     Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
     Route::post('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
+Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
 
 
     Route::prefix('settings/policies')->name('policies.')->group(function () {

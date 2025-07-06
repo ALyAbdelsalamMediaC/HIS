@@ -1,7 +1,7 @@
-    <?php
+<?php
 
-    namespace App\Http\Controllers\API;
-    use App\Http\Controllers\Controller;
+namespace App\Http\Controllers\API;
+use App\Http\Controllers\Controller;
 
     use App\Models\Bookmark;
     use App\Models\Article;
