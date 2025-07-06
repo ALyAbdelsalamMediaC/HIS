@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\WEB\CommentController;
 use App\Http\Controllers\WEB\AdminAuthController;
 use App\Http\Controllers\WEB\AdminCommentController;
@@ -67,7 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
     Route::post('/admins/rate', [AdminCommentController::class, 'rate'])->name('admins.rate');
 
-
+    Route::get('/get-google-token', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
     Route::get('/content/articles/add', [ArticleController::class, 'create']);

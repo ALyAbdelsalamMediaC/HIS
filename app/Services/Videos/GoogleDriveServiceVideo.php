@@ -14,11 +14,25 @@ class GoogleDriveServiceVideo
     public function __construct()
     {
         $this->client = new Client();
-        $this->client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
-        $this->client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+       $credentialsPath = storage_path('app/credentials.json');
+
+        if (!file_exists($credentialsPath)) {
+           throw new \Exception('Credentials file not found at: ' . $credentialsPath);
+        }
+        
+        $credentials = json_decode(file_get_contents($credentialsPath), true);
+        
+          if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Invalid JSON in credentials file: ' . json_last_error_msg());
+        }
+        
+        if (!isset($credentials['web']['client_id']) || !isset($credentials['web']['client_secret'])) {
+            throw new \Exception('Client ID or Client Secret missing in credentials.json');
+        }
+        $this->client->setClientId($credentials['web']['client_id']);
+        $this->client->setClientSecret($credentials['web']['client_secret']);
         $this->client->setAccessType('offline');
         $this->client->setScopes([Drive::DRIVE_FILE]);
-
         // Check if a token file exists
         $tokenPath = storage_path('app/google-token.json');
 
@@ -30,11 +44,6 @@ class GoogleDriveServiceVideo
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
-
-                if ($this->client->isAccessTokenExpired()) {
-                header('Location: http://localhost:8000/get-google-token.php');
-                exit;
-            }
             $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
             if (isset($accessToken['error'])) {
                 throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
