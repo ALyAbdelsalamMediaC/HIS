@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Media;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GlobalController extends Controller
 {
@@ -13,9 +14,25 @@ class GlobalController extends Controller
     {
         try {
             $searchTerm = $request->input('search');
+            $user = Auth::user();
 
-            $articles = \App\Models\Article::where('title', 'like', '%' . $searchTerm . '%')->get();
-            $videos = \App\Models\Media::where('title', 'like', '%' . $searchTerm . '%')->get();
+            // Initialize variables
+            $articles = collect();
+            $videos = collect();
+
+            // Filter based on user role
+            if ($user->role === 'reviewer') {
+                // For reviewers: only show videos they're assigned to, no articles
+                $videos = Media::where('title', 'like', '%' . $searchTerm . '%')
+                    ->where(function($query) use ($user) {
+                        $query->whereJsonContains('assigned_to', $user->id);
+                    })
+                    ->get();
+            } else {
+                // For other roles (admin, user): show all articles and videos
+                $articles = Article::where('title', 'like', '%' . $searchTerm . '%')->get();
+                $videos = Media::where('title', 'like', '%' . $searchTerm . '%')->get();
+            }
 
             if ($request->has('ajax')) {
                 $articlesArr = $articles->map(function($a) {

@@ -138,24 +138,29 @@
                         <table class="custom-table">
                             <thead style="color:#ADADAD;">
                                 <tr>
-                                    <th style="width:20%; text-align: left;">#</th>
+                                    <th style="width:15%; text-align: left;">#</th>
                                     <th style="width:30%; text-align: left;">Name</th>
-                                    <th style="width:20%; text-align: left;">Views</th>
+                                    <th style="width:15%; text-align: left;">Views</th>
+                                    <th style="width:15%; text-align: left;">Likes</th>
                                     <th style="width:20%; text-align: left;">Comments</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td style="text-align: left;">1</td>
-                                    <td style="text-align: left;">Ahmed</td>
-                                    <td style="text-align: left;">132k</td>
-                                    <td style="text-align: left;">50</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="6" class="text-center">
-                                        <x-data-not-found>No videos found.</x-data-not-found>
-                                    </td>
-                                </tr>
+                                @forelse($topVideos as $index => $video)
+                                    <tr>
+                                        <td style="text-align: left;">{{ $index + 1 }}</td>
+                                        <td style="text-align: left;">{{ $video->user->name ?? 'N/A' }}</td>
+                                        <td style="text-align: left;">{{ number_format($video->views ?? 0) }}</td>
+                                        <td style="text-align: left;">{{ number_format($video->likes_count ?? 0) }}</td>
+                                        <td style="text-align: left;">{{ number_format($video->comments ? $video->comments->count() : 0) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <x-data-not-found>No videos found.</x-data-not-found>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -174,21 +179,26 @@
                                 <thead style="color:#ADADAD;">
                                     <tr>
                                         <th style="width:20%; text-align: left;">#</th>
-                                        <th style="width:30%; text-align: left;">Name</th>
+                                        <th style="width:40%; text-align: left;">Name</th>
+                                        <th style="width:20%; text-align: left;">Likes</th>
                                         <th style="width:20%; text-align: left;">Comments</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td style="text-align: left;">1</td>
-                                        <td style="text-align: left;">Ahmed</td>
-                                        <td style="text-align: left;">50</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <x-data-not-found>No articles found.</x-data-not-found>
-                                        </td>
-                                    </tr>
+                                    @forelse($topArticles as $index => $article)
+                                        <tr>
+                                            <td style="text-align: left;">{{ $index + 1 }}</td>
+                                            <td style="text-align: left;">{{ $article->user->name ?? 'N/A' }}</td>
+                                            <td style="text-align: left;">{{ number_format($article->likesarticle_count ?? 0) }}</td>
+                                            <td style="text-align: left;">{{ number_format($article->commentarticle ? $article->commentarticle->count() : 0) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center">
+                                                <x-data-not-found>No articles found.</x-data-not-found>
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>

@@ -15,10 +15,19 @@
   <section class="single-video-container">
 
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
-    <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
-    Your browser does not support the video tag.
-    </video>
+    <div class="video-container">
+        <video 
+            controls 
+            class="video-player"
+            preload="none"
+            @if($media->thumbnail_path)
+                poster="{{ $media->thumbnail_path }}"
+            @endif
+        >
+            <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
     <!-- Video Title -->
     <div class="gap-3 mt-3 d-flex align-items-center">
@@ -169,6 +178,26 @@
 
 @push('scripts')
 <script src="{{ asset('js/validations.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.querySelector('.video-player');
+    if (video) {
+        // Ensure video loads properly with poster
+        video.addEventListener('loadstart', function() {
+            console.log('Video loading started');
+        });
+        
+        video.addEventListener('loadeddata', function() {
+            console.log('Video data loaded');
+        });
+        
+        // Handle video play to hide poster
+        video.addEventListener('play', function() {
+            console.log('Video started playing');
+        });
+    }
+});
+</script>
 @endpush
 
 <script src="{{ asset('js/descriptonReadMore.js') }}"></script>

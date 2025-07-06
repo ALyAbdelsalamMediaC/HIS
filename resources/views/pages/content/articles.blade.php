@@ -32,40 +32,9 @@
 
     <div class="content-container">
     <div class="filters-container w-100" data-url="{{ route('content.articles') }}">
-      <div class="d-flex justify-content-between align-items-center">
       <div class="w-25">
         <x-search_input id="search_input" type="text" name="search" placeholder="Search article title..."
         value="{{ request('search') }}" class="w-100" />
-      </div>
-
-      <div class="gap-2 d-flex align-items-center">
-        @php
-      $filters = [
-      'category' => [
-      'placeholder' => '-- Select Category --',
-      'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
-      ],
-      'status' => [
-      'placeholder' => '-- Select status --',
-      'options' => [
-        'published' => 'Published',
-        'pending' => 'Pending',
-        'declined' => 'Declined'
-      ]
-      ],
-      ];
-    @endphp
-
-        @foreach($filters as $name => $data)
-      <x-filter_select name="{{ $name }}" class="form-control-select" :options="$data['options']"
-      placeholder="{{ $data['placeholder'] }}" :selected="request($name)">
-      </x-filter_select>
-      @endforeach
-
-        <x-button id="reset-filters">
-        <x-svg-icon name="refresh" size="16" /> Reset
-        </x-button>
-      </div>
       </div>
     </div>
 

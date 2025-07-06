@@ -50,9 +50,13 @@
                     <div class="gap-2 d-flex align-items-center">
                         @php
                             $filters = [
-                                'category' => [
-                                    'placeholder' => '-- Select Category --',
+                                'year' => [
+                                    'placeholder' => '-- Select year --',
                                     'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
+                                ],
+                                'month' => [
+                                    'placeholder' => '-- Select month --',
+                                    'options' => $subCategories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
                                 ],
                                 'status' => [
                                     'placeholder' => '-- Select status --',
@@ -60,7 +64,7 @@
                                         'published' => 'Published',
                                         'pending' => 'Pending',
                                         'declined' => 'Declined',
-                                        'in_review' => 'In review',
+                                        'inreview' => 'In review',
                                     ]
                                 ],
                             ];

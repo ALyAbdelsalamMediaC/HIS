@@ -14,7 +14,7 @@
 
   <section class="single-video-container">
     <!-- Thumbnail -->
-    @if(!empty($item->thumbnail_path))
+    @if(!empty($article->thumbnail_path) && $article->thumbnail_path !== 'null')
     <div class="article-thumbnail">
       <img src="{{ $article->thumbnail_path }}" alt="{{ $article->title }}">
     </div>

@@ -15,10 +15,19 @@
   <section class="single-video-container">
 
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
-    <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
-    Your browser does not support the video tag.
-    </video>
+    <div class="video-container">
+        <video 
+            controls 
+            class="video-player"
+            preload="none"
+            @if($media->thumbnail_path)
+                poster="{{ $media->thumbnail_path }}"
+            @endif
+        >
+            <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
     <!-- Video Title -->
     <div class="gap-3 mt-3 d-flex align-items-center">
