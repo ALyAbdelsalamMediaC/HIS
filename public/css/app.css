@@ -466,6 +466,18 @@ body {
     transform: translate(-50%, -50%);
 }
 
+.input-icon textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 60px;
+    max-height: 120px;
+}
+
+.input-icon textarea::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
 .forget-pass {
     width: 100%;
     display: flex;
@@ -593,7 +605,7 @@ body {
     font-size: 14px;
     font-weight: 400;
     color: var(--primary-color);
-    padding: 10px 24px;
+    padding: 8px 20px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -664,6 +676,9 @@ body {
     text-align: center;
     border-radius: 50%;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .arrow-back-btn:hover {
@@ -1078,14 +1093,20 @@ body {
 }
 
 .dashboard-num-cards.dashboard-num-cards-nonadmin {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
 }
 
 .card-icon1,
 .card-icon2,
 .card-icon3,
 .card-icon4 {
-    padding: 12px 16px;
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: var(--main-border-radius-md);
 }
 
@@ -1099,7 +1120,7 @@ body {
     background: #e9ffdb;
 }
 .card-icon4 {
-    background: #fbfdd0;
+    background: #ffe7ce;
 }
 
 .dashboard-contetn-container {
@@ -1353,6 +1374,9 @@ body {
 .video-card-content-content {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .bottom-vid-pagination {
@@ -1374,8 +1398,8 @@ body {
     background-color: #fff3f3;
 }
 .card-status.inreview {
-    color: #3f8f43;
-    background-color: #deffe0;
+    color: #f1862f;
+    background-color: #ffe7ce;
 }
 
 .card-status.pending {
@@ -1681,6 +1705,43 @@ body {
 /* ========================================================
    Video
    ======================================================== */
+.video-container {
+    position: relative;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
+}
+
+.video-player {
+    width: 100%;
+    height: 600px;
+    border-radius: 20px;
+    object-fit: cover;
+    background-color: #000;
+}
+
+/* Ensure poster image covers the video area properly */
+.video-player[poster] {
+    object-fit: cover;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Edit video player styles */
+.video-player-edit {
+    width: 100%;
+    height: 300px;
+    border-radius: 20px;
+    object-fit: cover;
+    background-color: #000;
+}
+
+.video-player-edit[poster] {
+    object-fit: cover;
+    background-size: cover;
+    background-position: center;
+}
 .single-video-container {
     padding: 24px;
 
@@ -1693,6 +1754,85 @@ body {
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.comment-content-wrapper {
+    position: relative;
+}
+
+.comment-text {
+    transition: max-height 0.3s ease, overflow 0.3s ease;
+    word-wrap: break-word;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+.read-more-btn,
+.read-less-btn {
+    font-size: 14px !important;
+    text-decoration: none !important;
+    border: none !important;
+    background: none !important;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.read-more-btn:hover,
+.read-less-btn:hover {
+    color: var(--hover-button) !important;
+    text-decoration: underline !important;
+}
+
+/* Ensure smooth transitions for the read more functionality */
+.comment-text.collapsed {
+    max-height: 60px;
+    overflow: hidden;
+    position: relative;
+}
+
+.comment-text.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}
+
+/* ========================================================
+   Description Read More Styles
+   ======================================================== */
+.description-content-wrapper {
+    position: relative;
+}
+
+.description-text {
+    transition: max-height 0.3s ease, overflow 0.3s ease;
+    word-wrap: break-word;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ensure smooth transitions for the description read more functionality */
+.description-text.collapsed {
+    max-height: 80px;
+    overflow: hidden;
+    position: relative;
+}
+
+.description-text.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
 }
 
 .input-icon-send {
@@ -1754,6 +1894,8 @@ body {
     box-shadow: 0px 0px 6.1px 0px rgba(0, 0, 0, 0.07);
     padding: 24px;
     margin-top: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Optimize replies container */
@@ -1833,6 +1975,20 @@ body {
 }
 .quill-content .ql-align-justify {
     text-align: justify;
+}
+
+/* ========================================================
+    Article Image
+   ======================================================== */
+.article-thumbnail {
+    width: 100%;
+}
+
+.article-thumbnail img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: var(--main-border-radius-md);
 }
 
 /* ========================================================

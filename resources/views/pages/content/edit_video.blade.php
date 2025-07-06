@@ -20,10 +20,19 @@
     <div class="row">
       <div class="col-md-6">
       <div class="video-preview-container">
-      <video controls style="width: 100%; border-radius: 20px; height: 300px;" preload="none">
-      <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
-      Your browser does not support the video tag.
-      </video>
+        <div class="video-container">
+            <video 
+                controls 
+                class="video-player-edit"
+                preload="none"
+                @if($media->thumbnail_path)
+                    poster="{{ asset('storage/' . $media->thumbnail_path) }}"
+                @endif
+            >
+                <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
       </div>
       </div>
       <div class="col-md-6">

@@ -13,11 +13,18 @@
   </div>
 
   <section class="single-video-container">
+    <!-- Thumbnail -->
+    @if(!empty($article->thumbnail_path) && $article->thumbnail_path !== 'null')
+    <div class="article-thumbnail">
+      <img src="{{ $article->thumbnail_path }}" alt="{{ $article->title }}">
+    </div>
+    @endif
+
     <!-- Article Title -->
     <div class="gap-3 mt-3 d-flex align-items-center">
       <h2 class="h3-semibold">{{ $article->title }}</h2>
-      <h4 class="h6-ragular card-status">
-        {{ ucfirst($article->status ?? 'published') }}
+      <h4 class="h6-ragular card-status published">
+      Published
       </h4>
     </div>
 
@@ -56,7 +63,15 @@
 
     <!-- Article Description -->
     <div class="mt-3 single-discription">
-      <div class="h5-ragular quill-content">{!! $article->description !!}</div>
+        <div class="h5-ragular description-content-wrapper quill-content" id="description-content-{{ $article->id }}">
+            <div class="description-text" id="description-text-{{ $article->id }}" style="white-space: pre-wrap;">{!! $article->description !!}</div>
+            <button class="btn-nothing read-more-btn" id="read-more-desc-{{ $article->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Read more
+            </button>
+            <button class="btn-nothing read-less-btn" id="read-less-desc-{{ $article->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Show less
+            </button>
+        </div>
     </div>
 
     <!-- Article Mentions  -->
@@ -120,4 +135,5 @@
 
 @push('scripts')
 <script src="{{ asset('js/validations.js') }}"></script>
+<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
 @endpush

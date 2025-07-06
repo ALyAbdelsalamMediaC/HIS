@@ -1,7 +1,6 @@
 @props([
     'commentsData' => [],
     'mediaId' => null,
-    'articleId' => null,
     'enableReplies' => true,
     'enableLikes' => true,
     'enableDelete' => true,
@@ -26,14 +25,26 @@
 <div class="comments-list-container">
     @forelse($commentsData as $comment)
         <div class="comment-container">
-            <div class="gap-3 d-flex align-items-start">
+            <div class="justify-between d-flex align-items-start w-100">
+                <div class="gap-3 w-100 d-flex align-items-start">
                 <div class="comment-container-user-icon">
                     <x-svg-icon name="user" size="18" color="#35758c" />
                 </div>
                 <div class="w-100">
                     <h4 class="h5-semibold">{{ $comment->user->name ?? 'Unknown User' }}</h4>
                     <span class="h6-ragular" style="color:#ADADAD;">Commented On    {{ $comment->created_at ? $comment->created_at->diffForHumans() : '' }}</span>
-                    <p class="mt-2 h6-ragular">{{ $comment->content }}</p>
+                    
+                    <!-- Comment content with Read More functionality -->
+                    <div class="mt-2 comment-content-wrapper" id="comment-content-{{ $comment->id }}">
+                        <div class="h6-ragular comment-text" id="comment-text-{{ $comment->id }}" style="white-space: pre-wrap;">{!! nl2br(e($comment->content)) !!}</div>
+                        <button class="btn-nothing read-more-btn" id="read-more-{{ $comment->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 4px;">
+                            Read more
+                        </button>
+                        <button class="btn-nothing read-less-btn" id="read-less-{{ $comment->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 4px;">
+                            Show less
+                        </button>
+                    </div>
+                    
                     <div class="d-flex justify-content-between align-items-center">
                         @if($enableLikes)
                         <div class="gap-3 mt-3 d-flex align-items-center">
@@ -70,7 +81,12 @@
                             @endif
                         </div>
                         @endif
-                        <div class="gap-2 mt-3 d-flex align-items-center">
+                       
+                    </div>
+                </div>
+                </div>
+
+                <div class="gap-2 mt-3 d-flex align-items-center">
                             @if($enableReplies)
                             <button class="btn-nothing reply-btn" data-comment-id="{{ $comment->id }}">
                                 <x-svg-icon name="replay" size="20" color="#ADADAD" />
@@ -82,17 +98,12 @@
                                 </button>
                             @endif
                         </div>
-                    </div>
-                </div>
             </div>
             
             <!-- Reply input, hidden by default -->
             @if($enableReplies)
             <div class="reply-input-container" id="reply-container-{{ $comment->id }}" style="display:none; margin-top:16px;">
-                @php
-                    $replyParam = $articleId ? ['article_id' => $articleId, 'parent_id' => $comment->id] : ['media_id' => $mediaId, 'parent_id' => $comment->id];
-                @endphp
-                <form action="{{ route($replyRoute, $replyParam) }}" method="POST" class="mb-2">
+                <form action="{{ route($replyRoute, ['media_id' => $mediaId, 'parent_id' => $comment->id]) }}" method="POST" class="mb-2">
                     @csrf
                     <x-comment-input id="reply-comment-{{ $comment->id }}" name="content" placeholder="Reply to this comment..." :value="old('content')" />
                     @error('content')
@@ -108,14 +119,26 @@
                 <div class="replies-container" style="margin-left: 40px; margin-top: 16px;">
                     @foreach($comment->replies as $reply)
                         <div class="comment-container" style="border: 1px solid #EDEDED; padding-left: 16px;">
-                            <div class="gap-3 d-flex align-items-start">
+                        <div class="justify-between d-flex align-items-start w-100">
+                        <div class="gap-3 w-100 d-flex align-items-start">
                                 <div class="comment-container-user-icon">
                                     <x-svg-icon name="user" size="18" color="#35758c" />
                                 </div>
                                 <div class="w-100">
                                     <h4 class="h5-semibold">{{ $reply->user->name ?? 'Unknown User' }}</h4>
                                     <span class="h6-ragular" style="color:#ADADAD;">Replied On {{ $reply->created_at->diffForHumans() }}</span>
-                                    <p class="mt-2 h6-ragular">{{ $reply->content }}</p>
+                                    
+                                    <!-- Reply content with Read More functionality -->
+                                    <div class="mt-2 comment-content-wrapper" id="reply-content-{{ $reply->id }}">
+                                        <div class="h6-ragular comment-text" id="reply-text-{{ $reply->id }}" style="white-space: pre-wrap;">{!! nl2br(e($reply->content)) !!}</div>
+                                        <button class="btn-nothing read-more-btn" id="read-more-reply-{{ $reply->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 4px;">
+                                            Read more
+                                        </button>
+                                        <button class="btn-nothing read-less-btn" id="read-less-reply-{{ $reply->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 4px;">
+                                            Show less
+                                        </button>
+                                    </div>
+                                    
                                     <div class="d-flex justify-content-between align-items-center">
                                         @if($enableLikes)
                                         <div class="gap-3 mt-3 d-flex align-items-center">
@@ -145,7 +168,11 @@
                                                 <span class="h6-ragular">{{ $replyLikesCount }} Likes</span>
                                             </div>
                                         </div>
-                                        @endif
+
+                                    </div>
+                                </div>
+                                </div>
+                                @endif
                                         @if($enableDelete && (auth()->user()->role === 'admin' || (auth()->user()->role === 'reviewer' && auth()->id() === $reply->user_id)))
                                             <div class="gap-2 mt-3 d-flex align-items-center">
                                                 <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteCommentModal{{ $reply->id }}">
@@ -153,8 +180,6 @@
                                                 </button>
                                             </div>
                                         @endif
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -205,9 +230,9 @@
     @endforelse
 </div>
 
-@if($enableReplies)
 @push('scripts')
 <script>
+    // Reply button functionality
     document.querySelectorAll('.reply-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var commentId = this.getAttribute('data-comment-id');
@@ -224,6 +249,109 @@
             }
         });
     });
+
+    // Read More functionality for comments and replies
+    function initializeReadMore() {
+        const maxHeight = 60; // Maximum height in pixels before showing "Read more"
+        
+        // Handle comments and replies
+        document.querySelectorAll('.comment-text').forEach(function(textElement) {
+            const contentWrapper = textElement.closest('.comment-content-wrapper');
+            const readMoreBtn = contentWrapper.querySelector('.read-more-btn');
+            const readLessBtn = contentWrapper.querySelector('.read-less-btn');
+            
+            // Remove existing event listeners to prevent duplicates
+            if (readMoreBtn) {
+                readMoreBtn.replaceWith(readMoreBtn.cloneNode(true));
+            }
+            if (readLessBtn) {
+                readLessBtn.replaceWith(readLessBtn.cloneNode(true));
+            }
+            
+            // Get fresh references after cloning
+            const newReadMoreBtn = contentWrapper.querySelector('.read-more-btn');
+            const newReadLessBtn = contentWrapper.querySelector('.read-less-btn');
+            
+            if (textElement.scrollHeight > maxHeight) {
+                // Content is longer than max height, show "Read more" button
+                textElement.style.maxHeight = maxHeight + 'px';
+                textElement.style.overflow = 'hidden';
+                textElement.classList.add('collapsed');
+                newReadMoreBtn.style.display = 'inline-block';
+                
+                // Read More button click
+                newReadMoreBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    textElement.style.maxHeight = 'none';
+                    textElement.style.overflow = 'visible';
+                    textElement.classList.remove('collapsed');
+                    newReadMoreBtn.style.display = 'none';
+                    newReadLessBtn.style.display = 'inline-block';
+                });
+                
+                // Read Less button click
+                newReadLessBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    textElement.style.maxHeight = maxHeight + 'px';
+                    textElement.style.overflow = 'hidden';
+                    textElement.classList.add('collapsed');
+                    newReadLessBtn.style.display = 'none';
+                    newReadMoreBtn.style.display = 'inline-block';
+                });
+            } else {
+                // Content is short enough, hide both buttons
+                newReadMoreBtn.style.display = 'none';
+                newReadLessBtn.style.display = 'none';
+            }
+        });
+    }
+
+    // Initialize read more functionality when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeReadMore();
+    });
+
+    // Re-initialize when new content is loaded (for dynamic content)
+    function reinitializeReadMore() {
+        setTimeout(initializeReadMore, 100);
+    }
+
+    // Export function for external use
+    window.reinitializeReadMore = reinitializeReadMore;
+
+    // Also initialize when the page is fully loaded (for images and other content)
+    window.addEventListener('load', function() {
+        initializeReadMore();
+    });
+
+    // Handle dynamic content loading (if comments are loaded via AJAX)
+    if (typeof window.MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    // Check if any comment containers were added
+                    const hasNewComments = Array.from(mutation.addedNodes).some(function(node) {
+                        return node.nodeType === 1 && (
+                            node.classList.contains('comment-container') ||
+                            node.querySelector('.comment-container')
+                        );
+                    });
+                    
+                    if (hasNewComments) {
+                        reinitializeReadMore();
+                    }
+                }
+            });
+        });
+
+        // Start observing the comments container
+        const commentsContainer = document.querySelector('.comments-list-container');
+        if (commentsContainer) {
+            observer.observe(commentsContainer, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
 </script>
 @endpush
-@endif

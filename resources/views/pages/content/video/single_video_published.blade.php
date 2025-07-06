@@ -15,10 +15,19 @@
   <section class="single-video-container">
 
     <!-- Video -->
-    <video controls style="width: 100%; border-radius: 20px; height: 600px;" preload="none">
-    <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
-    Your browser does not support the video tag.
-    </video>
+    <div class="video-container">
+        <video 
+            controls 
+            class="video-player"
+            preload="none"
+            @if($media->thumbnail_path)
+                poster="{{ $media->thumbnail_path }}"
+            @endif
+        >
+            <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
     <!-- Video Title -->
     <div class="gap-3 mt-3 d-flex align-items-center">
@@ -68,7 +77,15 @@
 
     <!-- Video Description -->
     <div class="mt-3 single-discription">
-    <div class="h5-ragular quill-content">{!! $media->description !!}</div>
+        <div class="h5-ragular description-content-wrapper" id="description-content-{{ $media->id }}">
+            <div class="quill-content description-text" id="description-text-{{ $media->id }}" style="white-space: pre-wrap;">{!! $media->description !!}</div>
+            <button class="btn-nothing read-more-btn" id="read-more-desc-{{ $media->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Read more
+            </button>
+            <button class="btn-nothing read-less-btn" id="read-less-desc-{{ $media->id }}" style="display:none; color: var(--primary-color); font-weight: 500; padding: 0; margin-top: 8px;">
+                Show less
+            </button>
+        </div>
     </div>
 
     <!-- Video Mentions  -->
@@ -161,4 +178,26 @@
 
 @push('scripts')
 <script src="{{ asset('js/validations.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.querySelector('.video-player');
+    if (video) {
+        // Ensure video loads properly with poster
+        video.addEventListener('loadstart', function() {
+            console.log('Video loading started');
+        });
+        
+        video.addEventListener('loadeddata', function() {
+            console.log('Video data loaded');
+        });
+        
+        // Handle video play to hide poster
+        video.addEventListener('play', function() {
+            console.log('Video started playing');
+        });
+    }
+});
+</script>
 @endpush
+
+<script src="{{ asset('js/descriptonReadMore.js') }}"></script>

@@ -64,6 +64,7 @@ class MediaController extends Controller
         $user = Auth::user();
 
         $categories = Category::all();
+        $subCategories = SubCategory::all();
 
         if ($this->client->isAccessTokenExpired()) {
             return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
@@ -95,6 +96,13 @@ class MediaController extends Controller
                 $q->where('name', $request->input('category'));
             });
         }
+        
+        // Filter by sub categories name
+        if ($request->filled('sub_categories')) {
+            $query->whereHas('sub_categories', function ($q) use ($request) {
+                $q->where('name', $request->input('sub_categories'));
+            });
+        }
 
         // Filter by date (created_at)
         if ($request->filled('date_from')) {
@@ -110,7 +118,7 @@ class MediaController extends Controller
         // Get all users with role 'reviewer'
         $reviewers = User::where('role', 'reviewer')->get();
 
-        return view('pages.content.videos', compact('media', 'reviewers', 'categories'));
+        return view('pages.content.videos', compact('media', 'reviewers', 'categories','subCategories'));
     } catch (Exception $e) {
         \Log::error('Media getall error: ' . $e->getMessage());
         return back()->with('error', 'Failed to fetch media.');
