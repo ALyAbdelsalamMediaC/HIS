@@ -58,72 +58,82 @@ class MediaController extends Controller
         $this->client = $this->driveServiceThumbnail->getClient(); // Ensure this method exists in the service
     }
 
-    public function getall(Request $request)
-{
-    try {
-        $user = Auth::user();
-
-        $categories = Category::all();
-        $subCategories = SubCategory::all();
-
-        if ($this->client->isAccessTokenExpired()) {
-            return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+    public function subCategories($category_id)
+    {
+        try {
+            $subCategory = SubCategory::where('category_id', $category_id)->get();
+            return view('pages.content.videos', compact('subCategory'));
+        } catch (Exception $e) {
+            LaravelLog::error('Fetch subcategories error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to fetch subcategories.');
         }
-
-        $query = Media::with('category', 'comments')
-            ->withCount('comments');
-
-        // Apply role-based filtering
-        if ($user->role === 'reviewer') {
-            // For reviewers: get media where they are in assigned_to and status is pending or published
-            $query->whereJsonContains('assigned_to', $user->id)
-                  ->whereIn('status', ['inreview', 'published','declined']);
-        } else {
-            // For admins: apply status filter only if provided, otherwise get all media
-            if ($request->filled('status')) {
-                $query->where('status', $request->input('status'));
-            }
-        }
-
-        // Search by title
-        if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->input('search') . '%');
-        }
-
-        // Filter by category name
-        if ($request->filled('category')) {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->where('name', $request->input('category'));
-            });
-        }
-        
-        // Filter by sub categories name
-        if ($request->filled('sub_categories')) {
-            $query->whereHas('sub_categories', function ($q) use ($request) {
-                $q->where('name', $request->input('sub_categories'));
-            });
-        }
-
-        // Filter by date (created_at)
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
-        }
-
-        // Order by latest and paginate
-        $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
-
-        // Get all users with role 'reviewer'
-        $reviewers = User::where('role', 'reviewer')->get();
-
-        return view('pages.content.videos', compact('media', 'reviewers', 'categories','subCategories'));
-    } catch (Exception $e) {
-        \Log::error('Media getall error: ' . $e->getMessage());
-        return back()->with('error', 'Failed to fetch media.');
     }
-}
+
+    public function getall(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            $categories = Category::all();
+
+            if ($this->client->isAccessTokenExpired()) {
+                return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+            }
+
+            $query = Media::with('category', 'comments')
+                ->withCount('comments');
+
+            // Apply role-based filtering
+            if ($user->role === 'reviewer') {
+                // For reviewers: get media where they are in assigned_to and status is pending or published
+                $query->whereJsonContains('assigned_to', $user->id)
+                    ->whereIn('status', ['inreview', 'published', 'declined']);
+            } else {
+                // For admins: apply status filter only if provided, otherwise get all media
+                if ($request->filled('status')) {
+                    $query->where('status', $request->input('status'));
+                }
+            }
+
+            // Search by title
+            if ($request->filled('search')) {
+                $query->where('title', 'like', '%' . $request->input('search') . '%');
+            }
+
+            // Filter by category name
+            if ($request->filled('category')) {
+                $query->whereHas('category', function ($q) use ($request) {
+                    $q->where('name', $request->input('category'));
+                });
+            }
+
+            // Filter by sub categories name
+            if ($request->filled('sub_categories')) {
+                $query->whereHas('sub_categories', function ($q) use ($request) {
+                    $q->where('name', $request->input('sub_categories'));
+                });
+            }
+
+            // Filter by date (created_at)
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->input('date_to'));
+            }
+
+            // Order by latest and paginate
+            $media = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+
+            // Get all users with role 'reviewer'
+            $reviewers = User::where('role', 'reviewer')->get();
+
+            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories'));
+        } catch (Exception $e) {
+            \Log::error('Media getall error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to fetch media.');
+        }
+    }
     public function assignTo(Request $request, $id)
     {
         try {
@@ -209,7 +219,7 @@ class MediaController extends Controller
                 $adminComments = AdminComment::where('media_id', $id)
                     ->orderBy('created_at', 'desc')
                     ->get();
-                
+
                 $reviewers = Review::where('media_id', $id)
                     ->whereNull('parent_id')
                     ->with(['replies' => function ($query) {
@@ -234,7 +244,7 @@ class MediaController extends Controller
                 $myRate = Rate::where('media_id', $id)
                     ->where('user_id', $user->id)
                     ->value('rate');
-                return view('pages.content.video.single_video_inreview_admin', compact('adminComments','media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
+                return view('pages.content.video.single_video_inreview_admin', compact('adminComments', 'media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
             } elseif ($user && $user->role === 'reviewer') {
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
@@ -251,25 +261,23 @@ class MediaController extends Controller
                 $myRate = Rate::where('media_id', $id)
                     ->where('user_id', $user->id)
                     ->value('rate');
-                return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys','replysCount','commentsCount', 'commentsData', 'userLiked', 'myRate'));
+                return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
             }
         } elseif ($status === 'published') {
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
-        }
-        elseif ($status === 'pending') {
+        } elseif ($status === 'pending') {
             $adminComments = AdminComment::where('media_id', $id)
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-                $assignedReviewerIds = json_decode($media->assigned_to, true) ?? [];
-                $assignedReviewers = User::whereIn('id', $assignedReviewerIds)->get();
+            $assignedReviewerIds = json_decode($media->assigned_to, true) ?? [];
+            $assignedReviewers = User::whereIn('id', $assignedReviewerIds)->get();
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
 
             return view('pages.content.video.single_video_pending', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
-        }
-        elseif ($status === 'declined') {
+        } elseif ($status === 'declined') {
             $user = Auth::user();
             $adminComments = AdminComment::where('media_id', $id)
                 ->orderBy('created_at', 'desc')
@@ -296,7 +304,7 @@ class MediaController extends Controller
                 $myRate = Rate::where('media_id', $id)
                     ->where('user_id', $user->id)
                     ->value('rate');
-                return view('pages.content.video.single_video_declined_reviwer', compact('media', 'replys','replysCount','commentsCount', 'commentsData', 'myRate'));
+                return view('pages.content.video.single_video_declined_reviwer', compact('media', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'myRate'));
             }
 
             // Default: admin view

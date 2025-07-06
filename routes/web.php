@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class);
 
     Route::get('/content/videos', [MediaController::class, 'getall'])->name('content.videos');
+    Route::get('/content/videos', [MediaController::class, 'subCategories'])->name('content.videos');
     Route::get('/content/videos/add', [MediaController::class, 'validation'])->name('content.validation');
     Route::get('/content/videos/add', [MediaController::class, 'create']);
     Route::post('/content/videos/add', [MediaController::class, 'store'])->name('content.store');
