@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\WEB;
 use App\Http\Controllers\Controller;
+use App\Models\Article;
 use App\Models\CommentArticle;
 use App\Models\Media;
 use App\Models\User;
@@ -34,7 +35,7 @@ class CommentArticleController extends Controller
             }
             
             // Verify media exists
-            if (!Media::find($article_id)) {
+            if (!Article::find($article_id)) {
                 return redirect()->back()
                 ->with('error', 'The specified media does not exist.')
                 ->withInput();
@@ -91,7 +92,6 @@ class CommentArticleController extends Controller
             }
 
             // Verify media and parent comment exist
-            $media = Media::findOrFail($article_id);
             $parentComment = CommentArticle::findOrFail($parent_id);
 
             // Verify that parent comment belongs to the specified media
