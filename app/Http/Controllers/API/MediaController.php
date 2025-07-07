@@ -248,38 +248,36 @@ class MediaController extends Controller
             ], 500);
         }
     }
-     public function recently_Added(Request $request)
+    public function recently_Added(Request $request)
     {
         try {
-                   $token = $request->bearerToken();
-        if ($token) {
+            $token = $request->bearerToken();
+            if ($token) {
 
                 $contentswithout = Category::with(['media' => function ($query) {
-                $query->withCount('comments')
-                      ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at']);
-            }])->orderBy('created_at', 'desc')->take(10)->get();
-             return response()->json([
-                'success' => true,
-                'message' => 'Recently added media retrieved successfully without.',
-                'data' => $contentswithout
-            ], 200);
-            
-            } 
-            
-            else{
+                    $query->withCount('comments')
+                        ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at']);
+                }])->orderBy('created_at', 'desc')->take(10)->get();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Recently added media retrieved successfully without.',
+                    'data' => $contentswithout
+                ], 200);
+            } else {
 
-            $contents = Category::with(['media' => function ($query) {
-    $query->withCount('comments', 'likes')
-          ->withExists(['likes as user_liked' => function ($q) {
-              $q->where('user_id', auth()->id());
-          }]);
-}])->orderBy('created_at', 'desc')->take(10)->get();
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Recently added media retrieved successfully.',
-                'data' => $contents
-            ], 200);}
+                $contents = Category::with(['media' => function ($query) {
+                    $query->withCount('comments', 'likes')
+                        ->withExists(['likes as is_liked' => function ($q) {
+                            $q->where('user_id', auth()->id());
+                        }]);
+                }])->orderBy('created_at', 'desc')->take(10)->get();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Recently added media retrieved successfully.',
+                    'data' => $contents
+                ], 200);
+            }
         } catch (Exception $e) {
             LaravelLog::error('Recently Added error: ' . $e->getMessage());
 
@@ -298,49 +296,53 @@ class MediaController extends Controller
     }
 
     public function featured(Request $request)
-{
-    try {
-        $token = $request->bearerToken();
-        if ($token) {
-            $contents = Category::with(['media' => function ($query) {
-                $query->withCount('comments')
-                      ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at'])
-                      ->where('is_featured', true);
-            }])->orderBy('created_at', 'desc')->take(10)->get();
-            
+    {
+        try {
+            $token = $request->bearerToken();
+            if ($token) {
+                $contents = Category::with(['media' => function ($query) {
+                    $query->withCount('comments')
+                        ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at'])
+                        ->where('is_featured', true);
+                }])->orderBy('created_at', 'desc')->take(10)->get();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Featured media retrieved successfully without token.',
+                    'data' => $contents
+                ], 200);
+            } else {
+               
+                $contents = Category::with(['media' => function ($query) {
+                    $query->withCount('comments', 'likes')
+                    ->where('is_featured', true)
+                        ->withExists(['likes as is_liked' => function ($q) {
+                            $q->where('user_id', auth()->id());
+                        }]);
+                }])->orderBy('created_at', 'desc')->take(10)->get();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Featured media retrieved successfully.',
+                    'data' => $contents
+                ], 200);
+            }
+        } catch (Exception $e) {
+            LaravelLog::error('Featured error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'featured_error',
+                'description' => $e->getMessage(),
+            ]);
+
             return response()->json([
-                'success' => true,
-                'message' => 'Featured media retrieved successfully without token.',
-                'data' => $contents
-            ], 200);
-        } else {
-            $contents = Category::with(['media' => function ($query) {
-                $query->withCount(['comments', 'likes'])
-                      ->where('is_featured', true);
-            }])->orderBy('created_at', 'desc')->take(10)->get();
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Featured media retrieved successfully.',
-                'data' => $contents
-            ], 200);
+                'success' => false,
+                'error' => 'Failed to fetch featured media.',
+                'message' => $e->getMessage()
+            ], 500);
         }
-    } catch (Exception $e) {
-        LaravelLog::error('Featured error: ' . $e->getMessage());
-
-        Log::create([
-            'user_id' => Auth::id(),
-            'type' => 'featured_error',
-            'description' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'error' => 'Failed to fetch featured media.',
-            'message' => $e->getMessage()
-        ], 500);
     }
-}
 
     public function update(Request $request, $id)
     {
@@ -499,7 +501,6 @@ class MediaController extends Controller
                 'message' => 'Media updated successfully.',
                 'data' => $media
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status' => 'error',
@@ -544,5 +545,4 @@ class MediaController extends Controller
             return response()->json(['error' => 'Failed to retrieve categories.'], 500);
         }
     }
-
 }

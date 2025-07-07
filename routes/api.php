@@ -6,6 +6,7 @@ use App\Http\Controllers\API\CommentsController;
 use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\BookmarkController;
+use App\Http\Controllers\API\CheckUpdateController;
 use App\Http\Controllers\API\GlobalController;
 use App\Http\Controllers\API\LikesController;
 use App\Http\Controllers\API\PolicyController;
@@ -56,3 +57,5 @@ Route::delete('/profile', [UserAuthController::class, 'deleteAccount'])->name('p
 
 Route::get('/policies', [PolicyController::class, 'index']);
 Route::get('/policies/{id}', [PolicyController::class, 'show']);
+Route::get('/check-update', [CheckUpdateController::class, 'get']);
+Route::post('/check-update', [CheckUpdateController::class, 'update']);
