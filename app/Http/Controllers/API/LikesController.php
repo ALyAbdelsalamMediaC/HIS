@@ -20,11 +20,11 @@ class LikesController extends Controller
             $request->validate([
                 'user_id' => 'required|integer|exists:users,id',
             ]);
-
+            
             $userId = $request->input('user_id');
-
+            
             // Find the media item
-            $media = Media::findOrFail($mediaId);
+            $media = Media::where('id',$mediaId)->first();
 
             // Check if the user already liked this media
             $existingLike = Like::where('user_id', $userId)

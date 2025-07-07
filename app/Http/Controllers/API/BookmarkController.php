@@ -161,19 +161,35 @@ use App\Http\Controllers\Controller;
             $articleLikes = Article::where('user_id', $userId)
                 ->withCount(['likesarticle', 'commentarticle'])
                 ->get();
+
+            $mediaLikes = $mediaLikes->isEmpty() ? null : $mediaLikes;
+            $articleLikes = $articleLikes->isEmpty() ? null : $articleLikes;
                 
-            $bookmarks = Bookmark::where('user_id', $userId)
-                ->with([
-                    'article',
-                    'media',
-                    'media' => function ($query) {
-                        $query->with(['likes', 'comments']);
-                    },
-                    'article' => function ($query) {
-                        $query->with(['likesarticle', 'commentarticle']);
-                    }
-                ])
+            // Get bookmarks for articles
+            $articleBookmarks = Bookmark::where('user_id', $userId)
+                ->whereNotNull('article_id')
+                ->with(['article' => function ($query) {
+                    $query->with(['likesarticle', 'commentarticle']);
+                }])
                 ->get();
+
+            // Get bookmarks for media
+            $mediaBookmarks = Bookmark::where('user_id', $userId)
+                ->whereNotNull('media_id')
+                ->with(['media' => function ($query) {
+                    $query->with(['likes', 'comments']);
+                }])
+                ->get();
+
+            // Set to null if empty
+            $articleBookmarks = $articleBookmarks->isEmpty() ? null : $articleBookmarks;
+            $mediaBookmarks = $mediaBookmarks->isEmpty() ? null : $mediaBookmarks;
+
+            // Combine all bookmarks if needed
+            $bookmarks = [
+                'articleBookmarks' => $articleBookmarks,
+                'mediaBookmarks' => $mediaBookmarks,
+            ];
 
             return response()->json([
                 'status' => 'success',

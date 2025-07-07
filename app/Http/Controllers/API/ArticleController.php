@@ -209,6 +209,12 @@ class ArticleController extends Controller
                         $this->driveServiceThumbnail->deleteFile($fileId);
                     }
                 }
+                // Upload new thumbnail
+                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                $url = $this->driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                $thumbnail_path = $url;
+            }
              
 
             // Update database
