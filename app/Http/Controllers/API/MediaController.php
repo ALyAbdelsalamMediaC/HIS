@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bookmark;
 use Illuminate\Http\Request;
 use App\Models\Log;
 use App\Models\Media;
@@ -17,6 +18,7 @@ use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is buil
 use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use Google\Service\MyBusinessBusinessInformation\Resource\Categories;
+use Illuminate\Support\Facades\Validator; // For input validation
 
 class MediaController extends Controller
 {
@@ -49,14 +51,20 @@ class MediaController extends Controller
     public function show()
     {
         try {
-            $categories = Category::with(['media' => function ($query) {
-                $query->withCount('comments', 'likes');
+            $categoriesPending = Category::with(['media' => function ($query) {
+                $query->where('status', 'pending')->withCount('comments', 'likes');
             }])->get();
 
+            $categories = Category::with(['media' => function ($query) {
+                $query->where('status', '!=', 'pending')->withCount('comments', 'likes');
+            }])->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Media categories retrieved successfully.',
-                'data' => $categories
+                'data' => [
+                    'categories' => $categories,
+                    'categoriesPending' => $categoriesPending
+                ]
             ], 200);
         } catch (Exception $e) {
             LaravelLog::error('Media retrieval error: ' . $e->getMessage());
@@ -250,27 +258,40 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
+        $userId = null; // Initialize $userId to avoid undefined variable issues
+
         try {
             $token = $request->bearerToken();
-            if ($token) {
+            $userId = (int) $request->user_id; // Convert to integer
 
+            if ($token) {
                 $contentswithout = Category::with(['media' => function ($query) {
-                    $query->withCount('comments')
-                        ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at']);
+                    $query->where('status', 'published')
+                        ->withCount('comments');
                 }])->orderBy('created_at', 'desc')->take(10)->get();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Recently added media retrieved successfully without.',
                     'data' => $contentswithout
                 ], 200);
             } else {
-
-                $contents = Category::with(['media' => function ($query) {
-                    $query->withCount('comments', 'likes')
-                        ->withExists(['likes as is_liked' => function ($q) {
-                            $q->where('user_id', auth()->id());
+                $contents = Category::with(['media' => function ($query) use ($userId) {
+                    $query->where('status', 'published')
+                        ->withCount(['comments', 'likes'])
+                        ->withExists(['likes as is_liked' => function ($q) use ($userId) {
+                            $q->where('user_id', $userId);
                         }]);
                 }])->orderBy('created_at', 'desc')->take(10)->get();
+
+                foreach ($contents as $category) {
+                    foreach ($category->media as $media) {
+                        $is_favorite = Bookmark::where('media_id', $media->id)
+                            ->where('user_id', $userId)
+                            ->exists();
+                        $media->is_favorite = $is_favorite;
+                    }
+                }
 
                 return response()->json([
                     'success' => true,
@@ -279,13 +300,17 @@ class MediaController extends Controller
                 ], 200);
             }
         } catch (Exception $e) {
+            // Log the error to Laravel's log system
             LaravelLog::error('Recently Added error: ' . $e->getMessage());
 
-            Log::create([
-                'user_id' => Auth::id(),
-                'type' => 'recently_added_error',
-                'description' => $e->getMessage(),
-            ]);
+            // If you have a Log model for database logging
+            if ($userId) { // Only log to database if $userId is set
+                Log::create([
+                    'user_id' => $userId,
+                    'type' => 'recently_added_error',
+                    'description' => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'success' => false,
@@ -295,31 +320,48 @@ class MediaController extends Controller
         }
     }
 
+
     public function featured(Request $request)
     {
+        $userId = null; // Initialize $userId to avoid undefined variable issues
+
         try {
+            $userId = (int) $request->user_id; // Convert to integer
+
             $token = $request->bearerToken();
             if ($token) {
                 $contents = Category::with(['media' => function ($query) {
-                    $query->withCount('comments')
-                        ->select(['id', 'user_id', 'category_id', 'sub_category_id', 'title', 'description', 'file_path', 'pdf', 'thumbnail_path', 'image_path', 'status', 'is_featured', 'duration', 'views', 'created_at', 'updated_at'])
-                        ->where('is_featured', true);
+                    $query->where('status', 'published')
+                        ->where('is_featured', true)
+                        ->withCount('comments');
                 }])->orderBy('created_at', 'desc')->take(10)->get();
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Featured media retrieved successfully without token.',
+                    'message' => 'Featured media retrieved successfully.',
                     'data' => $contents
                 ], 200);
             } else {
-               
-                $contents = Category::with(['media' => function ($query) {
-                    $query->withCount('comments', 'likes')
-                    ->where('is_featured', true)
-                        ->withExists(['likes as is_liked' => function ($q) {
-                            $q->where('user_id', auth()->id());
+                $contents = Category::with(['media' => function ($query) use ($userId) {
+                    $query->where('status', 'published')
+                        ->where('is_featured', true)
+                        ->withCount(['comments', 'likes'])
+                        ->withExists(['likes as is_liked' => function ($q) use ($userId) {
+                            $q->where('user_id', $userId);
                         }]);
                 }])->orderBy('created_at', 'desc')->take(10)->get();
+
+                // Optimize bookmark check
+                $bookmarkedMediaIds = Bookmark::where('user_id', $userId)
+                    ->pluck('media_id')
+                    ->toArray();
+
+                // Add is_favorite to each media item
+                foreach ($contents as $category) {
+                    foreach ($category->media as $media) {
+                        $media->is_favorite = in_array($media->id, $bookmarkedMediaIds);
+                    }
+                }
 
                 return response()->json([
                     'success' => true,
@@ -328,13 +370,17 @@ class MediaController extends Controller
                 ], 200);
             }
         } catch (Exception $e) {
+            // Log to Laravel's logging system
             LaravelLog::error('Featured error: ' . $e->getMessage());
 
-            Log::create([
-                'user_id' => Auth::id(),
-                'type' => 'featured_error',
-                'description' => $e->getMessage(),
-            ]);
+            // Log to database only if $userId is set
+            if ($userId) {
+                Log::create([
+                    'user_id' => $userId,
+                    'type' => 'featured_error',
+                    'description' => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'success' => false,
@@ -522,26 +568,67 @@ class MediaController extends Controller
             ], 500);
         }
     }
-    public function categories(Request $request)
+    public function getAllCategories(Request $request)
     {
         try {
-            $categories = Category::all();
-            $subCategory = SubCategory::where('category_id', $request->category_id)->get();
-            $subCategoryDetails = Media::where('sub_category_id', $request->sub_category_id)
-                ->with(['likes', 'comments'])
+            // Fetch all categories with their subcategories
+            $categories = Category::with('subcategories')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Categories and subcategories retrieved successfully.',
+                'data' => [
+                    'categories' => $categories,
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            // Log to Laravel's logging system
+            Log::error('Categories retrieval error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to retrieve categories.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function subCategoryDetails(Request $request)
+    {
+        try {
+
+            // Validate sub_category_id and user_id
+            $validator = Validator::make($request->all(), [
+                'sub_category_id' => 'required|integer',
+                'user_id' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid input.',
+                    'message' => $validator->errors()->first(),
+                ], 400);
+            }
+            $subCategoryId = (int) $request->sub_category_id;
+            $userId = (int) $request->user_id;
+            $subCategoryDetails = Media::where('sub_category_id', $subCategoryId)
+                ->where('user_id', $userId)
+                ->where('status', 'published')
+                
+                ->with(['likes', 'comments'])->withExists(['likes as is_liked' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }])
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Categories retrieved successfully.',
-                'data' => [
-                    'categories' => $categories,
-                    'subCategory' => $subCategory,
-                    'subCategoryDetails' => $subCategoryDetails,
-                ]
+                'message' => 'Sub Category details retrieved successfully.',
+                'data' =>  $subCategoryDetails,
+
             ], 200);
         } catch (Exception $e) {
-            LaravelLog::error('Categories retrieval error: ' . $e->getMessage());
+            LaravelLog::error('Sub Category details retrieval error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve categories.'], 500);
         }
     }

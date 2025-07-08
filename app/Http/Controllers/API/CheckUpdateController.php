@@ -29,11 +29,11 @@ class CheckUpdateController extends Controller
         ]);
 
         $update = CheckUpdate::getInstance();
-        $update->update($validated);
+        $update->updateInstance($validated);
 
         return response()->json([
             'message' => 'Update configuration modified successfully',
-            'data' => $update
+            'data' => CheckUpdate::getInstance()
         ]);
     }
 }

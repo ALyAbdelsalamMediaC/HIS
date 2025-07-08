@@ -36,7 +36,8 @@ Route::delete('/comment/{commentId}/like', [LikesController::class, 'removeLikeC
 
 Route::get('/comment/{commentId}/likes', [LikesController::class, 'getLikesCommentCount'])->name('comment.likes.count');
 
-Route::get('/categories', [MediaController::class, 'categories']);
+Route::get('/categories', [MediaController::class, 'getAllCategories']);
+Route::post('/sub_category/details', [MediaController::class, 'subCategoryDetails']);
 
 Route::get('/api/media/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
 Route::post('/media/admin-comment/reply', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
