@@ -26,7 +26,10 @@ Route::get('/article/show', [ArticleController::class, 'show']);
 Route::get('/comments/media', [CommentsController::class, 'getCommentsByMediaId']);
 Route::get('/comments/article', [CommentsController::class, 'getCommentsByArticleId']);
 Route::put('/media/{id}', [MediaController::class, 'update'])->name('media.update');
-Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
+Route::put('/articles', [ArticleController::class, 'update'])->name('articles.update');
+Route::get('/user_articles', [ArticleController::class, 'getArticlesByUserId']);
+Route::delete('/delete_article', [ArticleController::class, 'destroy']);
+
 
 Route::post('/media/{mediaId}/like', [LikesController::class, 'addLike'])->name('media.like');
 Route::delete('/media/{mediaId}/like', [LikesController::class, 'removeLike'])->name('media.unlike');
@@ -38,11 +41,12 @@ Route::get('/comment/{commentId}/likes', [LikesController::class, 'getLikesComme
 
 Route::get('/categories', [MediaController::class, 'getAllCategories']);
 Route::post('/sub_category/details', [MediaController::class, 'subCategoryDetails']);
+Route::post('/viewscount', [MediaController::class, 'viewsCount']);
 
 Route::get('/api/media/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
 Route::post('/media/admin-comment/reply', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
 
-Route::get('/bookmarks/{id}', [BookmarkController::class, 'getBookmarks']);
+Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
 Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
 Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);
 

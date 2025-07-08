@@ -52,11 +52,11 @@ class MediaController extends Controller
     {
         try {
             $categoriesPending = Category::with(['media' => function ($query) {
-                $query->where('status', 'pending')->withCount('comments', 'likes');
+                $query->whereIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
             }])->get();
 
             $categories = Category::with(['media' => function ($query) {
-                $query->where('status', '!=', 'pending')->withCount('comments', 'likes');
+                $query->whereNotIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
             }])->get();
             return response()->json([
                 'success' => true,
@@ -630,6 +630,38 @@ class MediaController extends Controller
         } catch (Exception $e) {
             LaravelLog::error('Sub Category details retrieval error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve categories.'], 500);
+        }
+    }
+
+    public function viewsCount(Request $request)
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'media_id' => 'required|integer'
+            ]);
+
+            $media_id = $validated['media_id'];
+            $media = Media::find($media_id);
+
+            if (!$media) {
+                throw new Exception('Media not found.');
+            }
+
+            // Increment the views column
+            $media->increment('views');
+
+            return response()->json([
+                'views' => $media->views,
+                'message' => 'Views count updated and retrieved successfully.'
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Media views count error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to update or retrieve media views count.',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

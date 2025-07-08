@@ -49,8 +49,6 @@ class ArticleController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'year' => 'required|digits:4',
-                'month' => 'required',
                 'user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
@@ -63,26 +61,7 @@ class ArticleController extends Controller
                 'mention.*' => 'nullable|string|max:255',
             ]);
 
-            $category = Category::firstOrCreate(
-                [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
-                ],
-                [
-                    'description' => "Category for year {$validated['year']}"
-                ]
-            );
 
-            // Find or create subcategory (month)
-            $subCategory = SubCategory::firstOrCreate(
-                [
-                    'name' => $validated['month'],
-                    'category_id' => $category->id
-                ],
-                [
-                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
-                ]
-            );
 
             // Store thumbnail if exists
             $pdf = null;
@@ -113,8 +92,6 @@ class ArticleController extends Controller
 
             // Save to database
             $Article = Article::create([
-                'category_id' => $category->id,
-                'sub_category_id' => $subCategory->id,
                 'user_id' => $validated['user_id'],
                 'title' => $validated['title'],
                 'hyperlink' => $validated['hyperlink'],
@@ -127,7 +104,7 @@ class ArticleController extends Controller
 
             // Log success
             Log::create([
-                'user_id' => Auth::id(),
+                'user_id' => $validated['user_id'],
                 'type' => 'article_upload_success',
                 'description' => 'Uploaded article: ' . $Article->title,
             ]);
@@ -153,15 +130,22 @@ class ArticleController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
+         $validated = $request->validate([
+            'article_id' => 'required|exists:articles,id',
+        ], [
+            'article_id.exists' => 'The specified article does not exist.',
+        ]);
+
+        $article_id = (int)$validated['article_id'];
         try {
-            $article = Article::findOrFail($id);
+            $article = Article::findOrFail($article_id);
 
             // Validate input
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
-                
+
                 'title' => 'required|string|max:255',
                 'hyperlink' => 'nullable|url|max:2048',
                 'description' => 'nullable|string',
@@ -180,7 +164,7 @@ class ArticleController extends Controller
                 ->values()
                 ->toArray();
 
-            
+
             // Update PDF file on Google Drive
             $pdf = $article->pdf;
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
@@ -197,7 +181,7 @@ class ArticleController extends Controller
                 $pdf = 'https://drive.google.com/file/d/' . $pdf . '/preview';
             }
 
-          
+
 
             // Update thumbnail if exists
             $thumbnail_path = $article->thumbnail_path;
@@ -215,7 +199,7 @@ class ArticleController extends Controller
                 $url = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 $thumbnail_path = $url;
             }
-             
+
 
             // Update database
             $article->update([
@@ -241,7 +225,6 @@ class ArticleController extends Controller
                 'message' => 'Article updated successfully.',
                 'data' => $article
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status' => 'error',
@@ -261,6 +244,91 @@ class ArticleController extends Controller
                 'status' => 'error',
                 'message' => 'Article update failed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+    public function destroy(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'article_id' => 'required|exists:articles,id',
+        ], [
+            'user_id.exists' => 'The specified user does not exist.',
+            'article_id.exists' => 'The specified article does not exist.',
+        ]);
+        $articleId = $request->input('article_id'); 
+        $userId = $request->input('user_id'); 
+        try {
+            $article = Article::findOrFail($articleId);
+
+            // Delete PDF from Google Drive if exists
+            if ($article->pdf) {
+                $fileId = $this->driveServicePDF->getFileIdFromUrl($article->pdf);
+                if ($fileId) {
+                    $this->driveServicePDF->deleteFile($fileId);
+                }
+            }
+
+            // Delete thumbnail from Google Drive if exists
+            if ($article->thumbnail_path) {
+                $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($article->thumbnail_path);
+                if ($fileId) {
+                    $this->driveServiceThumbnail->deleteFile($fileId);
+                }
+            }
+
+            // Delete article
+            $article->delete();
+
+            // Log success
+            Log::create([
+                'user_id' => $userId,
+                'type' => 'article_delete_success',
+                'description' => 'Deleted article: ' . $article->title,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Article deleted successfully.'
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Article deletion error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => $userId,
+                'type' => 'article_delete_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to delete article.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getArticlesByUserId(Request $request)
+    {
+
+        // Validate the request
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ], [
+            'user_id.exists' => 'The specified user does not exist.',
+        ]);
+
+        $userId = $validated['user_id'];
+
+        try {
+            $articles = Article::where('user_id', $userId)->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Articles retrieved successfully.',
+                'data' => $articles
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Error retrieving articles: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve articles.'], 500);
         }
     }
 }
