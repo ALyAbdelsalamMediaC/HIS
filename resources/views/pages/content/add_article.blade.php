@@ -76,10 +76,10 @@
         </select>
     </div>
 
-    <div class="mt-3 mb-2 form-check">
+    <!-- <div class="mt-3 mb-2 form-check">
       <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured">
       <label class="form-check-label" for="is_featured">Featured</label>
-    </div>
+    </div> -->
     
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="submit">Add Article</x-button>
