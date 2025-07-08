@@ -339,4 +339,52 @@
       });
     });
   </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector('form[action="{{ route('content.update', $media->id) }}"]');
+      if (form) {
+        form.addEventListener("submit", function (event) {
+          const status = document.getElementById('status').value;
+          const assignedReviewersCount = {{ $media->assigned_reviewers->count() }};
+          let isValid = true;
+
+          // Custom reviewer validation for this form only
+          if (status === 'inreview' && assignedReviewersCount === 0) {
+            isValid = false;
+            displayError(document.getElementById('status'), [
+              "You need to assign a reviewer first to make the status In Review."
+            ]);
+          }
+
+          if (!isValid) {
+            event.preventDefault();
+            const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitButton) {
+              submitButton.disabled = false;
+              if (submitButton.originalInnerHTML) {
+                submitButton.innerHTML = submitButton.originalInnerHTML;
+              }
+            }
+          }
+        });
+      }
+
+      // Local displayError for this form only
+      function displayError(element, messages) {
+        const errorContainerId = element.name + "-error-container";
+        const errorContainer = document.getElementById(errorContainerId);
+        if (errorContainer) {
+          errorContainer.innerHTML = createErrorHtml(messages);
+        }
+      }
+      function createErrorHtml(messages) {
+        let html = '<ul class="error-input-login">';
+        messages.forEach(function (message) {
+          html += "<li>" + message + "</li>";
+        });
+        html += "</ul>";
+        return html;
+      }
+    });
+  </script>
 @endpush
