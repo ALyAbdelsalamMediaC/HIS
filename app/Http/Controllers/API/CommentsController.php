@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+
 class CommentsController extends Controller
 {
     public function addComment(Request $request)
@@ -55,7 +56,6 @@ class CommentsController extends Controller
                 'message' => 'Comment created successfully.',
                 'data' => $comment,
             ], 200);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -122,7 +122,6 @@ class CommentsController extends Controller
                 'message' => 'Reply created successfully.',
                 'data' => $reply,
             ], 201);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -136,58 +135,59 @@ class CommentsController extends Controller
             ], 500);
         }
     }
-   public function getCommentsByMediaId(Request $request)
+    public function getCommentsByMediaId(Request $request)
     {
         try {
             // Validate the media_id
-            $validator = Validator::make(['media_id' => $request->media_id], [
-                'media_id' => 'required|exists:media,id',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
+            $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'media_id'=> 'required|exists:media,id'
+        ], [
+            'user_id.exists' => 'The specified user does not exist.',
+            'media_id' => 'required|exists:media,id',
+        ]);
+            // Validate the user_id if provided
+            $user_id = (int) $validated['user_id'];
+            $media_id = (int) $validated['media_id'];
+            
 
             // Validate the user_id if provided
-            $user_id = $request->user_id;
-            if ($user_id) {
-                $userValidator = Validator::make(['user_id' => $user_id], [
-                    'user_id' => 'exists:users,id',
-                ]);
-
-                if ($userValidator->fails()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'errors' => $userValidator->errors(),
-                    ], 422);
-                }
-            }
-
-            // Fetch parent comments with their replies and user data
-            $query = Comment::where('media_id', $request->media_id)
+            $user_id = $validated['user_id'];
+            $media_id = $validated['media_id'];
+            
+            $query = Comment::where('media_id', $media_id)
                 ->whereNull('parent_id')
-                ->with(['replies' => function ($query) {
-                    $query->orderBy('created_at', 'asc')
-                          ->with('user');
-                }, 'user'])
+                ->with([
+                    'replies' => function ($query) use ($user_id) {
+                        $query->orderBy('created_at', 'asc')
+                            ->with(['user']);
+                    },
+                    'user'
+                ])
                 ->orderBy('created_at', 'asc');
 
-            // Filter by user_id if provided
             if ($user_id) {
-                $query->where('user_id', $user_id);
+                // No filter by user_id, get all comments for the media
             }
 
+            // Get comments
             $comments = $query->get();
+
+            // Attach is_liked attribute for each comment and its replies
+            $comments->each(function ($comment) use ($user_id) {
+                $comment->is_liked = $comment->likes()->where('user_id', $user_id)->exists();
+                if ($comment->relationLoaded('replies')) {
+                    $comment->replies->each(function ($reply) use ($user_id) {
+                        $reply->is_liked = $reply->likes()->where('user_id', $user_id)->exists();
+                    });
+                }
+            });
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Comments retrieved successfully.',
                 'data' => $comments,
             ], 200);
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -232,7 +232,7 @@ class CommentsController extends Controller
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'asc')
-                          ->with('user');
+                        ->with('user');
                 }, 'user'])
                 ->orderBy('created_at', 'asc');
 
@@ -248,7 +248,6 @@ class CommentsController extends Controller
                 'message' => 'Comments retrieved successfully.',
                 'data' => $comments,
             ], 200);
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',

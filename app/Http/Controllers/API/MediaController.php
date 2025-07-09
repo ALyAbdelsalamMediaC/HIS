@@ -664,4 +664,34 @@ class MediaController extends Controller
             ], 500);
         }
     }
+
+    public function getMediaByUserId(Request $request)
+    {
+
+        // Validate the request
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ], [
+            'user_id.exists' => 'The specified user does not exist.',
+        ]);
+
+        $userId = $validated['user_id'];
+
+        try {
+            $PendingMedia = Media::where('user_id', $userId)->where('status', 'pending')->get();
+            $PublishedMedia = Media::where('user_id', $userId)->where('status', '!=', 'pending')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'media retrieved successfully.',
+                'data' => [
+                    'pending' => $PendingMedia,
+                    'published' => $PublishedMedia
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Error retrieving media: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve media.'], 500);
+        }
+    }
 }

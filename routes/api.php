@@ -21,6 +21,7 @@ Route::post('/media/store', [MediaController::class, 'store']);
 Route::get('/media/show', [MediaController::class, 'show']);
 Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
 Route::get('/media/featured', [MediaController::class, 'featured']);
+Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
 Route::post('/article/store', [ArticleController::class, 'store']);
 Route::get('/article/show', [ArticleController::class, 'show']);
 Route::get('/comments/media', [CommentsController::class, 'getCommentsByMediaId']);
@@ -58,6 +59,7 @@ Route::post('/login', [UserAuthController::class, 'login']);
 Route::post('login/google', [SocialAuthController::class, 'handleGoogleLoginApi'])->name('api.social.google.login');
 Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
 Route::put('/profile', [UserAuthController::class, 'editProfile'])->name('profile.update');
+Route::put('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
 Route::delete('/profile', [UserAuthController::class, 'deleteAccount'])->name('profile.delete');
 
 Route::get('/policies', [PolicyController::class, 'index']);
