@@ -47,6 +47,10 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/content/subcategories', [MediaController::class, 'getSubcategoriesByCategory'])->name('content.subcategories');
     Route::get('/content/months-by-year', [MediaController::class, 'getMonthsByYear'])->name('content.monthsByYear');
+    Route::post('/content/videos/upload-chunk', [MediaController::class, 'uploadChunk'])->name('content.uploadChunk');
+    Route::get('/content/videos/upload-chunk', [MediaController::class, 'testChunk'])->name('content.testChunk');
+
+
 
     // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
@@ -72,7 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
     Route::post('/admins/rate', [AdminCommentController::class, 'rate'])->name('admins.rate');
 
-    Route::get('/get-google-token', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
+    Route::get('/get-google-token.php', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
     Route::get('/content/articles/add', [ArticleController::class, 'create']);
@@ -136,6 +140,7 @@ Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
             Route::delete('/{category}', [PolicyController::class, 'destroyCategory'])->name('destroy');
         });
     });
+
 });
 
 

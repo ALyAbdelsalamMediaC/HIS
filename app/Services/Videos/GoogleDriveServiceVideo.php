@@ -44,6 +44,11 @@ class GoogleDriveServiceVideo
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
+            
+            //       if ($this->client->isAccessTokenExpired()) {
+            //     header('Location: https://his.mc-apps.org/get-google-token.php');
+            //     exit;
+            // }
             $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
             if (isset($accessToken['error'])) {
                 throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
@@ -60,7 +65,7 @@ class GoogleDriveServiceVideo
 
     public function getAuthUrl()
     {
-        $this->client->setRedirectUri('http://localhost:8000/get-google-token.php'); // Replace with your redirect URI
+        $this->client->setRedirectUri('https://his.mc-apps.org/get-google-token.php'); // Replace with your redirect URI
         return $this->client->createAuthUrl();
     }
     public function getClient()
@@ -72,23 +77,37 @@ class GoogleDriveServiceVideo
     {
         $fileMetadata = new DriveFile([
             'name' => $name,
-            'parents' => [env('GOOGLE_DRIVE_FOLDER_V_VIDEOS')], //  Upload to specific folder
-
+            'parents' => [env('GOOGLE_DRIVE_FOLDER_V_VIDEOS')],
         ]);
-        $content = file_get_contents($file->getRealPath());
 
-        $uploadedFile = $this->service->files->create($fileMetadata, [
-            'data' => $content,
-            'mimeType' => $file->getMimeType(),
-            'uploadType' => 'multipart',
-            'fields' => 'id'
-        ]);
+        $service = $this->service;
+
+        $filePath = $file->getRealPath();
+        $mimeType = $file->getMimeType();
+
+        // Read the file contents as a string for Google API
+        $fileContents = file_get_contents($filePath);
+        if ($fileContents === false) {
+            throw new \Exception('Failed to read file contents for Google Drive upload.');
+        }
+        $uploadedFile = $service->files->create(
+            $fileMetadata,
+            [
+                'data' => $fileContents,
+                'mimeType' => $mimeType,
+                'uploadType' => 'resumable',
+                'fields' => 'id',
+            ]
+        );
+
+        if (!$uploadedFile || !isset($uploadedFile->id)) {
+            throw new \Exception('Failed to upload file to Google Drive.');
+        }
 
         // Make the file public
         $permission = new \Google\Service\Drive\Permission();
         $permission->setRole('reader');
         $permission->setType('anyone');
-
         $this->service->permissions->create($uploadedFile->id, $permission);
 
         return $uploadedFile->id;

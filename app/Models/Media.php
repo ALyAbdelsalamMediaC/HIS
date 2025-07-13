@@ -24,7 +24,6 @@ class Media extends Model
         'image_path',
         'is_featured',
         'assigned_to',
-        'is_favorite',
         'mention',
     ];
 

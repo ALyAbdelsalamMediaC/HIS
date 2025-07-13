@@ -79,6 +79,9 @@
     <!-- QuillJS JS -->
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
+    <!-- Resumable.js for chunked uploads -->
+    <script src="https://cdn.jsdelivr.net/npm/resumablejs@1.1.0/resumable.min.js"></script>
+
     @stack('scripts')
 
 </body>

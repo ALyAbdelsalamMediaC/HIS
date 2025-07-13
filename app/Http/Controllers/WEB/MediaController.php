@@ -141,7 +141,7 @@ class MediaController extends Controller
 
             return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory'));
         } catch (Exception $e) {
-            \Log::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+           LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }
@@ -352,16 +352,21 @@ class MediaController extends Controller
                 'month' => 'required',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'file' => 'required|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
-                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
-                'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
+                'file' => $request->input('uploaded_video_path') ? 'nullable' : 'required|file|mimes:mp4|max:1048576', // 1GB in KB
+                'uploaded_video_path' => 'nullable|string|regex:/^' . preg_quote(storage_path('app/uploads/'), '/') . '.+$/', // Validate path
+                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB
+                'thumbnail_path' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB
+                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB
                 'is_featured' => 'nullable|boolean',
-                'is_favorite' => 'nullable|boolean',
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
-
+    
+            // Validate uploaded_video_path if provided
+            if ($request->input('uploaded_video_path') && !file_exists($request->input('uploaded_video_path'))) {
+                throw new \Exception('Invalid video path provided.');
+            }
+    
             $category = Category::firstOrCreate(
                 [
                     'name' => $validated['year'],
@@ -371,8 +376,7 @@ class MediaController extends Controller
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
-
-            // Find or create subcategory (month)
+    
             $subCategory = SubCategory::firstOrCreate(
                 [
                     'name' => $validated['month'],
@@ -382,68 +386,78 @@ class MediaController extends Controller
                     'description' => "Subcategory for {$validated['month']} {$validated['year']}"
                 ]
             );
-
-            // Clean up mentions array
+    
             $mentions = collect($request->input('mention', []))
                 ->filter()
                 ->map(fn($item) => trim($item))
                 ->values()
                 ->toArray();
-
+    
             $getID3 = new getID3();
             $duration = null;
-
-            // Get video duration
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
-                $videoPath = $request->file('file')->getRealPath();
+            $video = null;
+    
+            // Handle chunked upload
+            $assembledPath = $request->input('uploaded_video_path');
+            if ($assembledPath && file_exists($assembledPath)) {
+                $videoPath = $assembledPath;
                 $fileInfo = $getID3->analyze($videoPath);
                 $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
-            }
-
-            $video = null;
-            if ($request->hasFile('file')) {
                 $driveService = new GoogleDriveServiceVideo();
+                $filename = time() . '_' . basename($videoPath);
+                LaravelLog::info('About to upload to Google Drive', ['videoPath' => $videoPath, 'filename' => $filename]);
+                $url = $driveService->uploadFile(new \Illuminate\Http\File($videoPath), $filename);
+                LaravelLog::info('Google Drive upload returned', ['url' => $url]);
+                if (!$url) {
+                    throw new \Exception('Failed to retrieve Google Drive file ID.');
+                }
+                $video = 'https://drive.google.com/file/d/' . $url . '/preview';
+                unlink($videoPath); // Clean up
+                LaravelLog::info('Google Drive upload complete, file ID: ' . $url);
+            } elseif ($request->hasFile('file')) {
                 if ($request->file('file')->isValid()) {
+                    $videoPath = $request->file('file')->getRealPath();
+                    $fileInfo = $getID3->analyze($videoPath);
+                    $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+                    $driveService = new GoogleDriveServiceVideo();
                     $filename = time() . '_' . $request->file('file')->getClientOriginalName();
+                    LaravelLog::info('About to upload to Google Drive', ['videoPath' => $videoPath, 'filename' => $filename]);
                     $url = $driveService->uploadFile($request->file('file'), $filename);
+                    LaravelLog::info('Google Drive upload returned', ['url' => $url]);
+                    if (!$url) {
+                        throw new \Exception('Failed to retrieve Google Drive file ID.');
+                    }
                     $video = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    LaravelLog::info('Google Drive upload complete, file ID: ' . $url);
                 }
+            } else {
+                throw new \Exception('No video file provided.');
             }
-
+    
             $pdf = null;
-            if ($request->hasFile('pdf')) {
+            if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
                 $driveServicePDF = new GoogleDriveServicePDF();
-                if ($request->file('pdf')->isValid()) {
-                    $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                    $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                    $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
-                }
+                $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
+                $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
+                $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
             }
-
-            // Store thumbnail if exists
+    
             $thumbnailPath = null;
-
-            if ($request->hasFile('thumbnail_path')) {
+            if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
                 $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
-                if ($request->file('thumbnail_path')->isValid()) {
-                    $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
-                    $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                    $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-                }
+                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
+                $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
             }
-
+    
             $imagePath = null;
-
-            if ($request->hasFile('image_path')) {
+            if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
                 $driveServiceImage = new GoogleDriveServiceImage();
-                if ($request->file('image_path')->isValid()) {
-                    $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
-                    $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                    $imagePath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-                }
+                $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
+                $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
+                $imagePath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
             }
-
-            // Save to database
+    
             $media = Media::create([
                 'category_id' => $category->id,
                 'sub_category_id' => $subCategory->id,
@@ -457,26 +471,30 @@ class MediaController extends Controller
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
-                'is_favorite' => $request->boolean('is_favorite'),
                 'duration' => $duration,
             ]);
-            // Log success
+    
             Log::create([
                 'user_id' => Auth::id(),
                 'type' => 'media_upload_success',
                 'description' => 'Uploaded media: ' . $media->title,
             ]);
-
+    
             return redirect()->route('content.videos')->with('success', 'Media uploaded successfully.');
-        } catch (Exception $e) {
-            LaravelLog::error('Media upload error: ' . $e->getMessage());
-
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            LaravelLog::error('Validation error: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->withInput()->with('error', 'Validation failed: ' . $e->getMessage());
+        } catch (\Google\Service\Exception $e) {
+            LaravelLog::error('Google Drive error: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->withInput()->with('error', 'Google Drive upload failed: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            LaravelLog::error('Media upload error: ' . $e->getMessage(), ['exception' => $e]);
             Log::create([
                 'user_id' => Auth::id(),
                 'type' => 'media_upload_error',
                 'description' => $e->getMessage(),
             ]);
-            return back()->withInput()->with('error', 'Media upload failed. ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Media upload failed: ' . $e->getMessage());
         }
     }
 
@@ -495,179 +513,6 @@ class MediaController extends Controller
         } catch (Exception $e) {
             LaravelLog::error('Media edit error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load media for editing.');
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        try {
-            $media = Media::findOrFail($id);
-
-            // Validate input
-            $validated = $request->validate([
-                'year' => 'required|digits:4',
-                'month' => 'required',
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
-                'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
-                'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
-                'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
-                'is_featured' => 'nullable|boolean',
-                'is_favorite' => 'nullable|boolean',
-                'mention' => 'nullable|array',
-                'mention.*' => 'nullable|string|max:255',
-            ]);
-
-            $category = Category::firstOrCreate(
-                [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
-                ],
-                [
-                    'description' => "Category for year {$validated['year']}"
-                ]
-            );
-
-            // Find or create subcategory (month)
-            $subCategory = SubCategory::firstOrCreate(
-                [
-                    'name' => $validated['month'],
-                    'category_id' => $category->id
-                ],
-                [
-                    'description' => "Subcategory for {$validated['month']} {$validated['year']}"
-                ]
-            );
-
-            // Clean up mentions array
-            $mentions = collect($request->input('mention', []))
-                ->filter()
-                ->map(fn($item) => trim($item))
-                ->values()
-                ->toArray();
-
-            $getID3 = new getID3();
-            $duration = $media->duration;
-
-            // Update video duration if new file is uploaded
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
-                $videoPath = $request->file('file')->getRealPath();
-                $fileInfo = $getID3->analyze($videoPath);
-                $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
-            }
-
-            // Update video file on Google Drive
-            $video = $media->file_path;
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
-                $driveServiceVideo = new GoogleDriveServiceVideo();
-                // Delete old file from Google Drive if exists
-                if ($media->file_path) {
-                    $fileId = $driveServiceVideo->getFileIdFromUrl($media->file_path);
-                    if ($fileId) {
-                        $driveServiceVideo->deleteFile($fileId);
-                    }
-                }
-                // Upload new file
-                $filename = time() . '_' . $request->file('file')->getClientOriginalName();
-                $video = $driveServiceVideo->uploadFile($request->file('file'), $filename);
-                $video = 'https://drive.google.com/file/d/' . $video . '/preview';
-            }
-
-            // Update PDF file on Google Drive
-            $pdf = $media->pdf;
-            if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
-                $driveServicePDF = new GoogleDriveServicePDF();
-                // Delete old PDF from Google Drive if exists
-                if ($media->pdf) {
-                    $fileId = $driveServicePDF->getFileIdFromUrl($media->pdf);
-                    if ($fileId) {
-                        $driveServicePDF->deleteFile($fileId);
-                    }
-                }
-                // Upload new PDF
-                $filename = time() . '_' . $request->file('pdf')->getClientOriginalName();
-                $pdf = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
-                $pdf = 'https://drive.google.com/file/d/' . $pdf . '/preview';
-            }
-
-            // Update thumbnail if exists
-            $thumbnailPath = $media->thumbnail_path;
-            if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
-                $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
-                // Delete old thumbnail from Google Drive if exists
-                if ($media->thumbnail_path) {
-                    $fileId = $driveServiceThumbnail->getFileIdFromUrl($media->thumbnail_path);
-                    if ($fileId) {
-                        $driveServiceThumbnail->deleteFile($fileId);
-                    }
-                }
-                // Upload new thumbnail
-                $filename = time() . '_' . $request->file('thumbnail_path')->getClientOriginalName();
-                $thumbnailPath = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
-                $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $thumbnailPath . '=w1000?authuser=0';
-            }
-
-            // Update image if exists
-            $imagePath = $media->image_path;
-            if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
-                $driveServiceImage = new GoogleDriveServiceImage();
-                // Delete old image from Google Drive if exists
-                if ($media->image_path) {
-                    $fileId = $driveServiceImage->getFileIdFromUrl($media->image_path);
-                    if ($fileId) {
-                        $driveServiceImage->deleteFile($fileId);
-                    }
-                }
-                // Upload new image
-                $filename = time() . '_' . $request->file('image_path')->getClientOriginalName();
-                $imagePath = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
-                $imagePath = 'https://lh3.googleusercontent.com/d/' . $imagePath . '=w1000?authuser=0';
-            }
-
-            // Determine new status
-            $newStatus = $media->status;
-            if ($media->status === 'published') {
-                $newStatus = 'inreview';
-            } elseif ($request->has('status')) {
-                $newStatus = $request->input('status', $media->status);
-            }
-
-            // Update database
-            $media->update([
-                'category_id' => $category->id,
-                'sub_category_id' => $subCategory->id,
-                'title' => $validated['title'],
-                'description' => $validated['description'] ?? null,
-                'file_path' => $video,
-                'pdf' => $pdf,
-                'status' => $newStatus,
-                'thumbnail_path' => $thumbnailPath,
-                'image_path' => $imagePath,
-                'is_featured' => $request->boolean('is_featured'),
-                'is_favorite' => $request->boolean('is_favorite'),
-                'mention' => json_encode($mentions),
-                'duration' => $duration,
-            ]);
-
-            // Log success
-            Log::create([
-                'user_id' => Auth::id(),
-                'type' => 'media_update_success',
-                'description' => 'Updated media: ' . $media->title,
-            ]);
-
-            return redirect()->route('content.videos')->with('success', 'Media updated successfully.');
-        } catch (Exception $e) {
-            LaravelLog::error('Media update error: ' . $e->getMessage());
-
-            Log::create([
-                'user_id' => Auth::id(),
-                'type' => 'media_update_error',
-                'description' => $e->getMessage(),
-            ]);
-
-            return back()->withInput()->with('error', 'Media update failed: ' . $e->getMessage());
         }
     }
 
@@ -768,6 +613,127 @@ class MediaController extends Controller
         } catch (Exception $e) {
             LaravelLog::error('Media streaming error: ' . $e->getMessage());
             abort(500, 'Error streaming video.');
+        }
+    }
+
+    /**
+     * Handle Resumable.js chunked video upload
+     */
+    public function uploadChunk(Request $request)
+    {
+        try {
+            $resumableIdentifier = $request->input('resumableIdentifier');
+            $resumableFilename = $request->input('resumableFilename');
+            $resumableChunkNumber = (int)$request->input('resumableChunkNumber');
+            $resumableTotalChunks = (int)$request->input('resumableTotalChunks');
+    
+            if (!$resumableIdentifier || !$resumableFilename || !$resumableChunkNumber || !$resumableTotalChunks) {
+                LaravelLog::error('Missing Resumable.js parameters', ['request' => $request->all()]);
+                return response()->json(['error' => 'Missing upload parameters'], 400);
+            }
+    
+            $tempDir = storage_path('app/resumable-temp/' . $resumableIdentifier);
+            if (!file_exists($tempDir)) {
+                if (!mkdir($tempDir, 0755, true)) {
+                    LaravelLog::error('Failed to create temp directory: ' . $tempDir, ['permissions' => fileperms($tempDir) ?? 'not exists']);
+                    return response()->json(['error' => 'Server error: Cannot create temp directory'], 500);
+                }
+            } elseif (!is_writable($tempDir)) {
+                LaravelLog::error('Temp directory not writable: ' . $tempDir, ['permissions' => fileperms($tempDir)]);
+                return response()->json(['error' => 'Server error: Temp directory not writable'], 500);
+            }
+    
+            if ($request->hasFile('file')) {
+                LaravelLog::info('Received chunk ' . $resumableChunkNumber . ' for ' . $resumableIdentifier, ['file_size' => $request->file('file')->getSize()]);
+                $chunk = $request->file('file');
+                $chunkPath = $tempDir . "/chunk_{$resumableChunkNumber}";
+                $chunk->move($tempDir, "chunk_{$resumableChunkNumber}");
+                if (!file_exists($chunkPath)) {
+                    LaravelLog::error('Failed to move chunk to: ' . $chunkPath, ['error' => error_get_last()]);
+                    return response()->json(['error' => 'Failed to save chunk'], 500);
+                }
+            } else {
+                LaravelLog::error('No chunk file provided', ['request' => $request->all()]);
+                return response()->json(['error' => 'No chunk file provided'], 400);
+            }
+    
+            $allChunksPresent = true;
+            for ($i = 1; $i <= $resumableTotalChunks; $i++) {
+                if (!file_exists($tempDir . "/chunk_{$i}")) {
+                    $allChunksPresent = false;
+                    break;
+                }
+            }
+    
+            if ($allChunksPresent) {
+                $uniqueName = uniqid() . '_' . $resumableFilename;
+                $uploadsDir = storage_path('app/uploads');
+                if (!file_exists($uploadsDir)) {
+                    mkdir($uploadsDir, 0755, true);
+                }
+                $finalPath = $uploadsDir . '/' . $uniqueName;
+                $out = @fopen($finalPath, 'ab');
+                if (!$out) {
+                    LaravelLog::error('Failed to open output file: ' . $finalPath, ['error' => error_get_last(), 'permissions' => fileperms(dirname($finalPath))]);
+                    return response()->json(['error' => 'Failed to assemble file'], 500);
+                }
+                for ($i = 1; $i <= $resumableTotalChunks; $i++) {
+                    $chunkPath = $tempDir . "/chunk_{$i}";
+                    $in = @fopen($chunkPath, 'rb');
+                    if (!$in) {
+                        fclose($out);
+                        LaravelLog::error('Failed to open chunk: ' . $chunkPath, ['error' => error_get_last()]);
+                        return response()->json(['error' => 'Failed to read chunk'], 500);
+                    }
+                    if (stream_copy_to_stream($in, $out) === false) {
+                        fclose($in);
+                        fclose($out);
+                        LaravelLog::error('Failed to copy chunk to output: ' . $chunkPath, ['error' => error_get_last()]);
+                        return response()->json(['error' => 'Failed to assemble file'], 500);
+                    }
+                    fclose($in);
+                    unlink($chunkPath);
+                }
+                fclose($out);
+                if (!rmdir($tempDir)) {
+                    LaravelLog::warning('Failed to remove temp directory: ' . $tempDir, ['contents' => scandir($tempDir)]);
+                }
+                LaravelLog::info('Assembled file at: ' . $finalPath, ['file_size' => filesize($finalPath)]);
+                // Extra debug: check if file exists before returning
+                if (!file_exists($finalPath)) {
+                    LaravelLog::error('Final assembled file does not exist before response', ['finalPath' => $finalPath]);
+                    return response()->json(['error' => 'Assembled file missing'], 500);
+                }
+                return response()->json(['path' => $finalPath]);
+            }
+    
+            return response()->json(['chunk' => $resumableChunkNumber, 'success' => true]);
+        } catch (\Exception $e) {
+            LaravelLog::error('Chunk upload error at chunk ' . $resumableChunkNumber, [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+            return response()->json(['error' => 'Chunk upload failed: ' . $e->getMessage()], 500);
+        }
+        // Fallback: always return JSON if something unexpected happens
+        LaravelLog::error('uploadChunk reached unexpected end without response', ['request' => $request->all()]);
+        return response()->json(['error' => 'Unexpected server error in uploadChunk'], 500);
+    }
+
+    /**
+     * Handle Resumable.js GET request to check if a chunk exists
+     */
+    public function testChunk(Request $request)
+    {
+        $resumableIdentifier = $request->input('resumableIdentifier');
+        $resumableChunkNumber = $request->input('resumableChunkNumber');
+        $tempDir = storage_path('app/resumable-temp/' . $resumableIdentifier);
+        $chunkPath = $tempDir . "/chunk_{$resumableChunkNumber}";
+        if (file_exists($chunkPath)) {
+            return response('', 200); // Chunk exists
+        } else {
+            return response('', 204); // Chunk does not exist
         }
     }
 
