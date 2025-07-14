@@ -261,10 +261,8 @@ class MediaController extends Controller
         $userId = null; // Initialize $userId to avoid undefined variable issues
 
         try {
-            $token = $request->bearerToken();
-            $userId = (int) $request->user_id; // Convert to integer
-
-            if ($token) {
+            $auth = $request->bearerToken();
+            if (!$auth) {
                 $contentswithout = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->withCount('comments');
@@ -320,7 +318,6 @@ class MediaController extends Controller
         }
     }
 
-
     public function featured(Request $request)
     {
         $userId = null; // Initialize $userId to avoid undefined variable issues
@@ -329,6 +326,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id; // Convert to integer
 
             $token = $request->bearerToken();
+
             if ($token) {
                 $contents = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
@@ -390,16 +388,16 @@ class MediaController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         try {
-            $media = Media::findOrFail($id);
 
             // Validate input
             $validated = $request->validate([
                 'year' => 'required|digits:4',
                 'month' => 'required',
                 'user_id' => 'required|exists:users,id',
+                'media_id' => 'required|exists:media,id',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
@@ -411,6 +409,7 @@ class MediaController extends Controller
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
+            $media = Media::findOrFail($validated['media_id']);
 
             $category = Category::firstOrCreate(
                 [
@@ -572,8 +571,11 @@ class MediaController extends Controller
     {
         try {
             // Fetch all categories with their subcategories
-            $categories = Category::with('subcategories')->get();
-
+            $categories = Category::with(['subcategories' => function ($query) {
+                $query->orderBy('name', 'desc');
+            }])
+                ->orderBy('name', 'desc')
+                ->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Categories and subcategories retrieved successfully.',
@@ -615,7 +617,7 @@ class MediaController extends Controller
             $subCategoryDetails = Media::where('sub_category_id', $subCategoryId)
                 ->where('user_id', $userId)
                 ->where('status', 'published')
-                
+
                 ->with(['likes', 'comments'])->withExists(['likes as is_liked' => function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 }])
@@ -691,6 +693,54 @@ class MediaController extends Controller
             ], 200);
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve media.'], 500);
+        }
+    }
+    public function getMediaByMediaId(Request $request)
+    {
+        try {
+            // Validate the media ID
+            $validated = $request->validate([
+                'media_id' => 'required|exists:media,id',
+            ], [
+                'media_id.exists' => 'The specified media does not exist.',
+            ]);
+
+            $media_id = $validated['media_id'];
+            $media = Media::findOrFail($media_id);
+
+            // Return the media details
+            return response()->json([
+                'success' => true,
+                'message' => 'Media retrieved successfully.',
+                'data' => $media
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve media.'], 500);
+        }
+    }
+    public function getMediaByCategoryId(Request $request)
+    {
+        try {
+            // Validate the category ID
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+            ], [
+                'category_id.exists' => 'The specified category does not exist.',
+            ]);
+
+            $category_id = $validated['category_id'];
+            $media = Media::where('category_id', $category_id)->get();
+
+            // Return the media details
+            return response()->json([
+                'success' => true,
+                'message' => 'Media retrieved successfully.',
+                'data' => $media
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Error retrieving media by category ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }

@@ -96,17 +96,17 @@ class UserAuthController extends Controller
                 ], 200); // 409 Conflict
             }
 
-             $profile_image = null;
+            $profile_image = null;
 
-        if ($request->hasFile('profile_image')) {
-            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-            if ($request->file('profile_image')->isValid()) {
-                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            if ($request->hasFile('profile_image')) {
+                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                if ($request->file('profile_image')->isValid()) {
+                    $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                    $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                }
             }
-        }
-        $validated['profile_image'] = $profile_image;
+            $validated['profile_image'] = $profile_image;
             // Create user
             $user = User::create($validated);
 
@@ -116,10 +116,13 @@ class UserAuthController extends Controller
                 'type' => 'user_create_success',
                 'description' => 'User created: ' . $user->email,
             ]);
+            $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'message' => 'User created successfully',
                 'user' => $user,
+                'token' => $token,
+
             ], 200);
         } catch (\Exception $e) {
             LaravelLog::error($e->getMessage());
@@ -137,63 +140,63 @@ class UserAuthController extends Controller
         }
     }
 
-     public function updateProfileImage(Request $request)
-{
-    try {
-        // Validate input
-        $validated = $request->validate([
-            'profile_image' => 'nullable|image|max:2048', // Image is optional for this endpoint
-            'user_id' => 'required',
-        ]);
+    public function updateProfileImage(Request $request)
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'profile_image' => 'nullable|image|max:2048', // Image is optional for this endpoint
+                'user_id' => 'required',
+            ]);
 
-        // Get the authenticated user
-        $user = User::where('id',$validated['user_id'])->first();
-        if (!$user) {
+            // Get the authenticated user
+            $user = User::where('id', $validated['user_id'])->first();
+            if (!$user) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $profile_image = $user->profile_image; // Retain existing image if upload fails
+
+            // Handle profile image upload
+            if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
+                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            }
+
+            // Update user's profile image
+            $user->update(['profile_image' => $profile_image]);
+
+            // Log success
+            Log::create([
+                'user_id' => $validated['user_id'],
+                'type' => 'profile_image_update_success',
+                'description' => 'Profile image updated for user: ' . $user->email,
+            ]);
+
             return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'User not authenticated.',
-            ], 401);
+                'message' => 'Profile image updated successfully',
+                'user' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            LaravelLog::error($e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'profile_image_update_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update profile image',
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-        $profile_image = $user->profile_image; // Retain existing image if upload fails
-
-        // Handle profile image upload
-        if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
-            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-            $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-            $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-            $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-        }
-
-        // Update user's profile image
-        $user->update(['profile_image' => $profile_image]);
-
-        // Log success
-        Log::create([
-            'user_id' => $validated['user_id'],
-            'type' => 'profile_image_update_success',
-            'description' => 'Profile image updated for user: ' . $user->email,
-        ]);
-
-        return response()->json([
-            'message' => 'Profile image updated successfully',
-            'user' => $user,
-        ], 200);
-    } catch (\Exception $e) {
-        LaravelLog::error($e->getMessage());
-
-        Log::create([
-            'user_id' => Auth::id(),
-            'type' => 'profile_image_update_error',
-            'description' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to update profile image',
-            'message' => $e->getMessage(),
-        ], 500);
     }
-}
 
 
     public function resetPassword(Request $request)

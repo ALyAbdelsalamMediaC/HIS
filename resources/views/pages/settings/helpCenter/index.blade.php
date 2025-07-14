@@ -77,7 +77,7 @@
       <div class="accordion-body">
       <p>{{ $policy->body }}</p>
       <p class="mt-2 text-muted small">
-      Added by: {{ $policy->addedBy->name }} on {{ $policy->created_at->format('M d, Y') }}
+      Added by: {{ $policy->addedBy->name }} on {{ $policy->created_at ? $policy->created_at->format('M d, Y') : 'N/A' }}
       </p>
       </div>
       </div>
