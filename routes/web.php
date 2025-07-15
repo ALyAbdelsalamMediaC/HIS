@@ -53,6 +53,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
+    
+    // New routes for AJAX HTML rendering
+    Route::get('/comments/{comment_id}/html', [CommentController::class, 'getCommentHtml'])->name('comments.html');
+    Route::get('/comments/reply/{reply_id}/{parent_id}/html', [CommentController::class, 'getReplyHtml'])->name('comments.reply.html');
 
     // Article comments
     Route::post('/article-comments/add/{media_id}', [CommentArticleController::class, 'addComment'])->name('article.comments.add');
@@ -64,6 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/AdminComment/reply/{media_id}/{parent_id}', [AdminCommentController::class, 'showReplyForm'])->name('AdminComment.reply.form');
     Route::post('/AdminComment/reply/{media_id}/{parent_id}', [AdminCommentController::class, 'reply'])->name('AdminComment.reply');
     Route::delete('/AdminComment/{comment_id}', [AdminCommentController::class, 'deleteComment'])->name('AdminComment.delete');
+    // AJAX HTML rendering for admin comments
+    Route::get('/AdminComment/{comment_id}/html', [AdminCommentController::class, 'getCommentHtml'])->name('AdminComment.html');
 
     Route::post('/reviews/add/{media_id}', [ReviewsController::class, 'addReview'])->name('reviews.add');
     Route::get('/reviews/reply/{media_id}/{parent_id}', [ReviewsController::class, 'showReplyForm'])->name('reviews.reply.form');
@@ -71,7 +77,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reviews/{comment_id}', [ReviewsController::class, 'deleteReview'])->name('reviews.delete');
     Route::post('/reviews/rate', [ReviewsController::class, 'rate'])->name('reviews.rate');
     Route::post('/admins/rate', [AdminCommentController::class, 'rate'])->name('admins.rate');
-
+    Route::get('/reviews/{comment_id}/html', [ReviewsController::class, 'getReviewHtml'])->name('reviews.html');
+    Route::get('/reviews/reply/{reply_id}/{parent_id}/html', [ReviewsController::class, 'getReplyHtml'])->name('reviews.reply.html');
     Route::get('/get-google-token', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 

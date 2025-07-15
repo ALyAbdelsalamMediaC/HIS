@@ -21,6 +21,13 @@ class CommentArticleController extends Controller
             ]);
             
             if ($validator->fails()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => $validator->errors(),
+                        'message' => 'Validation failed.'
+                    ], 422);
+                }
                 return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -29,6 +36,12 @@ class CommentArticleController extends Controller
             // Get the authenticated user
             $user = auth()->user();
             if (!$user || empty($user->email)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You must be logged in with a valid email address to comment.'
+                    ], 401);
+                }
                 return redirect()->back()
                 ->with('error', 'You must be logged in with a valid email address to comment.')
                 ->withInput();
@@ -36,27 +49,54 @@ class CommentArticleController extends Controller
             
             // Verify media exists
             if (!Article::find($article_id)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The specified media does not exist.'
+                    ], 404);
+                }
                 return redirect()->back()
                 ->with('error', 'The specified media does not exist.')
                 ->withInput();
             }
             
             // Create the comment
-            CommentArticle::create([
+            $comment = CommentArticle::create([
                 'user_id' => $user->id,
                 'article_id' => $article_id,
                 'parent_id' => null,
                 'content' => $request->content,
             ]);
             
+            if ($request->expectsJson()) {
+                $comment = $comment->fresh(['user', 'replies.user']);
+                return response()->json([
+                    'success' => true,
+                    'comment' => $comment,
+                    'message' => 'Comment added successfully.'
+                ]);
+            }
+            
             return redirect()->back()
             ->with('success', 'Comment added successfully.');
             
         } catch (ModelNotFoundException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media not found.'
+                ], 404);
+            }
             return redirect()->back()
                 ->with('error', 'Media not found.')
                 ->withInput();
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while adding the comment.'
+                ], 500);
+            }
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while adding the comment.')
                 ->withInput();
@@ -78,6 +118,13 @@ class CommentArticleController extends Controller
             ]);
 
             if ($validator->fails()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => $validator->errors(),
+                        'message' => 'Validation failed.'
+                    ], 422);
+                }
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -86,6 +133,12 @@ class CommentArticleController extends Controller
             // Get the authenticated user
             $user = auth()->user();
             if (!$user || empty($user->email)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You must be logged in with a valid email address to reply.'
+                    ], 401);
+                }
                 return redirect()->back()
                     ->with('error', 'You must be logged in with a valid email address to reply.')
                     ->withInput();
@@ -96,27 +149,54 @@ class CommentArticleController extends Controller
 
             // Verify that parent comment belongs to the specified media
             if ($parentComment->article_id != $article_id) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The parent comment does not belong to the specified media.'
+                    ], 400);
+                }
                 return redirect()->back()
                     ->with('error', 'The parent comment does not belong to the specified media.')
                     ->withInput();
             }
 
             // Create the reply
-            CommentArticle::create([
+            $reply = CommentArticle::create([
                 'user_id' => $user->id,
                 'article_id' => $article_id,
                 'parent_id' => $parent_id,
                 'content' => $request->content,
             ]);
 
+            if ($request->expectsJson()) {
+                $reply = $reply->fresh(['user']);
+                return response()->json([
+                    'success' => true,
+                    'reply' => $reply,
+                    'message' => 'Reply added successfully.'
+                ]);
+            }
+
             return redirect()->back()
                 ->with('success', 'Reply added successfully.');
 
         } catch (ModelNotFoundException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media or parent comment not found.'
+                ], 404);
+            }
             return redirect()->back()
                 ->with('error', 'Media or parent comment not found.')
                 ->withInput();
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while adding the reply.'
+                ], 500);
+            }
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while adding the reply.')
                 ->withInput();
@@ -244,6 +324,13 @@ class CommentArticleController extends Controller
             ]);
             
             if ($validator->fails()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => $validator->errors(),
+                        'message' => 'Validation failed.'
+                    ], 422);
+                }
                 return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -254,6 +341,12 @@ class CommentArticleController extends Controller
             
             // Check if the authenticated user is the owner of the comment
             if (auth()->user()->id !== $comment->user_id) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You do not have permission to delete this comment.'
+                    ], 403);
+                }
                 return redirect()->back()
                     ->with('error', 'You do not have permission to delete this comment.');
             }
@@ -262,14 +355,34 @@ class CommentArticleController extends Controller
             $comment->replies()->delete();
             $comment->delete();
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'comment_id' => $comment_id,
+                    'message' => 'Comment deleted successfully.'
+                ]);
+            }
+
             return redirect()->back()
                 ->with('success', 'Comment deleted successfully.');
 
         } catch (ModelNotFoundException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Comment not found.'
+                ], 404);
+            }
             return redirect()->back()
                 ->with('error', 'Comment not found.')
                 ->withInput();
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while deleting the comment: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while deleting the comment: ' . $e->getMessage());
         }
