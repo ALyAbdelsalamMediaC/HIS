@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log as LaravelLog;
 use Exception;
 use App\Models\Category;
 use App\Models\SubCategory;
+use App\Models\User;
 use getID3;
 use App\Services\Videos\GoogleDriveServiceVideo; // Make sure this service is built
 use App\Services\Videos\GoogleDriveServicePDF; // Make sure this service is built
@@ -19,6 +20,7 @@ use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is bu
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use Google\Service\MyBusinessBusinessInformation\Resource\Categories;
 use Illuminate\Support\Facades\Validator; // For input validation
+use App\Services\NotificationService;
 
 class MediaController extends Controller
 {
@@ -27,14 +29,19 @@ class MediaController extends Controller
     protected $driveServiceImage;
     protected $driveServicePDF;
     protected $driveServiceThumbnail;
+    protected $notificationService;
+
 
     public function __construct(
         GoogleDriveServiceVideo $driveServiceVideo,
         GoogleDriveServicePDF $driveServicePDF,
         GoogleDriveServiceImage $driveServiceImage,
-        GoogleDriveServiceThumbnail $driveServiceThumbnail
+        GoogleDriveServiceThumbnail $driveServiceThumbnail,
+        NotificationService $notificationService
+
     ) {
 
+        $this->notificationService = $notificationService;
 
         $this->driveServiceVideo = $driveServiceVideo;
         $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
@@ -195,6 +202,21 @@ class MediaController extends Controller
                 'type' => 'media_upload_success',
                 'description' => 'Uploaded media: ' . $media->title,
             ]);
+            $user_name = User::find($validated['user_id'])->name; 
+
+            $user = $validated['user_id'];
+            $title = "New " . $media->status ." media uploaded: ";
+            $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by ".$user_name . ". Please review it.";
+            $route = "/media_details/";
+
+            $this->notificationService->sendNotification(
+                $request->user(), // HR user as sender
+                $user,            // Requesting user as receiver
+                $title,
+                $body,
+                $route,
+                $media->id
+            );
 
             return response()->json([
                 'message' => 'Media uploaded successfully.' . ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
@@ -258,7 +280,8 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        print_r(1);die;
+        print_r(1);
+        die;
         $userId = null; // Initialize $userId to avoid undefined variable issues
 
         try {
@@ -327,7 +350,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id; // Convert to integer
 
             $token = $request->bearerToken();
-            
+
             if ($token) {
                 $contents = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
@@ -391,9 +414,9 @@ class MediaController extends Controller
 
     public function update(Request $request)
     {
-            
+
         try {
-            
+
             // Validate input
             $validated = $request->validate([
                 'year' => 'required|digits:4',
@@ -573,11 +596,11 @@ class MediaController extends Controller
     {
         try {
             // Fetch all categories with their subcategories
-           $categories = Category::with(['subcategories' => function ($query) {
-    $query->orderByRaw("FIELD(name, 'December', 'November', 'October', 'September', 'August', 'July', 'June', 'May', 'April', 'March', 'February', 'January')");
-}])
-    ->orderBy('name', 'desc')
-    ->get();
+            $categories = Category::with(['subcategories' => function ($query) {
+                $query->orderByRaw("FIELD(name, 'December', 'November', 'October', 'September', 'August', 'July', 'June', 'May', 'April', 'March', 'February', 'January')");
+            }])
+                ->orderBy('name', 'desc')
+                ->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Categories and subcategories retrieved successfully.',
@@ -619,7 +642,7 @@ class MediaController extends Controller
             $subCategoryDetails = Media::where('sub_category_id', $subCategoryId)
                 ->where('user_id', $userId)
                 ->where('status', 'published')
-                
+
                 ->with(['likes', 'comments'])->withExists(['likes as is_liked' => function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 }])
@@ -669,45 +692,45 @@ class MediaController extends Controller
         }
     }
 
-     public function getMediaByUserId(Request $request)
+    public function getMediaByUserId(Request $request)
     {
 
-      try {
+        try {
             $userId = (int) $request->user_id;
 
             $PendingMedia = Media::where('user_id', $userId)
-            ->where('status', 'pending')
-            ->with(['category'])
-            ->withCount(['AdminComment', 'likes'])
-            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])->first();
+                ->where('status', 'pending')
+                ->with(['category'])
+                ->withCount(['AdminComment', 'likes'])
+                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])->first();
 
 
-	$PublishedMedia = Media::where('user_id', $userId)
-            ->where('status', '!=', 'pending')
-            ->with(['category'])
-            ->withCount(['comments', 'likes'])
-            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])->first();
+            $PublishedMedia = Media::where('user_id', $userId)
+                ->where('status', '!=', 'pending')
+                ->with(['category'])
+                ->withCount(['comments', 'likes'])
+                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])->first();
 
-        $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
             // Return the media details
             return response()->json([
                 'success' => true,
                 'message' => 'Media retrieved successfully.',
-		'data' => [
+                'data' => [
                     'pending' => [$PendingMedia],
                     'published' => [$PublishedMedia]
-                ]            ], 200);
-        
+                ]
+            ], 200);
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }
-    
+
     public function getMediaByMediaId(Request $request)
     {
         try {
@@ -715,16 +738,16 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('id', $media_id)
-            ->with(['category'])
-            ->withCount(['comments', 'likes'])
-            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])->first();
+                ->with(['category'])
+                ->withCount(['comments', 'likes'])
+                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])->first();
 
-        
 
-        $media->is_favorite = Bookmark::where('user_id', $userId)
-            ->where('media_id', $media_id)->exists();
+
+            $media->is_favorite = Bookmark::where('user_id', $userId)
+                ->where('media_id', $media_id)->exists();
 
             // Return the media details
             return response()->json([
@@ -732,41 +755,40 @@ class MediaController extends Controller
                 'message' => 'Media retrieved successfully.',
                 'data' => [$media]
             ], 200);
-        
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }
-    
-   public function getMediaByCategoryId(Request $request)
-{
-    try {
-        $category_id = (int) $request->category_id;
-        $userId = (int) $request->user_id;
 
-        $media = Media::where('category_id', $category_id)
-            ->with(['category'])
-            ->withCount(['comments', 'likes'])
-            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])
-            ->first();
+    public function getMediaByCategoryId(Request $request)
+    {
+        try {
+            $category_id = (int) $request->category_id;
+            $userId = (int) $request->user_id;
 
-        // Assign is_favorite after confirming $media exists
-        $media->is_favorite = Bookmark::where('user_id', $userId)
-            ->where('media_id', $media->id) // Ensure it checks for this specific media
-            ->exists();
+            $media = Media::where('category_id', $category_id)
+                ->with(['category'])
+                ->withCount(['comments', 'likes'])
+                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])
+                ->first();
 
-        // Return the media details
-        return response()->json([
-            'success' => true,
-            'message' => 'Media retrieved successfully.',
-            'data' => [$media]
-        ], 200);
-    } catch (Exception $e) {
-        LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
-        return response()->json(['error' => 'Failed to retrieve media.'], 500);
+            // Assign is_favorite after confirming $media exists
+            $media->is_favorite = Bookmark::where('user_id', $userId)
+                ->where('media_id', $media->id) // Ensure it checks for this specific media
+                ->exists();
+
+            // Return the media details
+            return response()->json([
+                'success' => true,
+                'message' => 'Media retrieved successfully.',
+                'data' => [$media]
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve media.'], 500);
+        }
     }
-}
 }

@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/article/show', [ArticleController::class, 'show']);
     Route::get('/comments/media', [CommentsController::class, 'getCommentsByMediaId']);
     Route::get('/comments/article', [CommentsController::class, 'getCommentsByArticleId']);
-    Route::put('/update_media/', [MediaController::class, 'update'])->name('media.update');
+    Route::post('/update_media/', [MediaController::class, 'update'])->name('media.update');
     Route::put('/articles', [ArticleController::class, 'update'])->name('articles.update');
     Route::get('/user_articles', [ArticleController::class, 'getArticlesByUserId']);
     Route::delete('/delete_article', [ArticleController::class, 'destroy']);
