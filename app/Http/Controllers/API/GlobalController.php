@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Bookmark;
 use App\Models\Media;
 use Illuminate\Http\Request;
 
@@ -13,21 +14,23 @@ class GlobalController extends Controller
     {
         try {
             $searchTerm = $request->input('search');
+            $userId = (int) $request->user_id;
 
-            // Search in Article and Media models by title
-            $article = Article::where('title', 'like', '%' . $searchTerm . '%')->first();
-            if ($article) {
-                return response()->json([
-                    'type' => 'article',
-                    'data' => $article
-                ], 200);
-            }
-
-            $media = Media::where('title', 'like', '%' . $searchTerm . '%')->first();
-            if ($media) {
+            $Media = Media::where('title', 'like', '%' . $searchTerm . '%')
+            ->where('status', 'published')
+            ->with(['category'])
+            ->withCount(['comments', 'likes'])
+            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])->first();
+            if (is_null($Media)) {
+            throw new \Exception('No media found for the given search criteria.');
+        }
+            $Media->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            if ($Media) {
                 return response()->json([
                     'type' => 'media',
-                    'data' => $media
+                    'data' => [$Media]
                 ], 200);
             }
 

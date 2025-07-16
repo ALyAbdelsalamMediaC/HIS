@@ -16,60 +16,86 @@ class AdminCommentController extends Controller
     public function showAdminComment(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'media_id' => 'required|integer|exists:media,id',
-            ]);
+                        $media_id = $request->media_id;
+           $comments = AdminComment::where('media_id', $media_id)
+            ->whereNull('parent_id')
+            ->with(['replies' => function ($query) {
+                $query->select('id', 'user_id', 'media_id', 'parent_id', 'content', 'created_at', 'updated_at')->with('user');
+            }])
+            ->get();
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            $comments = AdminComment::where('media_id', $request->media_id)->get();
-
-            return response()->json([
-                'success' => true,
-                'data' => $comments,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'An unexpected error occurred.',
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'AdminComments' => $comments
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => 'An unexpected error occurred.',
+        ], 500);
     }
-    public function reply(Request $request)
+    }
+
+    public function addComment(Request $request)
     {
         try {
             // Validate the request
-            $validator = Validator::make($request->all(), [
-                'content' => 'required|string|min:1|max:5000',
-                'media_id' => 'required|integer|exists:media,id',
-                'parent_id' => 'required|integer|exists:admin_comments,id',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
 
             // Get the authenticated user
-            $user = auth()->user();
-            if (!$user || empty($user->email)) {
+            $userId = $request->user_id;
+            $media_id = $request->media_id;
+
+            $Media = Media::where('id',$media_id)->where('status','pending')->first();
+
+            // Verify media exists
+            if (!$Media) {
                 return redirect()->back()
-                    ->with('error', 'You must be logged in with a valid email address to reply.')
+                    ->with('error', 'The specified media does not exist.')
                     ->withInput();
             }
 
+            // Create the comment
+            AdminComment::create([
+                'user_id' => $userId,
+                'media_id' => $media_id,
+                'parent_id' => null,
+                'content' => $request->content,
+            ]);
+
+
+            return response()->json([
+                'success' => true,
+                'comment' => 'Comment added successfully.',
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()
+                ->with('error', 'Media not found.')
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'An unexpected error occurred while adding the comment.')
+                ->withInput();
+        }
+    }
+
+    public function reply(Request $request)
+    {
+        try {
+
+            $userId = $request->user_id;
+            $mediaId = $request->media_id;
+            $parentId = $request->parent_id;
+            $content = $request->content;
+
+
             // Verify media and parent comment exist
-            $media = Media::findOrFail($validator['media_id']);
-            $parentComment = AdminComment::findOrFail($validator['parent_id']);
+            $media = Media::findOrFail($mediaId)->where('status','pending')->first();
+            $parentComment = AdminComment::findOrFail($parentId);
 
             // Verify that parent comment belongs to the specified media
-            if ($parentComment->media_id != $validator['media_id']) {
+            if ($parentComment->media_id != $mediaId) {
                 return redirect()->back()
                     ->with('error', 'The parent comment does not belong to the specified media.')
                     ->withInput();
@@ -77,15 +103,15 @@ class AdminCommentController extends Controller
 
             // Create the reply
             AdminComment::create([
-                'user_id' => $user->id,
-                'media_id' => $validator['media_id'],
-                'parent_id' => $$validator['parent_id'],
-                'content' => $request->content,
+                'user_id' => $userId,
+                'media_id' => $mediaId,
+                'parent_id' => $parentId,
+                'content' => $content,
             ]);
-
-            return redirect()->back()
-                ->with('success', 'Reply added successfully.');
-
+                return response()->json([
+                'success' => true,
+                'comment' => 'Reply added successfully.',
+            ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()
                 ->with('error', 'Media or parent comment not found.')

@@ -14,14 +14,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Http\Request;
 
-Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('/comments', [CommentsController::class, 'addComment']);
-    Route::post('/comments/reply', [CommentsController::class, 'reply']);
-    Route::post('/media/store', [MediaController::class, 'store']);
-    Route::get('/media/show', [MediaController::class, 'show']);
+Route::post('/comments', [CommentsController::class, 'addComment']);
+Route::post('/comments/reply', [CommentsController::class, 'reply']);
+Route::post('/media/store', [MediaController::class, 'store']);
+Route::get('/media/show', [MediaController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
     Route::get('/media/featured', [MediaController::class, 'featured']);
+});
     Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
     Route::get('/media_details', [MediaController::class, 'getMediaByMediaId']);
     Route::get('/category_media', [MediaController::class, 'getMediaByCategoryId']);
@@ -47,8 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sub_category/details', [MediaController::class, 'subCategoryDetails']);
     Route::post('/viewscount', [MediaController::class, 'viewsCount']);
 
-    Route::get('/api/media/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
-    Route::post('/media/admin-comment/reply', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
+    Route::get('/show/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
+    Route::get('/add/admin-comments', [AdminCommentController::class, 'addComment'])->name('admin.comments.show');
+    Route::post('/reply/admin-comment/', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
 
     Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
     Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
@@ -63,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
     Route::put('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
     Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
-});
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 
