@@ -10,7 +10,7 @@ $client->setAuthConfig('credentials.json');
 $client->setAccessType('offline'); // To get a refresh token
 $client->setPrompt('consent');
 $client->addScope(Drive::DRIVE_FILE);
-$client->setRedirectUri('http://localhost:8000/get-google-token.php');
+$client->setRedirectUri('https://his.mc-apps.org/get-google-token.php');
 
 if (!isset($_GET['code'])) {
     $authUrl = $client->createAuthUrl();

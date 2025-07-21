@@ -86,7 +86,7 @@ class MediaController extends Controller
                 $subCategories = SubCategory::all();
             }
             if ($this->client->isAccessTokenExpired()) {
-                return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+                return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
             }
 
             $query = Media::with('category', 'subCategory', 'comments')
@@ -330,7 +330,7 @@ class MediaController extends Controller
         $categories = Category::all();
 
         if ($this->client->isAccessTokenExpired()) {
-            return redirect('http://localhost:8000/get-google-token.php?redirect=' . urlencode(url()->current()));
+            return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
         } else {
             return view('pages.content.add_video', compact('categories'));
         }
