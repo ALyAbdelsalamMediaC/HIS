@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/profile', [UserAuthController::class, 'deleteAccount'])->name('profile.delete');
 
     Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
-    Route::put('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
+    Route::post('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
     Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
