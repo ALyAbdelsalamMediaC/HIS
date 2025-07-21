@@ -122,13 +122,13 @@
     <!-- Reviwer`s Rating -->
     <div class="mt-4">
       <h3 class="mb-2 h4-semibold">Reviewer Rating : ( 1 - 10 )</h3>
-      <form action="{{ route('reviews.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
+      <form id="reviewer-rate-form" action="{{ route('reviews.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
         @csrf
         <input type="hidden" name="media_id" value="{{ $media->id }}">
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
         <div class="input-icon w-100">
           <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
-          <div class="input-icon-send" style="cursor:pointer" onclick="this.closest('form').submit();">
+          <div class="input-icon-send" style="cursor:pointer" onclick="document.getElementById('reviewer-rate-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
             <x-svg-icon name="send" size="14" color="#fff" />
           </div>
         </div>
@@ -139,64 +139,24 @@
     <div class="mt-4">
     <h3 class="mb-2 h4-semibold">Reviewer Comment</h3>
     <!-- Add Comment Form -->
-    <form action="{{ route('reviews.add', ['media_id' => $media->id]) }}" method="POST" class="mb-3">
-        @csrf
-        <x-comment-input id="comment" name="content" placeholder="Add new comment..." :value="old('content')" />
-    </form>
+    <div class="mb-3 input-icon review-reply-input-wrapper" data-media-id="{{ $media->id }}" data-action="add-review">
+        <x-textarea
+            id="review-reply-comment-main"
+            name="content"
+            placeholder="Add new comment..."
+            rows="1"
+            class="review-reply-textarea"
+            style="background-color: transparent; border-radius: 38px; min-height: 60px; max-height: 120px; resize: none; width: 100%; padding-right: 40px;"
+        />
+        <div class="input-icon-send review-reply-submit-btn" style="cursor:pointer; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);" title="Submit">
+            <x-svg-icon name="send" size="14" color="#fff" />
+        </div>
+    </div>
 
     <!-- Comments List -->
+    <div class="reviews-list-container" data-ajax-review='@json(["addReviewEndpoint" => "/reviews/add", "getReviewHtmlEndpoint" => "/reviews"])'>
     @foreach($commentsData as $comment)
-      <div class="comment-container">
-        <div class="gap-3 d-flex align-items-start">
-          <div class="comment-container-user-icon">
-            <x-svg-icon name="user" size="18" color="#35758c" />
-          </div>
-          <div class="w-100">
-            <h4 class="h5-semibold">{{ $comment->user->name ?? 'Unknown User' }}</h4>
-            <span class="h6-ragular" style="color:#ADADAD;">Commented On {{ $comment->created_at->diffForHumans() }}</span>
-            <p class="mt-2 h6-ragular">{{ $comment->content }}</p>
-            <div class="w-100 d-flex justify-content-end align-items-end">
-              <div class="gap-2 d-flex align-items-center">
-                <x-svg-icon name="message" size="16" color="#ADADAD" />
-                <span class="h6-ragular">{{ $replysCount }} Replies</span>
-              </div>
-            </div>
-            @php
-              $reviewReplies = $replys->where('parent_id', $comment->id);
-              $hasAdminReply = $reviewReplies->contains(function($r) { return isset($r->user) && $r->user->role === 'admin'; });
-            @endphp
-            @if(auth()->user()->role === 'reviewer' && auth()->id() === $comment->user_id && !$hasAdminReply)
-              <div class="mt-2 d-flex align-items-center">
-                <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $comment->id }}">
-                  <x-svg-icon name="trash" size="20" color="#BB1313" />
-                </button>
-              </div>
-              <!-- Delete Modal for Review -->
-              <x-modal id="deleteReviewModal{{ $comment->id }}" title="Delete Review">
-                <div class="my-3">
-                  <p class="h4-ragular" style="color:#000;">Are you sure you want to delete this review?</p>
-                  <p class="h5-ragular" style="color:#ADADAD;">This will also delete all replies to this review.</p>
-                </div>
-                <div class="modal-footer">
-                  <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-                  <form action="{{ route('reviews.delete', ['comment_id' => $comment->id]) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
-                  </form>
-                </div>
-              </x-modal>
-            @endif
-            @if($reviewReplies->count() > 0)
-              <div class="mt-2 replies-container" style="margin-left: 40px;">
-                @foreach($reviewReplies as $reply)
-                  <x-review-reply :reply="$reply" :replys="$replys" :media="$media" />
-                @endforeach
-              </div>
-            @endif
-          </div>
-        </div>
-      </div>
+      <x-review-item :comment="$comment" :replys="$replys" :media="$media" />
     @endforeach
     </div>
 
@@ -205,7 +165,9 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/validations.js') }}"></script>
+<script src="{{ asset('js/apis/ajaxReview.js') }}"></script>
+<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
+<script src="{{ asset('/js/apis/ajaxRate.js') }}"></script>
 <script>
   document.querySelectorAll('.reply-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -221,7 +183,41 @@
     });
   });
 </script>
+
+<script type="module">
+import { submitReviewerRate } from '/js/apis/ajaxRate.js';
+
+function showToast(message, type = 'success') {
+    if (window.showToast) {
+        window.showToast(message, type);
+    } else {
+        alert(message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const rateForm = document.getElementById('reviewer-rate-form');
+    if (rateForm) {
+        rateForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const mediaId = rateForm.querySelector('input[name="media_id"]').value;
+            const userId = rateForm.querySelector('input[name="user_id"]').value;
+            const rate = rateForm.querySelector('input[name="rate"]').value;
+            const csrfToken = rateForm.querySelector('input[name="_token"]').value;
+            submitReviewerRate(mediaId, userId, rate, csrfToken).then(data => {
+                if (data.success) {
+                    showToast(data.message || 'Rating submitted successfully.', 'success');
+                    // Update the input value to the new rate
+                    rateForm.querySelector('input[name="rate"]').value = rate;
+                } else {
+                    showToast(data.message || 'Failed to submit rating.', 'danger');
+                }
+            }).catch(() => showToast('Error submitting rating.', 'danger'));
+        });
+    }
+});
+</script>
 @endpush
 
-<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
+
 

@@ -8,7 +8,7 @@
   $isAdminUser = auth()->user()->role === 'admin';
 @endphp
 
-<div class="mb-2 comment-container" style="border: 1px solid #EDEDED; padding-left: 16px;">
+<div class="mb-2 comment-container" id="review-reply-{{ $reply->id }}" style="border: 1px solid #EDEDED; padding-left: 16px;">
   <div class="gap-3 d-flex align-items-start">
     <div class="comment-container-user-icon">
       <x-svg-icon name="user" size="18" color="#35758c" />
@@ -25,12 +25,12 @@
         </button>
       @endif
       @if(auth()->user()->role === 'admin')
-        <button class="btn-nothing reply-btn" data-reply-id="{{ $reply->id }}">
+        <button class="btn-nothing review-reply-btn" data-reply-id="{{ $reply->id }}">
           <x-svg-icon name="replay" size="20" color="#ADADAD" />
         </button>
       @endif
       @if(auth()->user()->role === 'reviewer')
-        <button class="btn-nothing reply-btn" data-reply-id="{{ $reply->id }}">
+        <button class="btn-nothing review-reply-btn" data-reply-id="{{ $reply->id }}">
           <x-svg-icon name="replay" size="20" color="#ADADAD" />
         </button>
       @endif
@@ -44,43 +44,30 @@
       </div>
       <div class="modal-footer">
         <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-        <form action="{{ route('reviews.delete', ['comment_id' => $reply->id]) }}" method="POST">
-          @csrf
-          @method('DELETE')
-          <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
-        </form>
+        <x-button type="button" class="delete-review-reply-confirm-btn" data-reply-id="{{ $reply->id }}" style="background-color:#BB1313; color:#fff;">Delete</x-button>
       </div>
     </x-modal>
   @endif
-  @if(auth()->user()->role === 'admin')
-    <div class="reply-input-container" id="reply-container-{{ $reply->id }}" style="display:none; margin-top:16px;">
-      <form action="{{ route('reviews.reply', ['media_id' => $media->id, 'parent_id' => $reply->id]) }}" method="POST" class="mb-2">
-        @csrf
-        <x-comment-input id="reply-comment-{{ $reply->id }}" name="content" placeholder="Reply to this comment..." :value="old('content')" />
-        @error('content')
-          <div class="mt-1 text-danger">{{ $message }}</div>
-        @enderror
-        <button type="submit" class="mt-2 btn btn-primary" style="display:none;"></button>
-      </form>
+  @if(auth()->user()->role === 'admin' || auth()->user()->role === 'reviewer')
+    <div class="mt-3 input-icon reply-input-container review-reply-input-wrapper" id="reply-container-{{ $reply->id }}" data-parent-id="{{ $reply->id }}" data-media-id="{{ $media ? $media->id : '' }}">
+      <x-textarea 
+        id="review-reply-comment-{{ $reply->id }}" 
+        name="content"
+        placeholder="Reply to this comment..." 
+        rows="1"
+        class="review-reply-textarea"
+        style="background-color: transparent; border-radius: 38px; min-height: 60px; max-height: 120px; resize: none; width: 100%; padding-right: 40px;"
+      />
+      <div class="input-icon-send review-reply-submit-btn" style="cursor:pointer; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);" title="Submit">
+        <x-svg-icon name="send" size="14" color="#fff" />
+      </div>
     </div>
   @endif
-  @if(auth()->user()->role === 'reviewer')
-    <div class="reply-input-container" id="reply-container-{{ $reply->id }}" style="display:none; margin-top:16px;">
-      <form action="{{ route('reviews.reply', ['media_id' => $media->id, 'parent_id' => $reply->id]) }}" method="POST" class="mb-2">
-        @csrf
-        <x-comment-input id="reply-comment-{{ $reply->id }}" name="content" placeholder="Reply to this comment..." :value="old('content')" />
-        @error('content')
-          <div class="mt-1 text-danger">{{ $message }}</div>
-        @enderror
-        <button type="submit" class="mt-2 btn btn-primary" style="display:none;"></button>
-      </form>
-    </div>
-  @endif
-  @if($children->count() > 0)
-    <div class="mt-2 replies-container" style="margin-left: 40px;">
+  <div class="mt-2 replies-container" id="review-replies-{{ $reply->id }}" style="margin-left: 40px;">
+    @if(isset($children) && $children->count() > 0)
       @foreach($children as $child)
         <x-review-reply :reply="$child" :replys="$replys" :media="$media" />
       @endforeach
-    </div>
-  @endif
+    @endif
+  </div>
 </div> 

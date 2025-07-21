@@ -41,7 +41,7 @@
       @endif
 
         <!-- Always render the slot content -->
-        {{ $slot }}
+        {!! $slot !!}
       </div>
     </div>
   </div>
