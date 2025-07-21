@@ -20,7 +20,7 @@ use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is bu
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use Google\Service\MyBusinessBusinessInformation\Resource\Categories;
 use Illuminate\Support\Facades\Validator; // For input validation
-use App\Services\NotificationService;
+// use App\Services\NotificationService;
 
 class MediaController extends Controller
 {
@@ -29,7 +29,7 @@ class MediaController extends Controller
     protected $driveServiceImage;
     protected $driveServicePDF;
     protected $driveServiceThumbnail;
-    protected $notificationService;
+    // protected $notificationService;
 
 
     public function __construct(
@@ -37,11 +37,11 @@ class MediaController extends Controller
         GoogleDriveServicePDF $driveServicePDF,
         GoogleDriveServiceImage $driveServiceImage,
         GoogleDriveServiceThumbnail $driveServiceThumbnail,
-        NotificationService $notificationService
+        // NotificationService $notificationService
 
     ) {
 
-        $this->notificationService = $notificationService;
+        // $this->notificationService = $notificationService;
 
         $this->driveServiceVideo = $driveServiceVideo;
         $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
@@ -209,14 +209,14 @@ class MediaController extends Controller
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by ".$user_name . ". Please review it.";
             $route = "/media_details/";
 
-            $this->notificationService->sendNotification(
-                $request->user(), // HR user as sender
-                $user,            // Requesting user as receiver
-                $title,
-                $body,
-                $route,
-                $media->id
-            );
+            // $this->notificationService->sendNotification(
+            //     $request->user(), // HR user as sender
+            //     $user,            // Requesting user as receiver
+            //     $title,
+            //     $body,
+            //     $route,
+            //     $media->id
+            // );
 
             return response()->json([
                 'message' => 'Media uploaded successfully.' . ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
