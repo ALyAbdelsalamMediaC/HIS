@@ -37,6 +37,14 @@ class LikesController extends Controller
                 ->first();
 
             if ($existingLike) {
+                if ($request->ajax() || $request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'liked' => true,
+                        'likesCount' => $media->likes()->count(),
+                        'message' => 'You have already liked this media.'
+                    ]);
+                }
                 return back()->with('error', 'You have already liked this media.');
             }
 
@@ -53,10 +61,28 @@ class LikesController extends Controller
                 'description' => "Liked media: {$media->title}",
             ]);
 
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'liked' => true,
+                    'likesCount' => $media->likes()->count(),
+                    'message' => 'Media liked successfully.'
+                ]);
+            }
+
             return back()->with('success', 'Media liked successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'liked' => false,
+                    'likesCount' => isset($media) ? $media->likes()->count() : 0,
+                    'message' => 'Failed to like media: ' . $e->getMessage()
+                ], 500);
+            }
 
             return back()->with('error', 'Failed to like media: ' . $e->getMessage());
         }
@@ -77,12 +103,19 @@ class LikesController extends Controller
                 ->where('media_id', $mediaId)
                 ->first();
 
+            $media = Media::findOrFail($mediaId);
+
             if (!$like) {
+                if ($request->ajax() || $request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'liked' => false,
+                        'likesCount' => $media->likes()->count(),
+                        'message' => 'You have not liked this media.'
+                    ]);
+                }
                 return back()->with('error', 'You have not liked this media.');
             }
-
-            // Get media title before deleting like for logging
-            $media = Media::findOrFail($mediaId);
 
             // Delete the like
             $like->delete();
@@ -94,10 +127,28 @@ class LikesController extends Controller
                 'description' => "Unliked media: {$media->title}",
             ]);
 
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'liked' => false,
+                    'likesCount' => $media->likes()->count(),
+                    'message' => 'Like removed successfully.'
+                ]);
+            }
+
             return back()->with('success', 'Like removed successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like removal failed: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'liked' => true,
+                    'likesCount' => isset($media) ? $media->likes()->count() : 0,
+                    'message' => 'Failed to remove like: ' . $e->getMessage()
+                ], 500);
+            }
 
             return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }
@@ -116,6 +167,14 @@ class LikesController extends Controller
                 ->first();
 
             if ($existingLike) {
+                if ($request->ajax() || $request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'liked' => true,
+                        'likesCount' => LikeComment::where('comment_id', $commentId)->count(),
+                        'message' => 'You have already liked this comment.'
+                    ]);
+                }
                 return back()->with('error', 'You have already liked this comment.');
             }
 
@@ -132,10 +191,28 @@ class LikesController extends Controller
                 'description' => "Liked comment: {$comment->content}",
             ]);
 
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'liked' => true,
+                    'likesCount' => LikeComment::where('comment_id', $commentId)->count(),
+                    'message' => 'Comment liked successfully.'
+                ]);
+            }
+
             return back()->with('success', 'Comment liked successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'liked' => false,
+                    'likesCount' => isset($comment) ? LikeComment::where('comment_id', $commentId)->count() : 0,
+                    'message' => 'Failed to like comment: ' . $e->getMessage()
+                ], 500);
+            }
 
             return back()->with('error', 'Failed to like comment: ' . $e->getMessage());
         }
@@ -156,12 +233,19 @@ class LikesController extends Controller
                 ->where('comment_id', $commentId)
                 ->first();
 
+            $comment = Comment::findOrFail($commentId);
+
             if (!$like) {
+                if ($request->ajax() || $request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'liked' => false,
+                        'likesCount' => LikeComment::where('comment_id', $commentId)->count(),
+                        'message' => 'You have not liked this comment.'
+                    ]);
+                }
                 return back()->with('error', 'You have not liked this comment.');
             }
-
-            // Get comment content before deleting like for logging
-            $comment = Comment::findOrFail($commentId);
 
             // Delete the like
             $like->delete();
@@ -173,10 +257,28 @@ class LikesController extends Controller
                 'description' => "Unliked comment: {$comment->content}",
             ]);
 
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'liked' => false,
+                    'likesCount' => LikeComment::where('comment_id', $commentId)->count(),
+                    'message' => 'Like removed successfully.'
+                ]);
+            }
+
             return back()->with('success', 'Like removed successfully.');
 
         } catch (\Exception $e) {
             Log::error('Like removal failed: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'liked' => true,
+                    'likesCount' => isset($comment) ? LikeComment::where('comment_id', $commentId)->count() : 0,
+                    'message' => 'Failed to remove like: ' . $e->getMessage()
+                ], 500);
+            }
 
             return back()->with('error', 'Failed to remove like: ' . $e->getMessage());
         }

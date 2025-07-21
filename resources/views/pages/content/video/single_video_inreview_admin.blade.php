@@ -151,7 +151,7 @@
               <span class="mt-2 h6-ragular" style="color:#ADADAD;">Commented On {{ $review->created_at->diffForHumans() }}</span>
               <div>
                   <x-svg-icon name="message" size="16" color="#ADADAD" />
-                  <span class="h6-ragular">{{ $replysCount }} Replies</span>
+                  <span class="h6-ragular reply-count" id="reply-count-{{ $review->id }}">{{ $replys->where('parent_id', $review->id)->count() }} Replies</span>
               </div>
               <button class="btn-nothing" data-bs-toggle="modal" data-bs-target="#deleteReviewModal{{ $review->id }}">
             <x-svg-icon name="trash" size="20" color="#BB1313" />
@@ -183,27 +183,34 @@
           </div>
         </x-modal>
         <!-- Reply input, hidden by default -->
-        <div class="mt-3 reply-input-container" id="reply-container-{{ $review->id }}" style="display:none;">
-          <form action="{{ route('reviews.reply', ['media_id' => $media->id, 'parent_id' => $review->id]) }}" method="POST" class="mb-2">
-            @csrf
-            <x-comment-input id="reply-comment-{{ $review->id }}" name="content" placeholder="Reply to this reviewer comment..." :value="old('content')" />
-            @error('content')
-              <div class="mt-1 text-danger">{{ $message }}</div>
-            @enderror
-            <button type="submit" class="mt-2 btn btn-primary" style="display:none;"></button>
-          </form>
+         <div class="mt-3 reply-input-container" id="reply-container-{{ $review->id }}"  style="display:none;">
+           <div class="review-reply-input-wrapper input-icon" data-parent-id="{{ $review->id }}" data-media-id="{{ $media->id }}">
+               <x-textarea 
+                   id="review-reply-comment-{{ $review->id }}" 
+                   name="content"
+                   placeholder="Reply to this reviewer comment..." 
+                   rows="1"
+                   class="review-reply-textarea"
+                   style="background-color: transparent; border-radius: 38px; min-height: 60px; max-height: 120px; resize: none; width: 100%; padding-right: 40px;"
+               />
+               <div class="input-icon-send review-reply-submit-btn" style="cursor:pointer; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);" title="Submit">
+                   <x-svg-icon name="send" size="14" color="#fff" />
+               </div>
+           </div>
 
             <!-- Show replies -->
-        @php
+           @php
           $reviewReplies = $replys->where('parent_id', $review->id);
         @endphp
         @if($reviewReplies->count() > 0)
-        <div class="mt-2 replies-container" style="margin-left: 40px;">
+        <div class="mt-2 replies-container review-replies-container" id="review-replies-{{ $review->id }}" data-ajax-review-replies="{}" style="margin-left: 40px;">
           @foreach($reviewReplies as $reply)
             <x-review-reply :reply="$reply" :replys="$replys" :media="$media" />
           @endforeach
         </div>
         @endif
+         </div>
+     
       </div>
       @endforeach
         </div>
@@ -212,13 +219,13 @@
     <!-- Admin`s Rating -->
     <div class="mt-4">
       <h3 class="mb-2 h4-semibold">Admin's Rating : ( 1 - 10 )</h3>
-      <form action="{{ route('admins.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
+      <form id="admin-rate-form" action="{{ route('admins.rate') }}" method="POST" class="gap-3 d-flex align-items-center w-100">
         @csrf
         <input type="hidden" name="media_id" value="{{ $media->id }}">
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
         <div class="input-icon w-100">
           <x-text_input type="number" id="rate" name="rate" placeholder="1 - 10" :value="$myRate" />
-          <div class="input-icon-send" style="cursor:pointer" onclick="this.closest('form').submit();">
+          <div class="input-icon-send" style="cursor:pointer" onclick="document.getElementById('admin-rate-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
             <x-svg-icon name="send" size="14" color="#fff" />
           </div>
         </div>
@@ -228,6 +235,13 @@
     <!-- Admin Comments -->
     <div class="mt-4">
         <h3 class="mb-2 h4-semibold">Admin Comments (Visible to Users)</h3>
+        @php
+            $ajaxConfig = json_encode([
+                'addCommentEndpoint' => '/AdminComment/add',
+                'deleteCommentEndpoint' => '/AdminComment',
+                'getCommentHtmlEndpoint' => '/AdminComment',
+            ]);
+        @endphp
         <x-comments 
             :commentsData="$adminComments"
             :mediaId="$media->id"
@@ -237,6 +251,8 @@
             :showAddComment="true"
             commentRoute="AdminComment.add"
             deleteRoute="AdminComment.delete"
+            commentType="admin"
+            :ajaxConfig="$ajaxConfig"
         />
     </div>
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
@@ -263,6 +279,10 @@
 
 @push('scripts')
   <script src="{{ asset('js/validations.js') }}"></script>
+  <script src="{{ asset('js/apis/ajaxReview.js') }}"></script>
+  <script src="{{ asset('js/descriptonReadMore.js') }}"></script>
+ 
+  <script src="{{ asset('/js/apis/ajaxRate.js') }}"></script>
 
   <script>
     document.querySelectorAll('.reply-btn').forEach(function (btn) {
@@ -332,6 +352,36 @@
       });
     });
   </script>
-@endpush
 
-<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
+<script type="module">
+  import { submitAdminRate } from '/js/apis/ajaxRate.js';
+  function showToast(message, type = 'success') {
+      if (window.showToast) {
+          window.showToast(message, type);
+      } else {
+          alert(message);
+      }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+      const rateForm = document.getElementById('admin-rate-form');
+      if (rateForm) {
+          rateForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const mediaId = rateForm.querySelector('input[name="media_id"]').value;
+              const userId = rateForm.querySelector('input[name="user_id"]').value;
+              const rate = rateForm.querySelector('input[name="rate"]').value;
+              const csrfToken = rateForm.querySelector('input[name="_token"]').value;
+              submitAdminRate(mediaId, userId, rate, csrfToken).then(data => {
+                  if (data.success) {
+                      showToast(data.message || 'Rating submitted successfully.', 'success');
+                      // Update the input value to the new rate
+                      rateForm.querySelector('input[name="rate"]').value = rate;
+                  } else {
+                      showToast(data.message || 'Failed to submit rating.', 'danger');
+                  }
+              }).catch(() => showToast('Error submitting rating.', 'danger'));
+          });
+      }
+  });
+  </script>
+@endpush

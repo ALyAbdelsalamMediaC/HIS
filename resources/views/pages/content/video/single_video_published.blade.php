@@ -53,23 +53,18 @@
       <x-svg-icon name="eye" size="24" color="Black" />
       <span class="h6-ragular">{{ $media->views}} viewers</span>
       </div>
-      <div>
-        @if($userLiked)
-          <form action="{{ route('media.like.remove', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn-nothing" title="Unlike">
-              <x-svg-icon name="like-fill" size="24" color="Black" />
-            </button>
-          </form>
-        @else
-          <form action="{{ route('media.like.add', ['mediaId' => $media->id]) }}" method="POST" style="display:inline;">
-            @csrf
-            <button type="submit" class="btn-nothing" title="Like">
+      <div class="gap-1 d-flex align-items-center">
+        <form id="like-form" data-liked="{{ $userLiked ? '1' : '0' }}" data-media-id="{{ $media->id }}">
+          @csrf
+          <button type="submit" class="btn-nothing" title="{{ $userLiked ? 'Unlike' : 'Like' }}" id="like-btn">
+            <span class="like-icon like-empty" style="{{ $userLiked ? 'display:none;' : '' }}">
               <x-svg-icon name="like-empty" size="24" color="Black" />
-            </button>
-          </form>
-        @endif
+            </span>
+            <span class="like-icon like-fill" style="{{ $userLiked ? '' : 'display:none;' }}">
+              <x-svg-icon name="like-fill" size="24" color="Black" />
+            </span>
+          </button>
+        </form>
         <span class="h6-ragular" id="like-count">{{$likesCount}} Likes</span>
       </div>
     </div>
@@ -153,6 +148,16 @@
     <div class="mt-4">
     <h3 class="mb-2 h4-semibold">Comments</h3>
     
+    @php
+        $ajaxConfig = json_encode([
+            'addCommentEndpoint' => '/comments/add',
+            'addReplyEndpoint' => '/comments/reply',
+            'deleteCommentEndpoint' => '/comments',
+            'likeCommentEndpoint' => '/comments',
+            'unlikeCommentEndpoint' => '/comments',
+        ]);
+    @endphp
+    
     <x-comments 
         :commentsData="$commentsData" 
         :mediaId="$media->id"
@@ -160,6 +165,7 @@
         :enableLikes="true"
         :enableDelete="true"
         :showAddComment="true"
+        :ajaxConfig="$ajaxConfig"
     />
     </div>
 
@@ -177,27 +183,38 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/validations.js') }}"></script>
-<script>
+<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
+<script src="{{ asset('js/showToast.js') }}"></script>
+<script type="module">
+import { likeVideo, unlikeVideo } from '/js/apis/publishVideoLike.js';
+
 document.addEventListener('DOMContentLoaded', function() {
-    const video = document.querySelector('.video-player');
-    if (video) {
-        // Ensure video loads properly with poster
-        video.addEventListener('loadstart', function() {
-            console.log('Video loading started');
-        });
-        
-        video.addEventListener('loadeddata', function() {
-            console.log('Video data loaded');
-        });
-        
-        // Handle video play to hide poster
-        video.addEventListener('play', function() {
-            console.log('Video started playing');
+    const likeForm = document.getElementById('like-form');
+    const likeBtn = document.getElementById('like-btn');
+    if (likeForm) {
+        likeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const liked = likeForm.getAttribute('data-liked') === '1';
+            const mediaId = likeForm.getAttribute('data-media-id');
+            const csrfToken = likeForm.querySelector('input[name="_token"]').value;
+            let promise = liked ? unlikeVideo(mediaId, csrfToken) : likeVideo(mediaId, csrfToken);
+            promise.then(data => {
+                if (data.success) {
+                    likeForm.setAttribute('data-liked', data.liked ? '1' : '0');
+                    const emptyIcon = likeBtn.querySelector('.like-empty');
+                    const fillIcon = likeBtn.querySelector('.like-fill');
+                    if (emptyIcon) emptyIcon.style.display = data.liked ? 'none' : '';
+                    if (fillIcon) fillIcon.style.display = data.liked ? '' : 'none';
+                    const likeCountSpan = document.getElementById('like-count');
+                    if (likeCountSpan && typeof data.likesCount !== 'undefined') {
+                        likeCountSpan.textContent = `${data.likesCount} Likes`;
+                    }
+                } else {
+                    showToast(data.message || 'Action failed', 'danger');
+                }
+            }).catch(() => showToast('Error processing like.', 'danger'));
         });
     }
 });
 </script>
 @endpush
-
-<script src="{{ asset('js/descriptonReadMore.js') }}"></script>
