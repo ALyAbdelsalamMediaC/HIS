@@ -738,16 +738,16 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('id', $media_id)
-                ->with(['category'])
-                ->withCount(['comments', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])->first();
+            ->with(['category'])
+            ->withCount(['comments', 'likes'])
+            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])->first();
 
+        
 
-
-            $media->is_favorite = Bookmark::where('user_id', $userId)
-                ->where('media_id', $media_id)->exists();
+        $media->is_favorite = Bookmark::where('user_id', $userId)
+            ->where('media_id', $media_id)->exists();
 
             // Return the media details
             return response()->json([
@@ -755,6 +755,7 @@ class MediaController extends Controller
                 'message' => 'Media retrieved successfully.',
                 'data' => [$media]
             ], 200);
+        
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
