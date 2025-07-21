@@ -104,10 +104,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => $validated['user_id']
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => $validated['user_id'],
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -438,10 +438,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => $validated['user_id']
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => $validated['user_id'],
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -738,6 +738,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('id', $media_id)
+            ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
                 ->withExists(['likes as is_liked' => function ($query) use ($userId) {
@@ -768,6 +769,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('category_id', $category_id)
+            ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
                 ->withExists(['likes as is_liked' => function ($query) use ($userId) {
