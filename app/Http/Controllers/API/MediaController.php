@@ -61,6 +61,7 @@ class MediaController extends Controller
             $categoriesPending = Category::with(['media' => function ($query) {
                 $query->whereIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
             }])->get();
+        $users = User::all();
 
             $categories = Category::with(['media' => function ($query) {
                 $query->whereNotIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
@@ -70,6 +71,7 @@ class MediaController extends Controller
                 'message' => 'Media categories retrieved successfully.',
                 'data' => [
                     'categories' => $categories,
+                    'users' => $users,
                     'categoriesPending' => $categoriesPending
                 ]
             ], 200);
@@ -122,6 +124,12 @@ class MediaController extends Controller
                     'description' => "Subcategory for {$validated['month']} {$validated['year']}"
                 ]
             );
+
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $getID3 = new getID3();
             $duration = null;
@@ -187,6 +195,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
+                'mention' => json_encode($mentions),
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'status' => 'pending', // Default status
