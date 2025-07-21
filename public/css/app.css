@@ -494,13 +494,6 @@ body {
     color: var(--hover-button);
 }
 
-.fixed-textarea {
-    width: 100%; /* Set your desired fixed width */
-    max-width: 100%; /* Ensure it doesn't exceed container width on smaller screens */
-    height: 150px; /* Set a fixed height if needed */
-    resize: none; /* Prevent users from resizing the textarea */
-    overflow: auto; /* Enable scrollbars when content overflows */
-}
 
 .select-border {
     border: 1px solid var(--secondary-color);
@@ -582,14 +575,6 @@ body {
 .select-form-inner:focus {
     border-color: var(--primary-color);
     outline: none;
-}
-
-.fixed-textarea {
-    width: 100%; /* Set your desired fixed width */
-    max-width: 100%; /* Ensure it doesn't exceed container width on smaller screens */
-    height: 150px; /* Set a fixed height if needed */
-    resize: none; /* Prevent users from resizing the textarea */
-    overflow: auto; /* Enable scrollbars when content overflows */
 }
 
 /* ========================================================
@@ -1455,6 +1440,12 @@ body {
     height: auto;
 }
 
+.replay-container{
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+
+}
+
 .video-info {
     padding: 15px;
 }
@@ -1758,6 +1749,14 @@ body {
 
 .comment-content-wrapper {
     position: relative;
+}
+
+.comment-like-btn path {
+    fill: #ADADAD !important;
+    transition: fill 0.2s;
+}
+.comment-like-btn.heart-liked svg path{
+    fill: #BB1313 !important;
 }
 
 .comment-text {

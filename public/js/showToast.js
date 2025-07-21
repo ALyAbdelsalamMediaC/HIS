@@ -6,7 +6,7 @@ function showToast(messages, type = "danger") {
 
     // Build the toast HTML
     const toastHtml = `
-  <div id="${toastId}" class="toast-container position-fixed bottom-0 end-0 p-4 z-index-11">
+  <div id="${toastId}" class="bottom-0 p-4 toast-container position-fixed end-0 z-index-11">
       <div class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="d-flex">
               <div class="toast-body">
@@ -21,7 +21,7 @@ function showToast(messages, type = "danger") {
                           : `<div class="font-size-md">${messages}</div>`
                   }
               </div>
-              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              <button type="button" class="m-auto btn-close btn-close-white me-2" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
       </div>
   </div>

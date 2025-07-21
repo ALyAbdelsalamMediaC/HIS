@@ -21,6 +21,13 @@ class AdminCommentController extends Controller
             ]);
 
             if ($validator->fails()) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Validation failed',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -29,6 +36,12 @@ class AdminCommentController extends Controller
             // Get the authenticated user
             $user = auth()->user();
             if (!$user || empty($user->email)) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You must be logged in with a valid email address to comment.'
+                    ], 401);
+                }
                 return redirect()->back()
                     ->with('error', 'You must be logged in with a valid email address to comment.')
                     ->withInput();
@@ -36,27 +49,56 @@ class AdminCommentController extends Controller
 
             // Verify media exists
             if (!Media::find($media_id)) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The specified media does not exist.'
+                    ], 404);
+                }
                 return redirect()->back()
                     ->with('error', 'The specified media does not exist.')
                     ->withInput();
             }
 
             // Create the comment
-            AdminComment::create([
+            $comment = AdminComment::create([
                 'user_id' => $user->id,
                 'media_id' => $media_id,
                 'parent_id' => null,
                 'content' => $request->content,
             ]);
 
+            // Load user relationship for JSON response
+            $comment->load('user');
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Comment added successfully.',
+                    'comment' => $comment
+                ]);
+            }
+
             return redirect()->back()
                 ->with('success', 'Comment added successfully.');
 
         } catch (ModelNotFoundException $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media not found.'
+                ], 404);
+            }
             return redirect()->back()
                 ->with('error', 'Media not found.')
                 ->withInput();
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while adding the comment.'
+                ], 500);
+            }
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while adding the comment.')
                 ->withInput();
@@ -78,6 +120,13 @@ class AdminCommentController extends Controller
             ]);
 
             if ($validator->fails()) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Validation failed',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -86,6 +135,12 @@ class AdminCommentController extends Controller
             // Get the authenticated user
             $user = auth()->user();
             if (!$user || empty($user->email)) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You must be logged in with a valid email address to reply.'
+                    ], 401);
+                }
                 return redirect()->back()
                     ->with('error', 'You must be logged in with a valid email address to reply.')
                     ->withInput();
@@ -97,27 +152,56 @@ class AdminCommentController extends Controller
 
             // Verify that parent comment belongs to the specified media
             if ($parentComment->media_id != $media_id) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid parent comment for this media.'
+                    ], 400);
+                }
                 return redirect()->back()
-                    ->with('error', 'The parent comment does not belong to the specified media.')
+                    ->with('error', 'Invalid parent comment for this media.')
                     ->withInput();
             }
 
             // Create the reply
-            AdminComment::create([
+            $comment = AdminComment::create([
                 'user_id' => $user->id,
                 'media_id' => $media_id,
                 'parent_id' => $parent_id,
                 'content' => $request->content,
             ]);
 
+            // Load user relationship for JSON response
+            $comment->load('user');
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reply added successfully.',
+                    'comment' => $comment
+                ]);
+            }
+
             return redirect()->back()
                 ->with('success', 'Reply added successfully.');
 
         } catch (ModelNotFoundException $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media or parent comment not found.'
+                ], 404);
+            }
             return redirect()->back()
                 ->with('error', 'Media or parent comment not found.')
                 ->withInput();
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while adding the reply.'
+                ], 500);
+            }
             return redirect()->back()
                 ->with('error', 'An unexpected error occurred while adding the reply.')
                 ->withInput();
@@ -206,22 +290,39 @@ class AdminCommentController extends Controller
             $comment->replies()->delete();
             $comment->delete();
 
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Comment deleted successfully.'
+                ]);
+            }
+
             return redirect()->back()
                 ->with('success', 'Comment deleted successfully.');
 
         } catch (ModelNotFoundException $e) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Comment not found.'
+                ], 404);
+            }
             return redirect()->back()
-                ->with('error', 'Comment not found.')
-                ->withInput();
+                ->with('error', 'Comment not found.');
         } catch (\Exception $e) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred while deleting the comment.'
+                ], 500);
+            }
             return redirect()->back()
-                ->with('error', 'An unexpected error occurred while deleting the comment: ' . $e->getMessage());
+                ->with('error', 'An unexpected error occurred while deleting the comment.');
         }
     }
 
     public function rate(Request $request)
     {
-        // Validate input
         $validator = Validator::make($request->all(), [
             'media_id' => 'required|exists:media,id',
             'user_id' => 'required|exists:users,id',
@@ -229,20 +330,31 @@ class AdminCommentController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors(),
+                    'message' => 'Validation failed.'
+                ], 422);
+            }
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
-        // Check user role
         $user = User::find($request->user_id);
         if (!$user || $user->role !== 'admin') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only admins can submit a rating.'
+                ], 403);
+            }
             return redirect()->back()
                 ->with('error', 'Only admins can submit a rating.')
                 ->withInput();
         }
 
-        // Save or update rate (assuming Rate model and rates table exist)
         Rate::updateOrCreate(
             [
                 'media_id' => $request->media_id,
@@ -253,7 +365,33 @@ class AdminCommentController extends Controller
             ]
         );
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Rating submitted successfully.'
+            ]);
+        }
+
         return redirect()->back()
             ->with('success', 'Rating submitted successfully.');
+    }
+
+    // AJAX HTML rendering for admin comments
+    public function getCommentHtml($comment_id)
+    {
+        try {
+            $comment = AdminComment::with('user')->findOrFail($comment_id);
+            // Return only the comment HTML without the full page layout
+            return view('components.comment-item', [
+                'comment' => $comment,
+                'enableReplies' => false,
+                'enableLikes' => false,
+                'enableDelete' => true,
+                'commentRoute' => 'AdminComment.add',
+                'deleteRoute' => 'AdminComment.delete',
+            ])->render();
+        } catch (\Exception $e) {
+            return response('Comment not found', 404);
+        }
     }
 }

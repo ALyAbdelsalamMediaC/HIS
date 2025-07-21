@@ -195,16 +195,25 @@
    <!-- Admin Comments -->
    <div class="mt-4">
         <h3 class="mb-2 h4-semibold">Admin Comments (Visible to Users)</h3>
-        <x-comments 
-            :commentsData="$adminComments"
-            :mediaId="$media->id"
-            :enableReplies="false"
-            :enableLikes="false"
-            :enableDelete="true"
-            :showAddComment="true"
-            commentRoute="AdminComment.add"
-            deleteRoute="AdminComment.delete"
-        />
+        @php
+        $ajaxConfig = json_encode([
+            'addCommentEndpoint' => '/AdminComment/add',
+            'deleteCommentEndpoint' => '/AdminComment',
+            'getCommentHtmlEndpoint' => '/AdminComment',
+        ]);
+    @endphp
+    <x-comments 
+        :commentsData="$adminComments" 
+        :mediaId="$media->id"
+        :enableReplies="false"
+        :enableLikes="false"
+        :enableDelete="true"
+        :showAddComment="true"
+        commentRoute="AdminComment.add"
+        deleteRoute="AdminComment.delete"
+        commentType="admin"
+        :ajaxConfig="$ajaxConfig"
+    />
     </div>
     
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
