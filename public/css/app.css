@@ -1976,6 +1976,16 @@ body {
     text-align: justify;
 }
 
+/* Quill content heading styles */
+.quill-content h1 {
+    font-size: 2em;
+    font-weight: bold;
+}
+.quill-content h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
 /* ========================================================
     Article Image
    ======================================================== */

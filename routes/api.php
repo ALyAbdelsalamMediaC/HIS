@@ -15,10 +15,10 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Http\Request;
 
 
-Route::post('/comments', [CommentsController::class, 'addComment']);
-Route::post('/comments/reply', [CommentsController::class, 'reply']);
-Route::post('/media/store', [MediaController::class, 'store']);
-Route::get('/media/show', [MediaController::class, 'show']);
+    Route::post('/comments', [CommentsController::class, 'addComment']);
+    Route::post('/comments/reply', [CommentsController::class, 'reply']);
+    Route::post('/media/store', [MediaController::class, 'store']);
+    Route::get('/media/show', [MediaController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
     Route::get('/media/featured', [MediaController::class, 'featured']);
@@ -47,10 +47,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/categories', [MediaController::class, 'getAllCategories']);
     Route::post('/sub_category/details', [MediaController::class, 'subCategoryDetails']);
     Route::post('/viewscount', [MediaController::class, 'viewsCount']);
+    Route::delete('delete/media', [MediaController::class, 'destroy']);
 
     Route::get('/show/admin-comments', [AdminCommentController::class, 'showAdminComment'])->name('admin.comments.show');
-    Route::get('/add/admin-comments', [AdminCommentController::class, 'addComment'])->name('admin.comments.show');
-    Route::post('/reply/admin-comment/', [AdminCommentController::class, 'reply'])->name('admin.comments.reply');
+    Route::post('/add/admin-comments', [AdminCommentController::class, 'addComment'])->name('admin.comments.show');
+    Route::post('/reply/admin-comments', [AdminCommentController::class, 'reply']);
 
     Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
     Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
@@ -65,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
     Route::post('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
     Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
+
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 

@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
-
 class CommentsController extends Controller
 {
     public function addComment(Request $request)
@@ -56,6 +55,7 @@ class CommentsController extends Controller
                 'message' => 'Comment created successfully.',
                 'data' => $comment,
             ], 200);
+
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -122,6 +122,7 @@ class CommentsController extends Controller
                 'message' => 'Reply created successfully.',
                 'data' => $reply,
             ], 201);
+
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -135,11 +136,11 @@ class CommentsController extends Controller
             ], 500);
         }
     }
-    public function getCommentsByMediaId(Request $request)
+   public function getCommentsByMediaId(Request $request)
     {
         try {
-            // Validate the media_id
-            $validated = $request->validate([
+           
+             $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'media_id'=> 'required|exists:media,id'
         ], [
@@ -150,12 +151,7 @@ class CommentsController extends Controller
             $user_id = (int) $validated['user_id'];
             $media_id = (int) $validated['media_id'];
             
-
-            // Validate the user_id if provided
-            $user_id = $validated['user_id'];
-            $media_id = $validated['media_id'];
-            
-            $query = Comment::where('media_id', $media_id)
+             $query = Comment::where('media_id', $media_id)
                 ->whereNull('parent_id')
                 ->with([
                     'replies' => function ($query) use ($user_id) {
@@ -196,7 +192,6 @@ class CommentsController extends Controller
             ], 500);
         }
     }
-
     public function getCommentsByArticleId(Request $request)
     {
         try {
@@ -232,7 +227,7 @@ class CommentsController extends Controller
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'asc')
-                        ->with('user');
+                          ->with('user');
                 }, 'user'])
                 ->orderBy('created_at', 'asc');
 
@@ -248,6 +243,7 @@ class CommentsController extends Controller
                 'message' => 'Comments retrieved successfully.',
                 'data' => $comments,
             ], 200);
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',

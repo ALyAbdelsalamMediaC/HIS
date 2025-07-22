@@ -25,7 +25,6 @@ class LikesController extends Controller
             
             // Find the media item
             $media = Media::where('id',$mediaId)->first();
-
             // Check if the user already liked this media
             $existingLike = Like::where('user_id', $userId)
                 ->where('media_id', $mediaId)

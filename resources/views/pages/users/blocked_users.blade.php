@@ -87,7 +87,13 @@
       </tbody>
       </table>
     </div>
-    </div>
+  </div>
+  <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
+      @if($users->count())
+          <x-table-info :paginator="$users" />
+          <x-pagination :paginator="$users" :appends="request()->query()" />
+      @endif
+  </div>
   </section>
 @endsection
 

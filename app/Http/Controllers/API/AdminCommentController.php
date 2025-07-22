@@ -18,7 +18,7 @@ class AdminCommentController extends Controller
         try {
                         $media_id = $request->media_id;
            $comments = AdminComment::where('media_id', $media_id)
-            ->whereNull('parent_id')
+            ->whereNull('parent_id')->with('user')
             ->with(['replies' => function ($query) {
                 $query->select('id', 'user_id', 'media_id', 'parent_id', 'content', 'created_at', 'updated_at')->with('user');
             }])
@@ -57,17 +57,19 @@ class AdminCommentController extends Controller
             }
 
             // Create the comment
-            AdminComment::create([
+            $comment = AdminComment::create([
                 'user_id' => $userId,
                 'media_id' => $media_id,
                 'parent_id' => null,
                 'content' => $request->content,
             ]);
+        $comment->load('user');
 
 
             return response()->json([
                 'success' => true,
                 'comment' => 'Comment added successfully.',
+                'comment' => $comment,
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()
@@ -102,15 +104,20 @@ class AdminCommentController extends Controller
             }
 
             // Create the reply
-            AdminComment::create([
+            $comment = AdminComment::create([
                 'user_id' => $userId,
                 'media_id' => $mediaId,
                 'parent_id' => $parentId,
                 'content' => $content,
             ]);
+            
+        $comment->load('user');
+
                 return response()->json([
                 'success' => true,
                 'comment' => 'Reply added successfully.',
+                
+                'comment' => $comment,
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()

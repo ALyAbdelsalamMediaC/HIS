@@ -5,7 +5,7 @@
 ])
 <div>
   <div id="quill-wrapper-{{ $id }}">
-    <div id="editor-{{ $id }}" style="min-height: 150px;">{!! $slot !!}</div>
+    <div id="editor-{{ $id }}" data-gramm="false" style="min-height: 150px;">{!! $slot !!}</div>
     <input type="hidden" name="{{ $name }}" id="{{ $id }}" value="{!! str_replace('"', '&quot;', $slot) !!}">
   </div>
 </div>

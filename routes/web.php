@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admins/rate', [AdminCommentController::class, 'rate'])->name('admins.rate');
     Route::get('/reviews/{comment_id}/html', [ReviewsController::class, 'getReviewHtml'])->name('reviews.html');
     Route::get('/reviews/reply/{reply_id}/{parent_id}/html', [ReviewsController::class, 'getReplyHtml'])->name('reviews.reply.html');
-    Route::get('/get-google-token', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
+    Route::get('/get-google-token.php', [GoogleAuthController::class, 'getGoogleToken'])->name('google.auth');
     Route::get('/content/articles', [ArticleController::class, 'getall'])->name('content.articles');
 
     Route::get('/content/articles/add', [ArticleController::class, 'create']);

@@ -37,7 +37,7 @@ class UserController extends Controller
                 $query->where('name', 'like', '%' . $search . '%');
             }
 
-            $users = $query->get();
+            $users = $query->paginate(20)->withQueryString();
             $total_users = $query->count();
             return view('pages.users.index', compact('users', 'total_users'));
         } catch (\Exception $e) {
@@ -128,7 +128,7 @@ class UserController extends Controller
 
             // Retrieve soft-deleted users with pagination
             $users = $query->select('id', 'name', 'email', 'phone', 'deleted_at')
-                ->paginate(10);
+                ->paginate(20)->withQueryString();
 
             // Get total number of deleted users (ignoring search filter)
             $totalDeleted = User::onlyTrashed()->count();
