@@ -289,9 +289,9 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        print_r(1);
-        die;
-        $userId = null; // Initialize $userId to avoid undefined variable issues
+        // print_r(1);
+        // die;
+        $userId = auth()->user()->id; // Initialize $userId to avoid undefined variable issues
 
         try {
             $auth = $request->bearerToken();
@@ -724,7 +724,16 @@ class MediaController extends Controller
                     $query->where('user_id', $userId);
                 }])->first();
 
+             if($PendingMedia !=null){
+                
             $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            }
+            
+            
+            if($PublishedMedia !=null){
+                
+            $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            }
             // Return the media details
             return response()->json([
                 'success' => true,
