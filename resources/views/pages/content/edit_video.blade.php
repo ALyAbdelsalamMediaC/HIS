@@ -74,7 +74,7 @@
       </p>
       @if($media->description)
       <p class="mb-2 h6-ragular" style="color:#676767;">
-      <strong>Description:</strong> {{ Str::limit($media->description, 100) }}
+      <strong>Description:</strong> {!! Str::words(strip_tags($media->description), 15, '...') !!}
       </p>
       @endif
       </div>
@@ -166,22 +166,10 @@
     @endif
     </div>
 
-        <!-- Status Select -->
-        <div class="form-infield">
-      <x-text_label for="status" :required="true">Status</x-text_label>
-      <x-select id="status" name="status"
-        :options="['pending' => 'Pending', 'inreview' => 'In Review', 'published' => 'Published', 'declined' => 'Declined']"
-        :selected="old('status', $media->status)"
-        placeholder="Select Status" data-required="true" data-name="Status" />
-      <div id="status-error-container">
-        <x-input-error :messages="$errors->get('status')" class="mt-2" />
-      </div>
-    </div>
-    
     <div class="form-infield">
       <x-text_label for="year" :required="true">Year</x-text_label>
       <x-select id="year" name="year"
-        :options="collect(range(date('Y'), 2015))->mapWithKeys(fn($y) => [$y => $y])->all()"
+        :options="collect(range(date('Y'), 2018))->mapWithKeys(fn($y) => [$y => $y])->all()"
         :selected="old('year', $yearName ?? null)"
         placeholder="Select Year" data-required="true" data-name="Year" />
       <div id="year-error-container">
@@ -240,6 +228,9 @@
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="submit">Update Video</x-button>
     </div>
+    <div id="video-upload-progress" style="margin-top:10px; text-align:center;"></div>
+    <div id="video-upload-error" style="margin-top:10px; color:red; text-align:center;"></div>
+    <div id="upload-retry" style="text-align:center; margin-top:10px; display:none;"></div>
     </form>
   </section>
 @endsection
@@ -248,143 +239,259 @@
   <script src="{{ asset('js/validations.js') }}"></script>
   <script src="{{ asset('js/showToast.js') }}"></script>
   <script>
-    function validateFile(input, expectedType, maxSizeBytes, errorMessage, defaultPlaceholder) {
-    const file = input.files[0];
-    if (file) {
-      const validTypes = expectedType.split(',');
-      if (!validTypes.includes(file.type)) {
-      showToast(`Please select a valid ${expectedType.includes('image') ? 'image (JPEG, JPG, PNG)' : 'PDF'} file`, 'danger');
-      input.value = '';
-      input.setAttribute('data-placeholder', defaultPlaceholder);
-      return;
-      }
-      if (file.size > maxSizeBytes) {
-      showToast(errorMessage, 'danger');
-      input.value = '';
-      input.setAttribute('data-placeholder', defaultPlaceholder);
-      return;
-      }
-      input.setAttribute('data-placeholder', file.name);
-    } else {
-      input.setAttribute('data-placeholder', defaultPlaceholder);
-    }
-    }
-
-    function updateFileName(input) {
-    validateFile(input, 'image/jpeg,image/jpg,image/png', 3 * 1024 * 1024, 'Image size exceeds 3MB. Please choose a smaller image.', 'Choose an image from your gallery');
-    }
-
-    function previewImage(input, previewId) {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const preview = document.getElementById(previewId);
-        preview.style.display = 'block';
-        const img = document.getElementById(`${previewId}-img`);
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-    const fileInputs = [
-      { id: 'thumbnail_path', placeholder: 'Choose an thumbnail from your gallery' },
-      { id: 'image_path', placeholder: 'Choose an image from your gallery' },
-      { id: 'pdf', placeholder: 'Choose a PDF file' }
-    ];
-
-    fileInputs.forEach(({ id, placeholder }) => {
-      const input = document.getElementById(id);
-      input.style.setProperty('--webkit-file-upload-button', 'none');
-      input.style.setProperty('--file-selector-button', 'none');
-      if (!input.files || input.files.length === 0) {
-      input.setAttribute('data-placeholder', placeholder);
-      }
-    });
-
-    const style = document.createElement('style');
-    style.textContent = `      input[type="file"]::-webkit-file-upload-button,
-      input[type="file"]::file-selector-button {
-      display: none;
-      }
-      input[type="file"] {
-      color: transparent;
-      }
-      input[type="file"]::before {
-      content: attr(data-placeholder);
-      color: #6c757d;
-      position: absolute;
-      padding-left:11px;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: calc(100% - 130px);
-      }
-      `;
-    document.head.appendChild(style);
-    });
-
-    $(document).ready(function() {
-      $('.select2-mentions').select2({
-        placeholder: 'Select or type names to mention',
-        tags: true,
-        tokenSeparators: [',', ' '],
-        width: '100%'
-      });
-    });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.querySelector('form[action="{{ route('content.update', $media->id) }}"]');
-      if (form) {
-        form.addEventListener("submit", function (event) {
-          const status = document.getElementById('status').value;
-          const assignedReviewersCount = {{ $media->assigned_reviewers->count() }};
-          let isValid = true;
-
-          // Custom reviewer validation for this form only
-          if (status === 'inreview' && assignedReviewersCount === 0) {
-            isValid = false;
-            displayError(document.getElementById('status'), [
-              "You need to assign a reviewer first to make the status In Review."
-            ]);
-          }
-
-          if (!isValid) {
-            event.preventDefault();
-            const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
-            if (submitButton) {
-              submitButton.disabled = false;
-              if (submitButton.originalInnerHTML) {
-                submitButton.innerHTML = submitButton.originalInnerHTML;
-              }
+        function validateFile(input, expectedType, maxSizeBytes, errorMessage, defaultPlaceholder) {
+            const file = input.files[0];
+            if (file) {
+                const validTypes = expectedType.split(',');
+                if (!validTypes.includes(file.type)) {
+                    showToast(`Please select a valid ${expectedType.includes('image') ? 'image (JPEG, JPG, PNG)' : 'PDF'} file`, 'danger');
+                    input.value = '';
+                    input.setAttribute('data-placeholder', defaultPlaceholder);
+                    return;
+                }
+                if (file.size > maxSizeBytes) {
+                    showToast(errorMessage, 'danger');
+                    input.value = '';
+                    input.setAttribute('data-placeholder', defaultPlaceholder);
+                    return;
+                }
+                input.setAttribute('data-placeholder', file.name);
+            } else {
+                input.setAttribute('data-placeholder', defaultPlaceholder);
             }
-          }
-        });
-      }
-
-      // Local displayError for this form only
-      function displayError(element, messages) {
-        const errorContainerId = element.name + "-error-container";
-        const errorContainer = document.getElementById(errorContainerId);
-        if (errorContainer) {
-          errorContainer.innerHTML = createErrorHtml(messages);
         }
-      }
-      function createErrorHtml(messages) {
-        let html = '<ul class="error-input-login">';
-        messages.forEach(function (message) {
-          html += "<li>" + message + "</li>";
+
+        function updateFileName(input) {
+            validateFile(input, 'image/jpeg,image/jpg,image/png', 3 * 1024 * 1024, 'Image size exceeds 3MB. Please choose a smaller image.', 'Choose an image from your gallery');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInputs = [
+                { id: 'thumbnail_path', placeholder: 'Choose an thumbnail from your gallery' },
+                { id: 'image_path', placeholder: 'Choose an image from your gallery' },
+                { id: 'pdf', placeholder: 'Choose a PDF file' }
+            ];
+
+            fileInputs.forEach(({ id, placeholder }) => {
+                const input = document.getElementById(id);
+                input.style.setProperty('--webkit-file-upload-button', 'none');
+                input.style.setProperty('--file-selector-button', 'none');
+                if (!input.files || input.files.length === 0) {
+                    input.setAttribute('data-placeholder', placeholder);
+                }
+            });
+
+            const style = document.createElement('style');
+            style.textContent = `
+                input[type="file"]::-webkit-file-upload-button,
+                input[type="file"]::file-selector-button {
+                    display: none;
+                }
+                input[type="file"] {
+                    color: transparent;
+                }
+                input[type="file"]::before {
+                    content: attr(data-placeholder);
+                    color: #6c757d;
+                    position: absolute;
+                    padding-left:11px;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: calc(100% - 130px);
+                }
+            `;
+            document.head.appendChild(style);
         });
-        html += "</ul>";
-        return html;
-      }
-    });
-  </script>
+
+        // Wrap all jQuery code in a single $(function(){ ... }) block
+        $(function() {
+            // Select2 initialization
+            $('.select2-mentions').select2({
+                placeholder: 'Select or type names to mention',
+                tags: true,
+                tokenSeparators: [',', ' '],
+                width: '100%'
+            });
+
+            // Resumable.js upload logic
+            var r = new Resumable({
+                target: '/content/videos/upload-chunk',
+                query: {_token: $('meta[name="csrf-token"]').attr('content')},
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                fileType: ['mp4'],
+                chunkSize: 1 * 1024 * 1024, // 1MB for smoother progress
+                simultaneousUploads: 3,
+                testChunks: true,
+                throttleProgressCallbacks: 0.5, // Update progress every 0.5s
+                maxFiles: 1
+            });
+
+            var progress = $('#video-upload-progress');
+            var error = $('#video-upload-error');
+            var hiddenPath = $('#uploaded_video_path');
+            var fileInput = $("input[name='file']");
+            var form = $('#video-upload-form');
+            var uploadBtn = $('#upload-btn');
+            var uploadStarted = false;
+            var uploadFinished = false;
+
+            // Retry button
+            var tryAgainBtn = $('<button type="button" id="retry-upload-btn" style="display:none;margin-top:10px;">Try Again</button>');
+            error.after(tryAgainBtn);
+
+            // Verify file input
+            if (!fileInput.length) {
+                console.error('File input not found');
+                error.text('File input not found. Please refresh the page.');
+                return;
+            }
+            r.assignBrowse(fileInput[0]);
+
+            // Add progress bar
+            progress.html('<div class="progress"><div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>');
+
+            r.on('fileAdded', function(file) {
+                if (file.size > 1024 * 1024 * 1024) { // 1GB limit
+                    error.text('File exceeds 1GB limit.');
+                    r.cancel();
+                    return;
+                }
+                console.log('File added:', file.fileName, file.size, 'bytes');
+                progress.find('.progress-bar').css('width', '0%').attr('aria-valuenow', 0).text('');
+                error.text('');
+                uploadStarted = false;
+                uploadFinished = false;
+                tryAgainBtn.hide();
+            });
+
+            r.on('fileProgress', function(file) {
+                var percent = Math.floor(file.progress() * 100);
+                console.log('Upload progress:', percent + '%');
+                progress.find('.progress-bar').css('width', percent + '%').attr('aria-valuenow', percent).text(`Uploading to server: ${percent}%`);
+            });
+
+            r.on('fileSuccess', function(file, response) {
+                console.log('File upload success:', response);
+                progress.find('.progress-bar').css('width', '100%').text('Server upload complete. Sending to Google Drive...');
+                error.text('');
+                uploadFinished = true;
+                tryAgainBtn.hide();
+                try {
+                    var res = JSON.parse(response);
+                    if (res.path) {
+                        hiddenPath.val(res.path);
+                        console.log('Setting uploaded_video_path:', res.path);
+                        form.off('submit.resumable').submit();
+                    } else {
+                        error.text('Upload completed but no file path returned.');
+                        console.error('Invalid response:', res);
+                    }
+                } catch (e) {
+                    error.text('Upload finished but server response invalid.');
+                    console.error('Response parse error:', e, response);
+                }
+            });
+
+            r.on('fileError', function(file, message) {
+                console.error('File upload error at chunk', file.chunkNumber, ':', message);
+                try {
+                    const errorObj = JSON.parse(message);
+                    error.text('Upload failed: ' + (errorObj.error || message));
+                } catch (e) {
+                    error.text('Upload failed: ' + message);
+                }
+                progress.find('.progress-bar').css('width', '0%').text('');
+                uploadStarted = false;
+                tryAgainBtn.show();
+            });
+
+            r.on('pause', function() {
+                console.log('Upload paused');
+                progress.find('.progress-bar').text('Upload paused');
+            });
+
+            r.on('cancel', function() {
+                console.log('Upload canceled');
+                progress.find('.progress-bar').css('width', '0%').text('Upload canceled');
+                error.text('');
+                uploadStarted = false;
+                tryAgainBtn.hide();
+            });
+
+            tryAgainBtn.on('click', function() {
+                if (navigator.onLine) {
+                    console.log('Retrying upload');
+                    error.text('');
+                    tryAgainBtn.hide();
+                    r.upload();
+                } else {
+                    error.text('Still offline. Please check your internet connection.');
+                }
+            });
+
+            form.on('submit.resumable', function(e) {
+                e.preventDefault();
+                // Validate required fields
+                const requiredFields = [
+                    { id: 'thumbnail_path', name: 'Thumbnail', type: 'file' },
+                    { id: 'year', name: 'Year' },
+                    { id: 'month', name: 'Month' },
+                    { id: 'title', name: 'Title' }
+                ];
+                for (let field of requiredFields) {
+                    const input = document.getElementById(field.id);
+                    if (!input.value || (field.type === 'file' && !input.files.length)) {
+                        showToast(`Please fill in the ${field.name} field`, 'danger');
+                        return;
+                    }
+                }
+                if (!uploadFinished && r.files.length === 0) {
+                    error.text('Please select a video file before submitting.');
+                    return;
+                }
+                if (!uploadFinished && r.files.length > 0) {
+                    uploadStarted = true;
+                    progress.find('.progress-bar').css('width', '0%').text('Uploading to server: 0%');
+                    error.text('');
+                    console.log('Starting chunk upload');
+                    r.upload();
+                } else if (uploadFinished && hiddenPath.val()) {
+                    console.log('Form submitting with uploaded_video_path:', hiddenPath.val());
+                    progress.find('.progress-bar').text('Processing upload to Google Drive...');
+                    uploadBtn.prop('disabled', true);
+                    form.off('submit.resumable').submit();
+                } else {
+                    error.text('Video upload did not complete. Please try again.');
+                    console.error('No uploaded_video_path value');
+                }
+            });
+
+            form.on('submit', function(e) {
+                if (!uploadFinished || !hiddenPath.val()) {
+                    e.preventDefault();
+                    console.log('Form submission prevented, triggering resumable submit');
+                    form.trigger('submit.resumable');
+                } else {
+                    console.log('Form data:', new FormData(this));
+                }
+            });
+
+            uploadBtn.on('click', function(e) {
+                console.log('Upload button clicked');
+                form.trigger('submit.resumable');
+            });
+
+            // Check browser support
+            if (!r.support) {
+                error.text('Your browser does not support chunked uploads. Please use a modern browser.');
+                console.error('Resumable.js not supported');
+                uploadBtn.prop('disabled', true);
+            }
+        });
+    </script>
 @endpush

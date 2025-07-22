@@ -263,14 +263,18 @@ function dragDropUpload(config) {
             this.errorMessage = '';
             
             const validFiles = files.filter(file => this.validateFile(file));
-            
             if (validFiles.length === 0) return;
 
+            // Set files to input element so form and Resumable.js can see them
+            const dataTransfer = new DataTransfer();
             if (this.multiple) {
+                validFiles.forEach(file => dataTransfer.items.add(file));
                 this.selectedFiles = validFiles;
             } else {
+                dataTransfer.items.add(validFiles[0]);
                 this.selectedFile = validFiles[0];
             }
+            this.$refs.fileInput.files = dataTransfer.files;
 
             showToast('Files selected successfully!', 'success');
         },
