@@ -289,8 +289,7 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        print_r(1);
-        die;
+        dd(auth()->user()->id);
         $userId = null; // Initialize $userId to avoid undefined variable issues
 
         try {
