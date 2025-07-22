@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Videos;
+namespace App\Services;
 
 use Google\Client;
 use Google\Service\Drive;

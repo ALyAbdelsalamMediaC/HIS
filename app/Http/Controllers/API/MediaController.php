@@ -724,7 +724,16 @@ class MediaController extends Controller
                     $query->where('user_id', $userId);
                 }])->first();
 
+             if($PendingMedia !=null){
+                
             $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            }
+            
+            
+            if($PublishedMedia !=null){
+                
+            $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            }
             // Return the media details
             return response()->json([
                 'success' => true,
