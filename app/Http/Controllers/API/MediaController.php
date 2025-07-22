@@ -20,7 +20,7 @@ use App\Services\Videos\GoogleDriveServiceImage; // Make sure this service is bu
 use App\Services\Videos\GoogleDriveServiceThumbnail; // Make sure this service is built
 use Google\Service\MyBusinessBusinessInformation\Resource\Categories;
 use Illuminate\Support\Facades\Validator; // For input validation
-use App\Services\NotificationService;
+// use App\Services\NotificationService;
 
 class MediaController extends Controller
 {
@@ -29,7 +29,7 @@ class MediaController extends Controller
     protected $driveServiceImage;
     protected $driveServicePDF;
     protected $driveServiceThumbnail;
-    protected $notificationService;
+    // protected $notificationService;
 
 
     public function __construct(
@@ -37,11 +37,11 @@ class MediaController extends Controller
         GoogleDriveServicePDF $driveServicePDF,
         GoogleDriveServiceImage $driveServiceImage,
         GoogleDriveServiceThumbnail $driveServiceThumbnail,
-        NotificationService $notificationService
+        // NotificationService $notificationService
 
     ) {
 
-        $this->notificationService = $notificationService;
+        // $this->notificationService = $notificationService;
 
         $this->driveServiceVideo = $driveServiceVideo;
         $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
@@ -61,6 +61,7 @@ class MediaController extends Controller
             $categoriesPending = Category::with(['media' => function ($query) {
                 $query->whereIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
             }])->get();
+        $users = User::all();
 
             $categories = Category::with(['media' => function ($query) {
                 $query->whereNotIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
@@ -70,6 +71,7 @@ class MediaController extends Controller
                 'message' => 'Media categories retrieved successfully.',
                 'data' => [
                     'categories' => $categories,
+                    'users' => $users,
                     'categoriesPending' => $categoriesPending
                 ]
             ], 200);
@@ -104,10 +106,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => $validated['user_id']
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => $validated['user_id'],
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -122,6 +124,12 @@ class MediaController extends Controller
                     'description' => "Subcategory for {$validated['month']} {$validated['year']}"
                 ]
             );
+
+            $mentions = collect($request->input('mention', []))
+                ->filter()
+                ->map(fn($item) => trim($item))
+                ->values()
+                ->toArray();
 
             $getID3 = new getID3();
             $duration = null;
@@ -187,6 +195,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
+                'mention' => json_encode($mentions),
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'status' => 'pending', // Default status
@@ -209,14 +218,14 @@ class MediaController extends Controller
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by ".$user_name . ". Please review it.";
             $route = "/media_details/";
 
-            $this->notificationService->sendNotification(
-                $request->user(), // HR user as sender
-                $user,            // Requesting user as receiver
-                $title,
-                $body,
-                $route,
-                $media->id
-            );
+            // $this->notificationService->sendNotification(
+            //     $request->user(), // HR user as sender
+            //     $user,            // Requesting user as receiver
+            //     $title,
+            //     $body,
+            //     $route,
+            //     $media->id
+            // );
 
             return response()->json([
                 'message' => 'Media uploaded successfully.' . ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
@@ -438,10 +447,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => $validated['user_id']
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => $validated['user_id'],
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -738,16 +747,16 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('id', $media_id)
-                ->with(['category'])
-                ->withCount(['comments', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])->first();
+            ->with(['category'])
+            ->withCount(['comments', 'likes'])
+            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])->first();
 
+        
 
-
-            $media->is_favorite = Bookmark::where('user_id', $userId)
-                ->where('media_id', $media_id)->exists();
+        $media->is_favorite = Bookmark::where('user_id', $userId)
+            ->where('media_id', $media_id)->exists();
 
             // Return the media details
             return response()->json([
@@ -755,6 +764,7 @@ class MediaController extends Controller
                 'message' => 'Media retrieved successfully.',
                 'data' => [$media]
             ], 200);
+        
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
@@ -768,6 +778,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('category_id', $category_id)
+            ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
                 ->withExists(['likes as is_liked' => function ($query) use ($userId) {

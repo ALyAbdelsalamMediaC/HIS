@@ -26,7 +26,7 @@ class GlobalController extends Controller
             if (is_null($Media)) {
             throw new \Exception('No media found for the given search criteria.');
         }
-            $Media->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            $Media->is_favorite = Bookmark::where('user_id', $userId)->where('media_id',$Media->id)->exists();
             if ($Media) {
                 return response()->json([
                     'type' => 'media',

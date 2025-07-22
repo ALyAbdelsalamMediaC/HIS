@@ -32,7 +32,7 @@ class GoogleDriveServicePDF
         if ($this->client->isAccessTokenExpired()) {
 
             //     if ($this->client->isAccessTokenExpired()) {
-            //     header('Location: http://localhost:8000/get-google-token.php');
+            //     header('Location: https://his.mc-apps.org/get-google-token.php');
             //     exit;
             // }
             $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
@@ -51,7 +51,7 @@ class GoogleDriveServicePDF
 
     public function getAuthUrl()
     {
-        $this->client->setRedirectUri('http://localhost:8000/get-google-token.php'); // Replace with your redirect URI
+        $this->client->setRedirectUri('https://his.mc-apps.org/get-google-token.php'); // Replace with your redirect URI
         return $this->client->createAuthUrl();
     }
     public function getClient()
