@@ -97,7 +97,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::get('/users/destroy', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::delete('/users/destroy', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
 
     Route::post('/media/{mediaId}', [LikesController::class, 'getLikesCommentCount'])->name('media.like.count');
