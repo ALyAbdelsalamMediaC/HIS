@@ -517,6 +517,7 @@ class MediaController extends Controller
     }
     public function update(Request $request, $id)
     {
+
         try {
             $media = Media::findOrFail($id);
 
@@ -527,6 +528,7 @@ class MediaController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
+                'uploaded_video_path' => 'nullable|string',
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
@@ -567,16 +569,30 @@ class MediaController extends Controller
             $getID3 = new getID3();
             $duration = $media->duration;
 
-            // Update video duration if new file is uploaded
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            // Handle chunked upload for update (like store)
+            $video = $media->file_path;
+            if ($request->filled('uploaded_video_path')) {
+                $assembledPath = $request->input('uploaded_video_path');
+                if ($assembledPath && file_exists($assembledPath)) {
+                    $videoPath = $assembledPath;
+                    $fileInfo = $getID3->analyze($videoPath);
+                    $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+                    $driveService = new GoogleDriveServiceVideo();
+                    $filename = time() . '_' . basename($videoPath);
+                    LaravelLog::info('About to upload to Google Drive', ['videoPath' => $videoPath, 'filename' => $filename]);
+                    $url = $driveService->uploadFile(new \Illuminate\Http\File($videoPath), $filename);
+                    LaravelLog::info('Google Drive upload returned', ['url' => $url]);
+                    if (!$url) {
+                        throw new \Exception('Failed to retrieve Google Drive file ID.');
+                    }
+                    $video = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    unlink($videoPath); // Clean up
+                    LaravelLog::info('Google Drive upload complete, file ID: ' . $url);
+                }
+            } else if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $videoPath = $request->file('file')->getRealPath();
                 $fileInfo = $getID3->analyze($videoPath);
                 $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
-            }
-
-            // Update video file on Google Drive
-            $video = $media->file_path;
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $driveServiceVideo = new GoogleDriveServiceVideo();
                 // Delete old file from Google Drive if exists
                 if ($media->file_path) {

@@ -14,7 +14,7 @@
     </div>
 
     <!-- Current Video Preview Section -->
-    <div class="p-4 mt-4 mb-4 rounded border" style="background-color: #f8f9fa;">
+    <div class="p-4 mt-4 mb-4 border rounded" style="background-color: #f8f9fa;">
     <h4 class="mb-3 h4-semibold" style="color:#35758C;">Current Video</h4>
     @if($media->file_path)
     <div class="row">
@@ -85,20 +85,22 @@
     @endif
     </div>
 
-    <form method="POST" action="{{ route('content.update', $media->id) }}" enctype="multipart/form-data" novalidate>
-    @csrf
-    @method('PUT')
 
-    <!-- Video Upload Section -->
-    <div class="mt-4 mb-4">
-      <h4 class="mb-3 h4-semibold" style="color:#35758C;">Update Video File (Optional)</h4>
-      <p class="mb-3 h6-ragular" style="color:#676767;">Leave empty to keep the current video file.</p>
-      <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="false"
-      :current-file="$media->file_path ? [
-      'name' => basename(parse_url($media->file_path, PHP_URL_PATH)) ?: 'Current Video',
-      'url' => $media->file_path
-      ] : null" />
-    </div>
+    <form id="video-upload-form" method="POST" action="{{ route('content.update', $media->id) }}" enctype="multipart/form-data" novalidate>
+        @csrf
+        @method('PUT')
+
+        <!-- Video Upload Section -->
+        <div class="mt-4 mb-4">
+            <h4 class="mb-3 h4-semibold" style="color:#35758C;">Update Video File (Optional)</h4>
+            <p class="mb-3 h6-ragular" style="color:#676767;">Leave empty to keep the current video file.</p>
+            <x-drag-drop-upload name="file" accept="video/mp4" max-size="1GB" supported-formats="MP4" :required="false"
+                :current-file="$media->file_path ? [
+                    'name' => basename(parse_url($media->file_path, PHP_URL_PATH)) ?: 'Current Video',
+                    'url' => $media->file_path
+                ] : null" />
+            <input type="hidden" id="uploaded_video_path" name="uploaded_video_path" value="" />
+        </div>
 
     <div class="mt-3 form-infield">
       <x-text_label for="thumbnail_path">Upload Thumbnail (Optional)</x-text_label>
@@ -225,12 +227,12 @@
       <label class="form-check-label" for="is_featured">Featured</label>
     </div>
 
-    <div class="mt-3 d-flex justify-content-end">
-      <x-button type="submit">Update Video</x-button>
-    </div>
-    <div id="video-upload-progress" style="margin-top:10px; text-align:center;"></div>
-    <div id="video-upload-error" style="margin-top:10px; color:red; text-align:center;"></div>
-    <div id="upload-retry" style="text-align:center; margin-top:10px; display:none;"></div>
+        <div class="mt-3 d-flex justify-content-end">
+            <x-button type="button" id="upload-btn">Update Video</x-button>
+        </div>
+        <div id="video-upload-progress" style="margin-top:10px; text-align:center;"></div>
+        <div id="video-upload-error" style="margin-top:10px; color:red; text-align:center;"></div>
+        <div id="upload-retry" style="text-align:center; margin-top:10px; display:none;"></div>
     </form>
   </section>
 @endsection
@@ -438,7 +440,6 @@
                 e.preventDefault();
                 // Validate required fields
                 const requiredFields = [
-                    { id: 'thumbnail_path', name: 'Thumbnail', type: 'file' },
                     { id: 'year', name: 'Year' },
                     { id: 'month', name: 'Month' },
                     { id: 'title', name: 'Title' }
