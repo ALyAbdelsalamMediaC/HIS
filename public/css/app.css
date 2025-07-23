@@ -428,9 +428,12 @@ body {
     );
 }
 
-/* When input has content (using a class that we'll add with JavaScript) */
+/* When input has content (using a class that we'll add with JavaScript) or is autofilled */
 .form-infield-focus
     .input-form-inner-login.has-content
+    ~ .label-form-inner-login,
+.form-infield-focus
+    .input-form-inner-login:-webkit-autofill
     ~ .label-form-inner-login {
     top: -15px; /* Move to the top */
     transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
@@ -447,6 +450,15 @@ body {
         #ffffff 100%
     );
     border-radius: 100px;
+}
+
+/* Style for autofilled inputs */
+.form-infield-focus .input-form-inner-login:-webkit-autofill,
+.form-infield-focus .input-form-inner-login:-webkit-autofill:hover,
+.form-infield-focus .input-form-inner-login:-webkit-autofill:focus {
+    -webkit-text-fill-color: #232323;
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Style the icon container */
@@ -1958,6 +1970,13 @@ body {
     height: auto; /* or a specific value like 300px */
 }
 
+  .quill-editor, .quill-editor * {
+    pointer-events: none !important;
+  }
+  .quill-editor .ql-editor {
+    pointer-events: auto !important;
+  }
+
 .ql-editor {
     /* This sets a default “rows” look */
     min-height: 200px; /* adjust as needed */
@@ -1985,6 +2004,20 @@ body {
     font-size: 1.5em;
     font-weight: bold;
 }
+
+/* Quill list styles using data attributes */
+.quill-content ol{
+    padding: 1em;
+
+}
+.quill-content [data-list="bullet"] {
+    list-style-type: disc;
+}
+
+.quill-content [data-list="ordered"] {
+    list-style-type: decimal;
+}
+
 
 /* ========================================================
     Article Image
