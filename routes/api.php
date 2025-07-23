@@ -25,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
     Route::get('/media_details', [MediaController::class, 'getMediaByMediaId']);
     Route::get('/category_media', [MediaController::class, 'getMediaByCategoryId']);
+    Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
+
 });
     Route::post('/article/store', [ArticleController::class, 'store']);
     Route::get('/article/show', [ArticleController::class, 'show']);
@@ -63,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [UserAuthController::class, 'editProfile'])->name('profile.update');
     Route::delete('/profile', [UserAuthController::class, 'deleteAccount'])->name('profile.delete');
 
-    Route::get('/search', [GlobalController::class, 'globalSearch'])->name('global.search');
     Route::post('/updateProfileImage', [UserAuthController::class, 'updateProfileImage']);
     Route::post('/password/reset', [UserAuthController::class, 'resetPassword'])->name('api.password.reset');
 
