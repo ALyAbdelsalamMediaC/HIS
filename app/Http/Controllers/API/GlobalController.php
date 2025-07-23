@@ -13,8 +13,8 @@ class GlobalController extends Controller
     public function globalSearch(Request $request)
     {
         try {
+            $userId = auth()->check() ? auth()->user()->id : null;
             $searchTerm = $request->input('search');
-            $userId = (int) $request->user_id;
 
             $Media = Media::where('title', 'like', '%' . $searchTerm . '%')
             ->where('status', 'published')
