@@ -52,7 +52,7 @@
     <div class="form-infield">
       <x-text_label for="email" :required="true">Email</x-text_label>
       <x-text_input type="email" id="email" name="email" value="{{ old('email', auth()->user()->email) }}"
-      placeholder="Enter your email" data-required="true" data-name="Email" />
+      placeholder="Enter your email" data-required="true" data-validate="email" data-name="Email" />
       <div id="email-error-container">
       <x-input-error :messages="$errors->get('email')" />
       </div>

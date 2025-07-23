@@ -55,12 +55,11 @@
     <div class="form-infield">
       <x-text_label for="email" :required="true">Email</x-text_label>
       <x-text_input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email"
-      data-required="true" data-name="Email" />
+      data-required="true" data-validate="email" data-name="Email" />
       <div id="email-error-container">
       <x-input-error :messages="$errors->get('email')" />
       </div>
     </div>
-
 
     <div class="form-infield">
       <x-text_label for="phone" :required="true">Phone number</x-text_label>
@@ -84,6 +83,9 @@
       <x-text_label for="password_confirmation" :required="true">Confirm Password</x-text_label>
       <x-text_input type="password" id="password_confirmation" name="password_confirmation"
       placeholder="Confirm your password" data-required="true" data-name="Confirm Password" />
+      <div id="password_confirmation-error-container">
+        <x-input-error :messages="$errors->get('password_confirmation')" />
+      </div>
     </div>
 
     <div class="mt-3 d-flex justify-content-end">
