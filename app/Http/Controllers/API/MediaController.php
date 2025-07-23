@@ -753,8 +753,8 @@ class MediaController extends Controller
                 'success' => true,
                 'message' => 'Media retrieved successfully.',
                 'data' => [
-                    'pending' => $PendingMedia,
-                    'published' => $PublishedMedia
+                    'pending' => [$PendingMedia],
+                    'published' => [$PublishedMedia]
                 ]
             ], 200);
         } catch (Exception $e) {
@@ -824,17 +824,22 @@ class MediaController extends Controller
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media->id)
                     ->exists();
+                    return response()->json([
+                'success' => true,
+                'message' => 'Media retrieved successfully.',
+                'data' =>[$media]
+            ], 200);
             } 
             else {
                 $media = [];
-            }
-
-            // Return the media details
-            return response()->json([
+                return response()->json([
                 'success' => true,
                 'message' => 'Media retrieved successfully.',
                 'data' =>$media
             ], 200);
+            }
+
+            
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);

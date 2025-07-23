@@ -31,6 +31,7 @@ class UserController extends Controller
     {
         try {
             $query = User::withoutTrashed();
+            $total_users = $query->count();
 
             if ($request->filled('search')) {
                 $search = $request->input('search');
@@ -38,7 +39,6 @@ class UserController extends Controller
             }
 
             $users = $query->paginate(20)->withQueryString();
-            $total_users = $query->count();
             return view('pages.users.index', compact('users', 'total_users'));
         } catch (\Exception $e) {
             Log::create([
