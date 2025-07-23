@@ -93,6 +93,14 @@ class MediaController extends Controller
 
             // Apply role-based filtering
             if ($user->hasRole('reviewer')) {
+                $categories = Media::where('status','inreview')
+                    ->whereJsonContains('assigned_to', $user->id)
+                    ->pluck('category_id')
+                    ->unique()
+                    ->map(function ($id) {
+                        return Category::find($id);
+                    });
+                    
                 $allowedStatuses = ['inreview', 'published', 'declined'];
                 $query->whereJsonContains('assigned_to', $user->id)
                     ->whereIn('status', $allowedStatuses);
