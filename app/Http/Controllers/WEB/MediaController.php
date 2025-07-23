@@ -145,38 +145,53 @@ class MediaController extends Controller
         }
     }
     public function assignTo(Request $request, $id)
-    {
-        try {
-            // Validate the request
-            $request->validate([
-                'reviewer_ids' => 'required|array',
-                'reviewer_ids.*' => 'exists:users,id'
-            ]);
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'reviewer_ids' => 'nullable|array',
+            'reviewer_ids.*' => 'exists:users,id'
+        ]);
 
-            // Get reviewers from request body
-            $reviewersArray = $request->input('reviewer_ids', []);
+        // Get reviewers from request body
+        $reviewersArray = $request->input('reviewer_ids', []);
 
-            // Clean up any whitespace, filter out empty values, and cast to int
-            $reviewersArray = array_filter(array_map(function ($id) {
-                return (int) trim($id);
-            }, $reviewersArray));
+        // Clean up any whitespace, filter out empty values, and cast to int
+        $reviewersArray = array_filter(array_map(function ($id) {
+            return (int) trim($id);
+        }, $reviewersArray));
 
+        // Prepare update data
+        $updateData = [];
+        
+        if (empty($reviewersArray)) {
+            // If no reviewers provided, clear assigned reviewers and set status to pending
+            $updateData = [
+                'assigned_to' => null,
+                'status' => 'pending'
+            ];
+        } else {
             // Convert to JSON (array of integers)
             $reviewersJson = json_encode(array_values($reviewersArray));
-
-            // Update media table using Eloquent
-            Media::where('id', $id)
-                ->update([
-                    'assigned_to' => $reviewersJson,
-                    'status' => 'inreview'
-                ]);
-
-            return back()->with('success', 'Reviewers assigned successfully.');
-        } catch (Exception $e) {
-            LaravelLog::error('Assign to error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to assign reviewers.');
+            $updateData = [
+                'assigned_to' => $reviewersJson,
+                'status' => 'inreview'
+            ];
         }
+
+        // Update media table using Eloquent
+        Media::where('id', $id)->update($updateData);
+
+        $message = empty($reviewersArray) 
+            ? 'Reviewers removed successfully.'
+            : 'Reviewers assigned successfully.';
+            
+        return back()->with('success', $message);
+    } catch (Exception $e) {
+        LaravelLog::error('Assign to error: ' . $e->getMessage());
+        return back()->with('error', 'Failed to process reviewer assignment.');
     }
+}
     public function recently_Added()
     {
         try {
