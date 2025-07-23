@@ -61,7 +61,7 @@
 
         <!-- Current File Info (for edit mode) -->
         <div x-show="currentFile !== null && !hasSelectedFiles" class="mt-3">
-            <div class="p-3 rounded border" style="background-color: #e9ecef;">
+            <div class="p-3 border rounded" style="background-color: #e9ecef;">
                 <p class="mb-1 h5-ragular" style="color:#35758C;">
                     <strong>Current File:</strong>
                 </p>
@@ -136,7 +136,7 @@
                 <!-- Other File Types -->
                 <template x-if="!selectedFile.type.startsWith('video/') && !selectedFile.type.startsWith('image/')">
                     <div class="file-preview">
-                        <div class="p-3 rounded border" style="background-color: #f8f9fa;">
+                        <div class="p-3 border rounded" style="background-color: #f8f9fa;">
                             <p class="mb-1 h5-ragular" style="color:#35758C;">
                                 <strong>File:</strong> <span x-text="selectedFile.name"></span>
                             </p>
@@ -179,7 +179,7 @@
                         <!-- Other File Types -->
                         <template x-if="!file.type.startsWith('video/') && !file.type.startsWith('image/')">
                             <div class="file-preview">
-                                <div class="p-2 rounded border" style="background-color: #f8f9fa;">
+                                <div class="p-2 border rounded" style="background-color: #f8f9fa;">
                                     <p class="mb-0 h6-ragular" style="color:#676767;">
                                         Type: <span x-text="file.type"></span> | 
                                         Size: <span x-text="formatFileSize(file.size)"></span>
@@ -275,6 +275,9 @@ function dragDropUpload(config) {
                 this.selectedFile = validFiles[0];
             }
             this.$refs.fileInput.files = dataTransfer.files;
+
+            // Trigger change event to notify Resumable.js
+            this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 
             showToast('Files selected successfully!', 'success');
         },

@@ -19,22 +19,17 @@
                     <p class="h4-ragular">Enter your email address and we'll send you a link to reset your password.</p>
                 </div>
 
-                @if (session('status'))
-                    <div class="alert alert-success">
-                        {{ session('status') }}
-                    </div>
-                @endif
-
                 <form method="POST" action="{{ route('admin.password.email') }}" novalidate>
                     @csrf
-                    <div class="form-infield">
-                        <x-text_input type="email" id="email" name="email" :value="old('email')" data-required="true"
-                            data-name="Email" />
-                        <x-text_label for="email">Email Address</x-text_label>
+                    <div class="form-infield-focus">
+                        <x-text_input type="email" id="email" name="email" 
+                            :value="old('email')" data-required="true" data-name="email" class="input-form-inner-login" />
+                        <x-text_label for="email" class="label-form-inner-login">Email</x-text_label>
                         <div id="email-error-container">
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
                     </div>
+
 
                     <button type="submit" class="w-100 button-login">
                         <span class="h4-semibold">Send Password Reset Link</span>
@@ -43,7 +38,7 @@
                 </form>
 
                 <div class="mt-3 forget-pass">
-                    <a href="{{ route('login') }}" class="h4-semibold">Back to Login</a>
+                    <a href="{{ route('login') }}" class="h5-semibold">Back to Login</a>
                 </div>
             </div>
         </div>

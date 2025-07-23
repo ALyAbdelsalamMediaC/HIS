@@ -31,9 +31,6 @@
                 $tabs = [
                     ['id' => 'videos', 'label' => 'Videos', 'route' => route('content.videos')],
                 ];
-                if (!auth()->user()->hasRole('reviewer')) {
-                    $tabs[] = ['id' => 'articles', 'label' => 'Articles', 'route' => route('content.articles')];
-                }
             @endphp
             <x-tabs_pages :tabs="$tabs" activeTab="videos" />
         </div>

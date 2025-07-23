@@ -26,7 +26,7 @@
                 class="video-player-edit"
                 preload="none"
                 @if($media->thumbnail_path)
-                    poster="{{ asset('storage/' . $media->thumbnail_path) }}"
+                     poster="{{ $media->thumbnail_path }}"
                 @endif
             >
                 <source src="{{ route('content.stream', ['id' => $media->id]) }}" type="video/mp4">
@@ -451,8 +451,20 @@
                         return;
                     }
                 }
-                if (!uploadFinished && r.files.length === 0) {
+                
+                // Check if we're in edit mode with an existing video
+                const hasExistingVideo = $('.video-player-edit').length > 0;
+                
+                // If there's no existing video and no new file selected
+                if (!hasExistingVideo && r.files.length === 0) {
                     error.text('Please select a video file before submitting.');
+                    return;
+                }
+                
+                // If there's an existing video and no new file selected, submit the form normally
+                if (hasExistingVideo && r.files.length === 0) {
+                    error.empty();
+                    form.off('submit.resumable').submit();
                     return;
                 }
                 if (!uploadFinished && r.files.length > 0) {
@@ -473,13 +485,25 @@
             });
 
             form.on('submit', function(e) {
-                if (!uploadFinished || !hiddenPath.val()) {
+                const hasExistingVideo = $('.video-player-edit').length > 0;
+                const hasNewVideo = r.files.length > 0;
+                
+                // If we have a new video upload
+                if (hasNewVideo && (!uploadFinished || !hiddenPath.val())) {
                     e.preventDefault();
                     console.log('Form submission prevented, triggering resumable submit');
                     form.trigger('submit.resumable');
-                } else {
-                    console.log('Form data:', new FormData(this));
+                    return;
                 }
+                
+                // If we're just editing with existing video
+                if (hasExistingVideo && !hasNewVideo) {
+                    console.log('Submitting form with existing video');
+                    error.empty();
+                    return true;
+                }
+                
+                console.log('Form data:', new FormData(this));
             });
 
             uploadBtn.on('click', function(e) {

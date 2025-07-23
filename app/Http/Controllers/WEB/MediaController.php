@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
-
 use App\Http\Controllers\Controller;
 use App\Models\AdminComment;
 use Google\Client;
@@ -757,17 +756,38 @@ class MediaController extends Controller
         }
     }
 
+       /**
+     * Extract Google Drive file ID from various possible URL formats.
+     */
+    private function extractGoogleDriveFileId($url)
+    {
+        // Match /file/d/{id}
+        if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match ?id={id}
+        if (preg_match('/[?&]id=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match /uc?id={id}
+        if (preg_match('/\/uc\?id=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match direct ID (if only the ID is stored)
+        if (preg_match('/^[a-zA-Z0-9_-]{20,}$/', $url)) {
+            return $url;
+        }
+        return null;
+    }
+
     public function stream($id)
     {
         try {
             $media = Media::findOrFail($id);
             $filePath = $media->file_path;
 
-            // Extract Google Drive file ID from the URL
-            $fileId = null;
-            if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $filePath, $matches)) {
-                $fileId = $matches[1];
-            }
+            // Extract Google Drive file ID from the URL (support multiple formats)
+            $fileId = $this->extractGoogleDriveFileId($filePath);
 
             if (!$fileId) {
                 abort(404, 'Google Drive file ID not found.');
