@@ -23,9 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
     Route::get('/media/featured', [MediaController::class, 'featured']);
     Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
-});
     Route::get('/media_details', [MediaController::class, 'getMediaByMediaId']);
     Route::get('/category_media', [MediaController::class, 'getMediaByCategoryId']);
+});
     Route::post('/article/store', [ArticleController::class, 'store']);
     Route::get('/article/show', [ArticleController::class, 'show']);
     Route::get('/comments/media', [CommentsController::class, 'getCommentsByMediaId']);
