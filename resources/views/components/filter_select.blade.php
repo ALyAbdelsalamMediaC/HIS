@@ -31,7 +31,8 @@
                 width: '100%',
                 minimumResultsForSearch: 8, // Show search box only if more than 6 options
                 dropdownCssClass: 'select2-dropdown-custom',
-                selectionCssClass: 'select2-selection-custom'
+                selectionCssClass: 'select2-selection-custom',
+                dropdownAutoWidth: false
             });
             
             // Handle Select2 change events for filtering

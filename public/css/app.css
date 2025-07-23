@@ -593,6 +593,12 @@ body {
     Select 2 Styles
    ======================================================== */
 
+/* Container sizing fixes */
+.select2-container {
+    width: 100% !important;
+    min-width: 200px;
+}
+
 .select2-container .select2-selection--single {
     width: 100%;
     height: auto;
@@ -611,6 +617,7 @@ body {
     .select2-selection__rendered {
     color: var(--primary-color);
     padding-left: 0;
+    line-height: normal;
 }
 
 .select2-container--default
@@ -646,7 +653,6 @@ body {
 .select2-dropdown {
     border-color: var(--border-color);
     border-radius: var(--main-border-radius-sm);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .select2-container--default
@@ -660,6 +666,13 @@ body {
     .select2-selection--single
     .select2-selection__placeholder {
     color: var(--medium-grey);
+}
+
+/* Fix text overflow */
+.select2-selection__rendered {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ========================================================
