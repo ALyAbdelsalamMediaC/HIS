@@ -49,9 +49,12 @@
                             $filters = [
                                'status' => [
                                     'placeholder' => '-- Select status --',
-                                    'options' => auth()->user()->hasRole('reviewer') 
-                                        ? array_intersect_key($statuses, array_flip(['published', 'declined', 'inreview']))
-                                        : array_merge(['all' => 'All'], $statuses)
+                                    'options' => array_merge(
+                                        ['all' => 'All'],
+                                        auth()->user()->hasRole('reviewer')
+                                            ? array_intersect_key($statuses, array_flip(['published', 'declined', 'inreview']))
+                                            : $statuses
+                                    )
                                 ],
                                 'year' => [
                                     'placeholder' => '-- Select year --',

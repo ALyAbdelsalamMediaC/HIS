@@ -101,7 +101,7 @@ class MediaController extends Controller
                         return Category::find($id);
                     });
                     
-                $allowedStatuses = ['inreview', 'published', 'declined'];
+                $allowedStatuses = ['all', 'inreview', 'published', 'declined'];
                 $query->whereJsonContains('assigned_to', $user->id)
                     ->whereIn('status', $allowedStatuses);
 
