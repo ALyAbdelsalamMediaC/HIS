@@ -734,11 +734,11 @@ class MediaController extends Controller
             $PublishedMedia = $PublishedMediaQuery->first();
 
             // Add is_favorite only if user is authenticated
-            if ($userId && $PendingMedia != null) {
+            if ($PendingMedia != null) {
                 $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
             }
 
-            if ($userId && $PublishedMedia != null) {
+            if ($PublishedMedia != null) {
                 $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
             }
 
@@ -776,7 +776,7 @@ class MediaController extends Controller
             $media = $mediaQuery->first();
 
             // Add is_favorite only if user is authenticated
-            if ($userId && $media != null) {
+            if ($media != null) {
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media_id)
                     ->exists();
@@ -816,7 +816,7 @@ class MediaController extends Controller
             $media = $mediaQuery->first();
 
             // Add is_favorite only if user is authenticated and media exists
-            if ($userId && $media != null) {
+            if ($media != null) {
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media->id)
                     ->exists();
