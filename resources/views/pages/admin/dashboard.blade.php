@@ -57,10 +57,10 @@
                                     <x-svg-icon name="content" size="20" />
                                     <span>Add Video</span>
                                 </x-link_btn>
-                                <x-link_btn href="{{ route('articles.store') }}">
+                                <!-- <x-link_btn href="{{ route('articles.store') }}">
                                     <x-svg-icon name="article" size="20" />
                                     <span>Add Article</span>
-                                </x-link_btn>
+                                </x-link_btn> -->
                             </div>
                         @endif
                     </div>
@@ -166,7 +166,7 @@
                     </div>
                 </div>
 
-                <!-- Top Articles -->
+                <!-- Top Articles
                 @if(auth()->check() && auth()->user()->hasRole('admin'))
                     <div class="mt-4 dashboard-content-items w-100">
                         <div class="d-flex justify-content-between">
@@ -203,7 +203,7 @@
                             </table>
                         </div>
                     </div>
-                @endif
+                @endif -->
 
                 <!-- Delete Video Modal for Dashboard -->
                 @if($lastPublishedMedia)

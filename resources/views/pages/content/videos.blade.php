@@ -16,10 +16,10 @@
                     <x-svg-icon name="content" size="20" />
                     <span>Add Video</span>
                 </x-link_btn>
-                <x-link_btn href="{{ route('articles.store') }}">
+                <!-- <x-link_btn href="{{ route('articles.store') }}">
                     <x-svg-icon name="article" size="20" />
                     <span>Add Article</span>
-                </x-link_btn>
+                </x-link_btn> -->
                 @endif
             </div>
 
