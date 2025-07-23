@@ -774,15 +774,12 @@ class MediaController extends Controller
                 });
 
             $media = $mediaQuery->first();
-
             // Add is_favorite only if user is authenticated
             if ($media != null) {
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media_id)
                     ->exists();
-            } else {
-                $media->is_favorite = false; // Set default for unauthenticated users
-            }
+            } 
 
             // Return the media details
             return response()->json([
@@ -820,9 +817,7 @@ class MediaController extends Controller
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media->id)
                     ->exists();
-            } else {
-                $media->is_favorite = false; // Set default for unauthenticated users or if no media found
-            }
+            } 
 
             // Return the media details
             return response()->json([
