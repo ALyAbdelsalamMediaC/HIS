@@ -61,7 +61,7 @@ class MediaController extends Controller
             $categoriesPending = Category::with(['media' => function ($query) {
                 $query->whereIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
             }])->get();
-        $users = User::all();
+            $users = User::all();
 
             $categories = Category::with(['media' => function ($query) {
                 $query->whereNotIn('status', ['pending', 'inreview'])->withCount('comments', 'likes');
@@ -211,11 +211,11 @@ class MediaController extends Controller
                 'type' => 'media_upload_success',
                 'description' => 'Uploaded media: ' . $media->title,
             ]);
-            $user_name = User::find($validated['user_id'])->name; 
+            $user_name = User::find($validated['user_id'])->name;
 
             $user = $validated['user_id'];
-            $title = "New " . $media->status ." media uploaded: ";
-            $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by ".$user_name . ". Please review it.";
+            $title = "New " . $media->status . " media uploaded: ";
+            $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
             $route = "/media_details/";
 
             // $this->notificationService->sendNotification(
@@ -289,8 +289,7 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        // print_r(1);
-        // die;
+
         $userId = auth()->user()->id; // Initialize $userId to avoid undefined variable issues
 
         try {
@@ -353,10 +352,9 @@ class MediaController extends Controller
 
     public function featured(Request $request)
     {
-        $userId = null; // Initialize $userId to avoid undefined variable issues
 
         try {
-            $userId = (int) $request->user_id; // Convert to integer
+            $userId = auth()->user()->id; // Initialize $userId to avoid undefined variable issues
 
             $token = $request->bearerToken();
 
@@ -703,37 +701,50 @@ class MediaController extends Controller
 
     public function getMediaByUserId(Request $request)
     {
-
         try {
-            $userId = (int) $request->user_id;
+            $userId = auth()->check() ? auth()->user()->id : null;
 
-            $PendingMedia = Media::where('user_id', $userId)
+            // Query for Pending Media
+            $PendingMediaQuery = Media::query()
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->where('user_id', $userId);
+                })
                 ->where('status', 'pending')
                 ->with(['category'])
                 ->withCount(['AdminComment', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])->first();
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }]);
+                });
 
+            $PendingMedia = $PendingMediaQuery->first();
 
-            $PublishedMedia = Media::where('user_id', $userId)
+            // Query for Published Media
+            $PublishedMediaQuery = Media::query()
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->where('user_id', $userId);
+                })
                 ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])->first();
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }]);
+                });
 
-             if($PendingMedia !=null){
-                
-            $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+            $PublishedMedia = $PublishedMediaQuery->first();
+
+            // Add is_favorite only if user is authenticated
+            if ($userId && $PendingMedia != null) {
+                $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
             }
-            
-            
-            if($PublishedMedia !=null){
-                
-            $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
+
+            if ($userId && $PublishedMedia != null) {
+                $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
             }
+
             // Return the media details
             return response()->json([
                 'success' => true,
@@ -744,7 +755,7 @@ class MediaController extends Controller
                 ]
             ], 200);
         } catch (Exception $e) {
-            LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
+            LaravelLog::error('Error retrieving media: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }
@@ -756,16 +767,16 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('id', $media_id)
-            ->with(['category'])
-            ->withCount(['comments', 'likes'])
-            ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])->first();
+                ->with(['category'])
+                ->withCount(['comments', 'likes'])
+                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])->first();
 
-        
 
-        $media->is_favorite = Bookmark::where('user_id', $userId)
-            ->where('media_id', $media_id)->exists();
+
+            $media->is_favorite = Bookmark::where('user_id', $userId)
+                ->where('media_id', $media_id)->exists();
 
             // Return the media details
             return response()->json([
@@ -773,7 +784,6 @@ class MediaController extends Controller
                 'message' => 'Media retrieved successfully.',
                 'data' => [$media]
             ], 200);
-        
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
@@ -787,7 +797,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
             $media = Media::where('category_id', $category_id)
-            ->where('status', '!=', 'pending')
+                ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
                 ->withExists(['likes as is_liked' => function ($query) use ($userId) {
@@ -812,72 +822,72 @@ class MediaController extends Controller
         }
     }
     public function destroy(Request $request)
-{
-    try {
-        $id = $request->input('media_id');
-        $user_id = $request->input('user_id');
-        
-        $media = Media::where('id',$id)->first();
+    {
+        try {
+            $id = $request->input('media_id');
+            $user_id = $request->input('user_id');
 
-        // Delete video file from Google Drive if exists
-        if ($media->file_path) {
-            $fileId = $this->driveServiceVideo->getFileIdFromUrl($media->file_path);
-            if ($fileId) {
-                $this->driveServiceVideo->deleteFile($fileId);
+            $media = Media::where('id', $id)->first();
+
+            // Delete video file from Google Drive if exists
+            if ($media->file_path) {
+                $fileId = $this->driveServiceVideo->getFileIdFromUrl($media->file_path);
+                if ($fileId) {
+                    $this->driveServiceVideo->deleteFile($fileId);
+                }
             }
-        }
 
-        // Delete PDF file from Google Drive if exists
-        if ($media->pdf) {
-            $fileId = $this->driveServicePDF->getFileIdFromUrl($media->pdf);
-            if ($fileId) {
-                $this->driveServicePDF->deleteFile($fileId);
+            // Delete PDF file from Google Drive if exists
+            if ($media->pdf) {
+                $fileId = $this->driveServicePDF->getFileIdFromUrl($media->pdf);
+                if ($fileId) {
+                    $this->driveServicePDF->deleteFile($fileId);
+                }
             }
-        }
 
-        // Delete thumbnail from Google Drive if exists
-        if ($media->thumbnail_path) {
-            $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($media->thumbnail_path);
-            if ($fileId) {
-                $this->driveServiceThumbnail->deleteFile($fileId);
+            // Delete thumbnail from Google Drive if exists
+            if ($media->thumbnail_path) {
+                $fileId = $this->driveServiceThumbnail->getFileIdFromUrl($media->thumbnail_path);
+                if ($fileId) {
+                    $this->driveServiceThumbnail->deleteFile($fileId);
+                }
             }
-        }
 
-        // Delete image from Google Drive if exists
-        if ($media->image_path) {
-            $fileId = $this->driveServiceImage->getFileIdFromUrl($media->image_path);
-            if ($fileId) {
-                $this->driveServiceImage->deleteFile($fileId);
+            // Delete image from Google Drive if exists
+            if ($media->image_path) {
+                $fileId = $this->driveServiceImage->getFileIdFromUrl($media->image_path);
+                if ($fileId) {
+                    $this->driveServiceImage->deleteFile($fileId);
+                }
             }
+
+            // Log the deletion
+            Log::create([
+                'user_id' => $user_id,
+                'type' => 'media_delete_success',
+                'description' => 'Deleted media: ' . $media->title,
+            ]);
+
+            // Delete the media record from the database
+            $media->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Media deleted successfully.'
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error('Media delete error: ' . $e->getMessage());
+
+            Log::create([
+                'user_id' => $user_id,
+                'type' => 'media_delete_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete media: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Log the deletion
-        Log::create([
-            'user_id' => $user_id,
-            'type' => 'media_delete_success',
-            'description' => 'Deleted media: ' . $media->title,
-        ]);
-
-        // Delete the media record from the database
-        $media->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Media deleted successfully.'
-        ], 200);
-    } catch (Exception $e) {
-        LaravelLog::error('Media delete error: ' . $e->getMessage());
-
-        Log::create([
-            'user_id' => $user_id,
-            'type' => 'media_delete_error',
-            'description' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete media: ' . $e->getMessage()
-        ], 500);
     }
-}
 }
