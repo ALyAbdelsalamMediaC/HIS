@@ -149,7 +149,7 @@ class MediaController extends Controller
         try {
             // Validate the request
             $request->validate([
-                'reviewer_ids' => 'required|array|min:1',
+                'reviewer_ids' => 'required|array',
                 'reviewer_ids.*' => 'exists:users,id'
             ]);
 
