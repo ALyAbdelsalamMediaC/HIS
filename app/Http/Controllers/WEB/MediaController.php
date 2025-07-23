@@ -92,13 +92,18 @@ class MediaController extends Controller
                 ->withCount('comments');
 
             // Apply role-based filtering
-            if ($user->role === 'reviewer') {
-                // For reviewers: get media where they are in assigned_to and status is pending or published
+            if ($user->hasRole('reviewer')) {
+                $allowedStatuses = ['inreview', 'published', 'declined'];
                 $query->whereJsonContains('assigned_to', $user->id)
-                    ->whereIn('status', ['inreview', 'published', 'declined']);
+                    ->whereIn('status', $allowedStatuses);
+
+                // Apply status filter only if it's within allowed statuses
+                if ($request->filled('status') && $request->input('status') !== 'all' && in_array($request->input('status'), $allowedStatuses)) {
+                    $query->where('status', $request->input('status'));
+                }
             } else {
-                // For admins: apply status filter only if provided, otherwise get all media
-                if ($request->filled('status')) {
+                // For admins or other roles
+                if ($request->filled('status') && $request->input('status') !== 'all') {
                     $query->where('status', $request->input('status'));
                 }
             }
@@ -138,9 +143,12 @@ class MediaController extends Controller
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
 
-            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory'));
+            // Pass dynamic statuses
+            $statuses = Media::STATUSES;
+
+            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory', 'statuses'));
         } catch (Exception $e) {
-           LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }

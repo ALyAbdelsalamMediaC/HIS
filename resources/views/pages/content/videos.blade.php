@@ -47,19 +47,23 @@
                     <div class="gap-2 d-flex align-items-center">
                         @php
                             $filters = [
-          
-                                'status' => [
+                               'status' => [
                                     'placeholder' => '-- Select status --',
-                                    'options' => [
-                                        'published' => 'Published',
-                                        'pending' => 'Pending',
-                                        'declined' => 'Declined',
-                                        'inreview' => 'In review',
-                                    ]
+                                    'options' => auth()->user()->hasRole('reviewer') 
+                                        ? array_intersect_key($statuses, array_flip(['published', 'declined', 'inreview']))
+                                        : array_merge(['all' => 'All'], $statuses)
                                 ],
                                 'year' => [
                                     'placeholder' => '-- Select year --',
-                                    'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
+                                    'options' => $categories
+                                        ->sortByDesc('name')
+                                        ->filter(function($category) use ($subCategoriesByCategory) {
+                                            // Only show years that have associated media for reviewers
+                                            return !auth()->user()->hasRole('reviewer') || 
+                                                isset($subCategoriesByCategory[$category->id]);
+                                        })
+                                        ->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])
+                                        ->toArray()
                                 ],
                             ];
                         @endphp
