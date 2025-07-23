@@ -368,10 +368,10 @@ class MediaController extends Controller
     
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => Auth::id(),
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -539,10 +539,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => Auth::id(),
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
