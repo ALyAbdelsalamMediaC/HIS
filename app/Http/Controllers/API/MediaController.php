@@ -289,12 +289,10 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-
-        $userId = auth()->user()->id; // Initialize $userId to avoid undefined variable issues
+        $userId = auth()->check() ? auth()->user()->id : null;
 
         try {
-            $auth = $request->bearerToken();
-            if (!$auth) {
+            if (!auth()->check()) {
                 $contentswithout = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->withCount('comments');
@@ -354,11 +352,10 @@ class MediaController extends Controller
     {
 
         try {
-            $userId = auth()->user()->id; // Initialize $userId to avoid undefined variable issues
+            $userId = auth()->check() ? auth()->user()->id : null;
 
-            $token = $request->bearerToken();
 
-            if ($token) {
+            if (!auth()->check()) {
                 $contents = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->where('is_featured', true)
@@ -764,19 +761,28 @@ class MediaController extends Controller
     {
         try {
             $media_id = (int) $request->media_id;
-            $userId = (int) $request->user_id;
+            $userId = auth()->check() ? auth()->user()->id : null;
 
-            $media = Media::where('id', $media_id)
+            // Query for Media
+            $mediaQuery = Media::where('id', $media_id)
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])->first();
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }]);
+                });
 
+            $media = $mediaQuery->first();
 
-
-            $media->is_favorite = Bookmark::where('user_id', $userId)
-                ->where('media_id', $media_id)->exists();
+            // Add is_favorite only if user is authenticated
+            if ($userId && $media != null) {
+                $media->is_favorite = Bookmark::where('user_id', $userId)
+                    ->where('media_id', $media_id)
+                    ->exists();
+            } else {
+                $media->is_favorite = false; // Set default for unauthenticated users
+            }
 
             // Return the media details
             return response()->json([
@@ -785,7 +791,7 @@ class MediaController extends Controller
                 'data' => [$media]
             ], 200);
         } catch (Exception $e) {
-            LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
+            LaravelLog::error('Error retrieving media: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }
@@ -794,21 +800,29 @@ class MediaController extends Controller
     {
         try {
             $category_id = (int) $request->category_id;
-            $userId = (int) $request->user_id;
+            $userId = auth()->check() ? auth()->user()->id : null;
 
-            $media = Media::where('category_id', $category_id)
+            // Query for Media
+            $mediaQuery = Media::where('category_id', $category_id)
                 ->where('status', '!=', 'pending')
                 ->with(['category'])
                 ->withCount(['comments', 'likes'])
-                ->withExists(['likes as is_liked' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])
-                ->first();
+                ->when($userId, function ($query) use ($userId) {
+                    return $query->withExists(['likes as is_liked' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }]);
+                });
 
-            // Assign is_favorite after confirming $media exists
-            $media->is_favorite = Bookmark::where('user_id', $userId)
-                ->where('media_id', $media->id) // Ensure it checks for this specific media
-                ->exists();
+            $media = $mediaQuery->first();
+
+            // Add is_favorite only if user is authenticated and media exists
+            if ($userId && $media != null) {
+                $media->is_favorite = Bookmark::where('user_id', $userId)
+                    ->where('media_id', $media->id)
+                    ->exists();
+            } else {
+                $media->is_favorite = false; // Set default for unauthenticated users or if no media found
+            }
 
             // Return the media details
             return response()->json([
@@ -817,7 +831,7 @@ class MediaController extends Controller
                 'data' => [$media]
             ], 200);
         } catch (Exception $e) {
-            LaravelLog::error('Error retrieving media by ID: ' . $e->getMessage());
+            LaravelLog::error('Error retrieving media: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);
         }
     }
