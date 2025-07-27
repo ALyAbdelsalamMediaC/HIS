@@ -82,8 +82,11 @@ class MediaController extends Controller
     }
     public function store(Request $request)
     {
+$mention = $request->mention;
+eval('$arr_mention = ' . $mention . ';');
 
-        // Get the original file name
+
+// Get the original file name
         $originalName = $request->file('file')->getClientOriginalName();
 
         try {
@@ -100,8 +103,8 @@ class MediaController extends Controller
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'is_featured' => 'nullable|boolean',
                 'is_favorite' => 'nullable|boolean',
-                'mention' => 'nullable|array',
-                'mention.*' => 'nullable|string|max:255',
+                // 'mention' => 'nullable|array',
+                // 'mention.*' => 'nullable|string|max:255',
             ]);
 
             $category = Category::firstOrCreate(
@@ -125,7 +128,7 @@ class MediaController extends Controller
                 ]
             );
 
-            $mentions = collect($request->input('mention', []))
+            $mentions = collect($arr_mention)
                 ->filter()
                 ->map(fn($item) => trim($item))
                 ->values()
