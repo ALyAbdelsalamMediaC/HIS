@@ -82,11 +82,11 @@ class MediaController extends Controller
     }
     public function store(Request $request)
     {
-$mention = $request->mention;
-eval('$arr_mention = ' . $mention . ';');
+        $mention = $request->mention;
+        eval('$arr_mention = ' . $mention . ';');
 
 
-// Get the original file name
+        // Get the original file name
         $originalName = $request->file('file')->getClientOriginalName();
 
         try {
@@ -739,15 +739,14 @@ eval('$arr_mention = ' . $mention . ';');
             // Add is_favorite only if user is authenticated
             if ($PendingMedia != null) {
                 $PendingMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
-            }else {
+            } else {
                 $PendingMedia = [];
             }
 
 
             if ($PublishedMedia != null) {
                 $PublishedMedia->is_favorite = Bookmark::where('user_id', $userId)->exists();
-            }
-            else {
+            } else {
                 $PublishedMedia = [];
             }
 
@@ -789,7 +788,7 @@ eval('$arr_mention = ' . $mention . ';');
                     ->where('media_id', $media_id)
                     ->exists();
             } else {
-                $media =[];
+                $media = [];
             }
             // Return the media details
             return response()->json([
@@ -827,22 +826,19 @@ eval('$arr_mention = ' . $mention . ';');
                 $media->is_favorite = Bookmark::where('user_id', $userId)
                     ->where('media_id', $media->id)
                     ->exists();
-                    return response()->json([
-                'success' => true,
-                'message' => 'Media retrieved successfully.',
-                'data' =>[$media]
-            ], 200);
-            } 
-            else {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Media retrieved successfully.',
+                    'data' => [$media]
+                ], 200);
+            } else {
                 $media = [];
                 return response()->json([
-                'success' => true,
-                'message' => 'Media retrieved successfully.',
-                'data' =>$media
-            ], 200);
+                    'success' => true,
+                    'message' => 'Media retrieved successfully.',
+                    'data' => $media
+                ], 200);
             }
-
-            
         } catch (Exception $e) {
             LaravelLog::error('Error retrieving media: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to retrieve media.'], 500);

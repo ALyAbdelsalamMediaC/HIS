@@ -228,6 +228,9 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
+       if (Auth::user()->hasRole('reviewer') && $status === 'pending') {
+            return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+        }
         $media = Media::with(['category', 'likes'])->findOrFail($id);
 
         // Get count of likes
