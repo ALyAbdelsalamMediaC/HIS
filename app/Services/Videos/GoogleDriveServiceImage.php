@@ -26,6 +26,7 @@ class GoogleDriveServiceImage
 
             $accessToken = json_decode(file_get_contents($tokenPath), true);
             $accessToken['created'] = time();
+            file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT));
             $this->client->setAccessToken($accessToken);
         }
 

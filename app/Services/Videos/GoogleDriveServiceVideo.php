@@ -14,18 +14,18 @@ class GoogleDriveServiceVideo
     public function __construct()
     {
         $this->client = new Client();
-       $credentialsPath = storage_path('app/credentials.json');
+        $credentialsPath = storage_path('app/credentials.json');
 
         if (!file_exists($credentialsPath)) {
-           throw new \Exception('Credentials file not found at: ' . $credentialsPath);
+            throw new \Exception('Credentials file not found at: ' . $credentialsPath);
         }
-        
+
         $credentials = json_decode(file_get_contents($credentialsPath), true);
-        
-          if (json_last_error() !== JSON_ERROR_NONE) {
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception('Invalid JSON in credentials file: ' . json_last_error_msg());
         }
-        
+
         if (!isset($credentials['web']['client_id']) || !isset($credentials['web']['client_secret'])) {
             throw new \Exception('Client ID or Client Secret missing in credentials.json');
         }
@@ -39,13 +39,14 @@ class GoogleDriveServiceVideo
         if (file_exists($tokenPath)) {
 
             $accessToken = json_decode(file_get_contents($tokenPath), true);
-            $accessToken['created'] = time(); 
+            $accessToken['created'] = time();
+            file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT));
             $this->client->setAccessToken($accessToken);
         }
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
-            
+
             //       if ($this->client->isAccessTokenExpired()) {
             //     header('Location: https://his.mc-apps.org/get-google-token.php');
             //     exit;
