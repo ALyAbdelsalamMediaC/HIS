@@ -25,6 +25,7 @@ class GoogleDriveServicePDF
         if (file_exists($tokenPath)) {
 
             $accessToken = json_decode(file_get_contents($tokenPath), true);
+            $accessToken['created'] = time();
             $this->client->setAccessToken($accessToken);
         }
 
