@@ -39,14 +39,13 @@ class NotificationService
             'body' => $body,
             'route' => $route,
             'sender_id' => $sender->id,
-            'receiver_id' => $receiver->id,
+            'receiver_id' => $receiver,
             'request_id' => $requestId,
             'seen' => false,
         ]);
-
         // Send FCM notification if the receiver has an fcm_token and messaging is available
-        if ($receiver->fcm_token && $this->messaging) {
-            $message = CloudMessage::withTarget('token', $receiver->fcm_token)
+        if ($sender->fcm_token && $this->messaging) {
+            $message = CloudMessage::withTarget('token', $sender->fcm_token)
                 ->withNotification([
                     'title' => $title,
                     'body' => $body,
@@ -54,12 +53,12 @@ class NotificationService
 
             try {
                 $this->messaging->send($message);
-                Log::info('FCM notification sent', ['receiver_id' => $receiver->id]);
+                Log::info('FCM notification sent', ['receiver_id' => $receiver]);
             } catch (\Exception $e) {
-                Log::error("Failed to send FCM notification to user {$receiver->id}: " . $e->getMessage());
+                Log::error("Failed to send FCM notification to user {$receiver}: " . $e->getMessage());
             }
         } elseif ($receiver->fcm_token) {
-            Log::warning('FCM notification not sent due to unavailable messaging service', ['receiver_id' => $receiver->id]);
+            Log::warning('FCM notification not sent due to unavailable messaging service', ['receiver_id' => $receiver]);
         }
     }
 }
