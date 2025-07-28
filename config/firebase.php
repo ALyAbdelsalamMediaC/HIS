@@ -3,20 +3,13 @@
 declare(strict_types=1);
 
 return [
-    /*
-     * ------------------------------------------------------------------------
-     * Default Firebase project
-     * ------------------------------------------------------------------------
-     */
+   
 
     'default' => env('FIREBASE_PROJECT', 'app'),
 
-    /*
-     * ------------------------------------------------------------------------
-     * Firebase project configurations
-     * ------------------------------------------------------------------------
-     */
-
+   'credentials' => [
+        'file' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase/his-2025-cb48bda90205.json')),
+    ],
     'projects' => [
         'app' => [
             'id' => 'his-2025',

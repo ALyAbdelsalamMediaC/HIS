@@ -23,10 +23,18 @@ use App\Http\Controllers\WEB\ReviewsController;
 
 Route::middleware('auth')->group(function () {
 
-    // Route::middleware(['auth', 'session.expired'])->group(function () {
-    // Route::get('/', function () {
-    //     return view('pages.admin.dashboard');
-    // })->name('pages.admin.dashboard');
+   Route::get('/test-firebase', function () {
+    $filePath = storage_path('app/firebase/his-2025-cb48bda90205.json');
+    if (file_exists($filePath)) {
+        if (is_readable($filePath)) {
+            return "File exists and is readable: " . $filePath;
+        } else {
+            return "File exists but is not readable: " . $filePath;
+        }
+    } else {
+        return "File does not exist: " . $filePath;
+    }
+});
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
