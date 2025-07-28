@@ -220,10 +220,10 @@ class MediaController extends Controller
             $title = "New " . $media->status . " media uploaded: ";
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
             $route = "/media_details/";
-
+            $user_data = User::find($validated['user_id']);
             $this->notificationService->sendNotification(
-                $request->user(), // HR user as sender
-                $user,            // Requesting user as receiver
+                $user_data, 
+                $user,            
                 $title,
                 $body,
                 $route,
