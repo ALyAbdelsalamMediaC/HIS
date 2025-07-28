@@ -31,7 +31,7 @@ class NotificationService
      * @param int|null $requestId Optional request ID to associate with the notification
      * @return void
      */
-    public function sendNotification(User $sender, User $receiver, string $title, string $body, ?string $route = null, ?int $requestId = null): void
+    public function sendNotification($sender,$receiver, string $title, string $body, ?string $route = null, ?int $requestId = null): void
     {
         // Store the notification in the database
         Notification::create([
