@@ -14,7 +14,7 @@ class FirebaseServiceProvider extends ServiceProvider
     {
         $this->app->singleton(Messaging::class, function ($app) {
             $factory = (new Factory)
-                ->withServiceAccount(config('firebase.projects.default.credentials'));
+                ->withServiceAccount(config('firebase.projects.app.credentials'));
             return $factory->createMessaging();
         });
     }
