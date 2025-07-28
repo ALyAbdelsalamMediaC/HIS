@@ -19,8 +19,8 @@ return [
 
     'projects' => [
         'app' => [
-
-            'credentials' => env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
+            'id' => 'his-2025',
+            'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase/his-2025-cb48bda90205.json')),
 
             /*
              * ------------------------------------------------------------------------
