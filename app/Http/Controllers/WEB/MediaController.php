@@ -846,6 +846,40 @@ class MediaController extends Controller
                 abort(404, 'Google Drive file ID not found.');
             }
 
+            // Check if the access token is expired and refresh it if needed
+            if ($this->client->isAccessTokenExpired()) {
+                // Get the token path
+                $tokenPath = storage_path('app/google-token.json');
+                
+                // Read the existing token
+                if (file_exists($tokenPath)) {
+                    $accessToken = json_decode(file_get_contents($tokenPath), true);
+                    
+                    // Check if we have a refresh token
+                    if (isset($accessToken['refresh_token'])) {
+                        // Refresh the access token
+                        $newAccessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
+                        
+                        if (!isset($newAccessToken['error'])) {
+                            // Update the client with the new access token
+                            $this->client->setAccessToken($newAccessToken);
+                            
+                            // Save the new token for future use
+                            file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
+                        } else {
+                            // If refresh fails, redirect to get a new token
+                            return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                        }
+                    } else {
+                        // No refresh token available, redirect to get a new token
+                        return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                    }
+                } else {
+                    // No token file, redirect to get a new token
+                    return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                }
+            }
+
             $driveService = new \Google\Service\Drive($this->client);
             $file = $driveService->files->get($fileId, ['alt' => 'media']);
 
