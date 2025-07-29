@@ -295,7 +295,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
         try {
-            if ($userId === null) {
+            if ($userId === 0) {
                 $contentswithout = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->withCount('comments');
@@ -358,7 +358,7 @@ class MediaController extends Controller
             $userId = (int) $request->user_id;
 
 
-            if ($userId === null) {
+            if ($userId === 0) {
                 $contents = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->where('is_featured', true)
