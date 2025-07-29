@@ -7,10 +7,14 @@
         <div class="d-flex flex-column align-items-center justify-content-center w-100">
             @if (isset($error))
                 <p class="text-danger">{{ $error }}</p>
-                <x-link_btn href="{{ url('/') }}" class="btn btn-primary mt-3">Go Back Home</x-link_btn>
+                <x-link_btn href="{{ url('/') }}" class="mt-3 btn btn-primary">Go Back Home</x-link_btn>
             @else
-                <p>Open this link in your browser to authorize access:</p>
-                <p><a href="{{ $authUrl }}" target="_blank" class="btn btn-primary">{{ $authUrl }}</a></p>
+                <script>
+                    window.location.href = "{{ $authUrl }}";
+                </script>
+                <noscript>
+                    <p>JavaScript is required. <a href="{{ $authUrl }}" class="btn btn-primary">Click here to authorize</a></p>
+                </noscript>
             @endif
         </div>
     </section>

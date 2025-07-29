@@ -65,8 +65,13 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = Notification::with(['sender', 'receiver','media'])->get();
-        return view('pages.settings.notifications.index', compact('notifications'));
+        $notifications = Notification::with(['sender', 'receiver','media'])->paginate(20);
+        $unreadNotifications = Notification::where('receiver_id', auth()->id())
+            ->where('seen', false)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+        return view('pages.settings.notifications.index', compact('notifications', 'unreadNotifications'));
     }
     public function read($id)
     {

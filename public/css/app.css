@@ -2047,6 +2047,53 @@ body {
 }
 
 /* ========================================================
+    Notifications Page Styles
+   ======================================================== */
+.notification-head .nav-link{
+    background-color: #F1F9FA;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 12px 24px;
+    color: var(--primary-color);
+    border-radius: var(--main-border-radius-md);
+}
+
+.notification-head .nav-link.active{
+    background-color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 12px 24px;
+    color: var(--white-color);
+    border-radius: var(--main-border-radius-md);
+}
+
+.notifications-list {
+    padding: 0 16px;
+}
+
+.notifications-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-radius: var(--main-border-radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+}
+
+.notifications-content-left {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notifications-content-left h5 {
+    color: var(--medium-grey);
+}
+
+
+/* ========================================================
     Media Queries and Responsive Styles
    ======================================================== */
 
