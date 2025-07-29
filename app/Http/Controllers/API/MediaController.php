@@ -292,9 +292,9 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        $userId = $request->user()->id;
+            $userId = (int) $request->user_id;
 
-
+        try {
             if ($userId === null) {
                 $contentswithout = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
@@ -355,7 +355,7 @@ class MediaController extends Controller
     {
 
         try {
-            $userId = $request->user()->id;
+            $userId = (int) $request->user_id;
 
 
             if ($userId === null) {
