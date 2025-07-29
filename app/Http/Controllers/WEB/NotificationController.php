@@ -8,6 +8,8 @@ use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Log as LaravelLog;
+
 
 class NotificationController extends Controller
 {
@@ -48,8 +50,7 @@ class NotificationController extends Controller
             $user = User::find(1);
             $title = 'send notification';
             $route = "/send-notification-requests/7";
-            $this->notificationService->sendNotification($request->user(),$user, $title, $body, $route);
-
+            $this->notificationService->sendNotification($request->user(), $user, $title, $body, $route);
         }
 
         // Example user (for testing purposes)
@@ -64,7 +65,51 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = Notification::with(['sender', 'receiver'])->get();
+        $notifications = Notification::with(['sender', 'receiver','media'])->get();
         return view('pages.settings.notifications.index', compact('notifications'));
+    }
+    public function read($id)
+    {
+        $notification = Notification::findOrFail($id);
+
+        if ($notification->receiver_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $notification->seen = true;
+        $notification->save();
+
+        if ($notification->route) {
+            try {
+                // Define regex patterns and corresponding index routes
+                $routeMap = [
+                    '/media/i' => 'content.videos', // Matches "media" case-insensitive
+                    
+                ];
+
+                foreach ($routeMap as $pattern => $indexRoute) {
+                    if (preg_match($pattern, $notification->route)) {
+                        return redirect()->route($indexRoute);
+                    }
+                }
+
+                // If no match, redirect back
+                return redirect()->back();
+            } catch (\Exception $e) {
+                LaravelLog::error('Failed to redirect to route: ' . $e->getMessage());
+                return redirect()->back();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function markAllRead(Request $request)
+    {
+        Notification::where('receiver_id', auth()->id())
+            ->where('seen', false)
+            ->update(['seen' => true]);
+
+        return redirect()->back()->with('success', 'All notifications marked as read.');
     }
 }
