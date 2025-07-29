@@ -148,9 +148,7 @@ class BookmarkController extends Controller
 
         $mediaLikes = $mediaLikes->isEmpty() ? null : $mediaLikes;
         $mediaBookmarks = Bookmark::with(['media' => function ($query) use ($userId) {
-                    $query->where('status', 'published')
-                        ->where('is_featured', true)
-                        ->withCount(['comments', 'likes'])
+                    $query->withCount(['comments', 'likes'])
                         ->withExists(['likes as is_liked' => function ($q) use ($userId) {
                             $q->where('user_id', $userId);
                         }]);
