@@ -47,7 +47,13 @@ class BookmarkController extends Controller
         $articleId = $request->input('article_id');
         $mediaId = $request->input('media_id');
         $flag = $request->input('flag');
-
+        $media = Media::where('id', $mediaId)->where('status'!='published')->first();
+        if ($media) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'media is not published'
+            ], 200);
+        }
         // Check if bookmark already exists
         $existingBookmark = Bookmark::where('user_id', $userId)
             ->where(function ($query) use ($articleId, $mediaId) {
@@ -62,7 +68,7 @@ class BookmarkController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Bookmark already exists'
-            ], 409);
+            ], 200);
         }
 
         // Create new bookmark

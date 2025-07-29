@@ -558,6 +558,7 @@ class MediaController extends Controller
                 'description' => $validated['description'] ?? null,
                 'file_path' => $video,
                 'pdf' => $pdf,
+                'status' => 'pending',
                 'thumbnail_path' => $thumbnailPath,
                 'image_path' => $imagePath,
                 'is_featured' => $request->boolean('is_featured'),
@@ -565,7 +566,10 @@ class MediaController extends Controller
                 'mention' => json_encode($mentions),
                 'duration' => $duration,
             ]);
-
+            $bookmark = Bookmark::where('user_id', $validated['user_id'])
+                ->where('media_id', $media->id)
+                ->first();
+                 $bookmark->delete();
             // Log success
             Log::create([
                 'user_id' => $validated['user_id'],
