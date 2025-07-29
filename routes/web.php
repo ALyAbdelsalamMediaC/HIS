@@ -70,10 +70,6 @@ Route::middleware('auth')->group(function () {
     // New routes for AJAX HTML rendering
     Route::get('/comments/{comment_id}/html', [CommentController::class, 'getCommentHtml'])->name('comments.html');
     Route::get('/comments/reply/{reply_id}/{parent_id}/html', [CommentController::class, 'getReplyHtml'])->name('comments.reply.html');
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/send', [NotificationController::class, 'store'])->name('notifications.store');
-    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
 
     // Article comments
     Route::post('/article-comments/add/{media_id}', [CommentArticleController::class, 'addComment'])->name('article.comments.add');
@@ -142,6 +138,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
     Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
     Route::post('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
+    Route::get('/settings/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/settings/notifications/send', [NotificationController::class, 'store'])->name('notifications.store');
+    Route::get('/settings/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/settings/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
 
 

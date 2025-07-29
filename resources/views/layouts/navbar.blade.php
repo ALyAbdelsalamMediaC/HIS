@@ -60,7 +60,7 @@
 
   <div class="gap-3 d-flex align-items-center">
     <div class="notification-bell-btn">
-      <x-notifications-dropdown :unreadNotifications="collect([])" />
+      <x-notifications-dropdown :unreadNotifications="$unreadNotifications" />
     </div>
     <a href="{{ route('settings.profile') }}" class="nav-profile">
       <x-svg-icon name="user" size="18" color="#fff" />
