@@ -19,6 +19,46 @@ class NotificationController extends Controller
     {
         $this->notificationService = $notificationService;
     }
+    public static function sendNotifications(array $receiverIds, string $title, string $body, ?string $route = null)
+    {
+        // Validate inputs
+        if (empty($receiverIds) || empty($title) || empty($body)) {
+            return false;
+        }
+
+        // Get authenticated user as sender
+        $sender = Auth::user();
+        if (!$sender) {
+            return false;
+        }
+
+        // Verify all receiver IDs exist
+        $validReceiverIds = User::whereIn('id', $receiverIds)->pluck('id')->toArray();
+        if (empty($validReceiverIds)) {
+            return false;
+        }
+
+        // Send notifications via service
+        $notificationService = app(NotificationService::class);
+        $success = true;
+
+        foreach ($validReceiverIds as $receiverId) {
+            try {
+                $receiver = User::find($receiverId);
+                if ($receiver) {
+                    $notificationService->sendNotification($sender, $receiver, $title, $body, $route);
+                } else {
+                    $success = false;
+                }
+            } catch (\Exception $e) {
+                $success = false;
+                \Log::error("Failed to send notification to user {$receiverId}: {$e->getMessage()}");
+            }
+        }
+
+        return $success;
+    }
+    
 
     public function store(Request $request)
     {

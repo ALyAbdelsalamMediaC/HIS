@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 return [
-   
+
+    'firebase' => [
+        'credentials' => env('FIREBASE_CREDENTIALS'),
+    ],
 
     'default' => env('FIREBASE_PROJECT', 'app'),
 
-   'credentials' => [
+    'credentials' => [
         'file' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase/his-2025-cb48bda90205.json')),
     ],
     'projects' => [

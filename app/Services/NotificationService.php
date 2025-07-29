@@ -4,61 +4,104 @@ namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
-use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
+use Kreait\Firebase\Messaging\AndroidConfig;
+use Kreait\Firebase\Messaging\ApnsConfig;
 
 class NotificationService
 {
-    protected $messaging;
-
-    public function __construct(?Messaging $messaging)
+    public function __construct(private ?Messaging $messaging)  // PHP 8 promoted prop
     {
-        $this->messaging = $messaging;
         if (!$messaging) {
             Log::warning('Firebase Messaging service is not available');
         }
     }
 
-    /**
-     * Send a notification to a user and store it in the database.
-     *
-     * @param User $sender The user initiating the action
-     * @param User $receiver The user receiving the notification
-     * @param string $title Notification title
-     * @param string $body Notification body
-     * @param string|null $route Optional route for the notification
-     * @param int|null $requestId Optional request ID to associate with the notification
-     * @return void
-     */
-    public function sendNotification($sender,$receiver, string $title, string $body, ?string $route = null, ?int $requestId = null): void
-    {
-        // Store the notification in the database
-        Notification::create([
-            'title' => $title,
-            'body' => $body,
-            'route' => $route,
-            'sender_id' => $sender->id,
-            'receiver_id' => $receiver,
-            'request_id' => $requestId,
-            'seen' => false,
-        ]);
-        // Send FCM notification if the receiver has an fcm_token and messaging is available
-        if ($sender->fcm_token && $this->messaging) {
-            $message = CloudMessage::withTarget('token', $sender->fcm_token)
-                ->withNotification([
-                    'title' => $title,
-                    'body' => $body,
-                ]);
+    /*────────────────────────── PUBLIC API ───────────────────────────*/
 
-            try {
-                $this->messaging->send($message);
-                Log::info('FCM notification sent', ['receiver_id' => $receiver]);
-            } catch (\Exception $e) {
-                Log::error("Failed to send FCM notification to user {$receiver}: " . $e->getMessage());
-            }
-        } elseif ($receiver->fcm_token) {
-            Log::warning('FCM notification not sent due to unavailable messaging service', ['receiver_id' => $receiver]);
+    /**
+     * Send a push + store a DB copy
+     */
+    public function sendNotification(
+        User $sender,
+        User $receiver,
+        string $title,
+        string $body,
+        ?string $route = null,
+        ?int    $requestId = null
+    ): void
+    {
+        /* 1) Persist in DB -------------------------------------------------- */
+        Notification::create([
+            'title'       => $title,
+            'body'        => $body,
+            'route'       => $route,
+            'sender_id'   => $sender->id,
+            'receiver_id' => $receiver->id,
+            'request_id'  => $requestId,
+            'seen'        => false,
+        ]);
+
+        /* 2) Push via FCM --------------------------------------------------- */
+        if (!$receiver->fcm_token || !$this->messaging) {
+            Log::warning('FCM notification not sent (missing token or service)', [
+                'receiver_id' => $receiver->id,
+            ]);
+            return;
         }
+
+        try {
+            $this->messaging->send(
+                $this->buildMessage($receiver->fcm_token, $title, $body)
+            );
+            Log::info('FCM notification sent', ['receiver_id' => $receiver->id]);
+        } catch (\Throwable $e) {
+            Log::error("Failed to send FCM notification to user {$receiver->id}: {$e->getMessage()}");
+        }
+    }
+
+   
+
+    /*────────────────────────── HELPERS ──────────────────────────────*/
+
+    /**
+     * Build a CloudMessage with sound keys for Android + iOS
+     */
+    private function buildMessage(string $token, string $title, string $body): CloudMessage
+    {
+        /* a) Visible banner */
+        $notification = FcmNotification::create($title, $body);
+
+        /* b) Android config */
+        $android = AndroidConfig::fromArray([
+            'priority'     => 'high',
+            'notification' => [
+                'sound'      => 'default',
+                'channel_id' => 'high_importance_v2',   // must match Flutter channel
+            ],
+        ]);
+
+        /* c) APNs (iOS) config */
+        $apns = ApnsConfig::fromArray([
+            'payload' => [
+                'aps' => [
+                    'sound'  => 'default',
+                    'badge'  => 1,
+                ],
+            ],
+            'headers' => [
+                // ensure alert‑type push with high priority
+                'apns-push-type' => 'alert',
+                'apns-priority'  => '10',
+            ],
+        ]);
+
+        return CloudMessage::withTarget('token', $token)
+            ->withNotification($notification)
+            ->withAndroidConfig($android)
+            ->withApnsConfig($apns);
     }
 }
