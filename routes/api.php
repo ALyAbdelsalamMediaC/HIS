@@ -20,9 +20,9 @@ Route::post('/comments', [CommentsController::class, 'addComment']);
 Route::post('/comments/reply', [CommentsController::class, 'reply']);
 Route::post('/media/store', [MediaController::class, 'store']);
 Route::get('/media/show', [MediaController::class, 'show']);
+Route::get('/media/featured', [MediaController::class, 'featured']);
+Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
-    Route::get('/media/featured', [MediaController::class, 'featured']);
     Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
     Route::get('/media_details', [MediaController::class, 'getMediaByMediaId']);
     Route::get('/category_media', [MediaController::class, 'getMediaByCategoryId']);

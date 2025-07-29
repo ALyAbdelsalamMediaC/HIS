@@ -5,6 +5,7 @@ namespace App\Services\Videos;
 use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
+use Illuminate\Support\Facades\Log;
 
 class GoogleDriveServiceVideo
 {
@@ -29,36 +30,57 @@ class GoogleDriveServiceVideo
         if (!isset($credentials['web']['client_id']) || !isset($credentials['web']['client_secret'])) {
             throw new \Exception('Client ID or Client Secret missing in credentials.json');
         }
+
         $this->client->setClientId($credentials['web']['client_id']);
         $this->client->setClientSecret($credentials['web']['client_secret']);
         $this->client->setAccessType('offline');
         $this->client->setScopes([Drive::DRIVE_FILE]);
-        // Check if a token file exists
+        $this->client->setRedirectUri('https://his.mc-apps.org/get-google-token.php');
+
+        // Load existing token
         $tokenPath = storage_path('app/google-token.json');
 
         if (file_exists($tokenPath)) {
-
             $accessToken = json_decode(file_get_contents($tokenPath), true);
-            $accessToken['created'] = time();
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Invalid JSON in google-token.json: ' . json_last_error_msg());
+                throw new \Exception('Invalid JSON in google-token.json');
+            }
             $this->client->setAccessToken($accessToken);
+        } else {
+            Log::warning('No token file found at: ' . $tokenPath);
+            throw new \Exception('No token file found. Please authenticate to generate a new token.');
         }
 
-        // If the access token is expired, refresh it
+        // Refresh token if expired
         if ($this->client->isAccessTokenExpired()) {
+            try {
+                if (!isset($accessToken['refresh_token'])) {
+                    throw new \Exception('No refresh token available in google-token.json');
+                }
 
-            //       if ($this->client->isAccessTokenExpired()) {
-            //     header('Location: https://his.mc-apps.org/get-google-token.php');
-            //     exit;
-            // }
-            $accessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
-            if (isset($accessToken['error'])) {
-                throw new \Exception("Failed to refresh access token: " . $accessToken['error_description']);
+                $newAccessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
+                
+                if (isset($newAccessToken['error'])) {
+                    Log::error('Failed to refresh access token: ' . $newAccessToken['error_description']);
+                    throw new \Exception('Failed to refresh access token: ' . $newAccessToken['error_description']);
+                }
+
+                // Update created time and save the new token
+                $newAccessToken['created'] = time();
+                $this->client->setAccessToken($newAccessToken);
+                
+                // Save the new token to file
+                if (file_put_contents($tokenPath, json_encode($newAccessToken, JSON_PRETTY_PRINT)) === false) {
+                    Log::error('Failed to write new token to: ' . $tokenPath);
+                    throw new \Exception('Failed to save new access token to file');
+                }
+
+                Log::info('Access token refreshed and saved successfully');
+            } catch (\Exception $e) {
+                Log::error('Token refresh failed: ' . $e->getMessage());
+                throw new \Exception('Unable to refresh access token: ' . $e->getMessage());
             }
-
-            $this->client->setAccessToken($accessToken);
-
-            // Save the new token to file
-            file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
         }
 
         $this->service = new Drive($this->client);
