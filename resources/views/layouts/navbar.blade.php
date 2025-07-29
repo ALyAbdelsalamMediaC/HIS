@@ -1,25 +1,3 @@
-    @php
-    use App\Models\Notification;
-    use Illuminate\Support\Facades\Auth;
-    use Carbon\Carbon;
-    use App\Models\User;
-
-    $today = Carbon::today();
-    $yesterday = Carbon::yesterday();
-
-    $unreadNotifications = Notification::where('receiver_id', Auth::id())
-      ->where('seen', false)
-      ->orderBy('created_at', 'desc')
-      ->get();
-
-    $todayNotifications = $unreadNotifications->filter(function ($notification) use ($today) {
-      return Carbon::parse($notification->created_at)->isToday();
-    })->take(3);
-
-    $yesterdayNotifications = $unreadNotifications->filter(function ($notification) use ($yesterday) {
-      return Carbon::parse($notification->created_at)->isYesterday();
-    })->take(3);
-    @endphp
 <header class="navbar-custome">
   <div class="gap-3 d-flex align-items-center">
     <div class="nav-mobile-hamburger d-md-none">
@@ -81,12 +59,14 @@
   </div>
 
   <div class="gap-3 d-flex align-items-center">
-    <div class="notification-bell-btn">
-      <x-notifications-dropdown :unreadNotifications="$unreadNotifications" />
-    </div>
-    <a href="{{ route('settings.profile') }}" class="nav-profile">
-      <x-svg-icon name="user" size="18" color="#fff" />
-    </a>
+    @if(Auth::check())
+      <div class="notification-bell-btn">
+        <x-notifications-dropdown />
+      </div>
+      <a href="{{ route('settings.profile') }}" class="nav-profile">
+        <x-svg-icon name="user" size="18" color="#fff" />
+      </a>
+    @endif
   </div>
 </header>
 

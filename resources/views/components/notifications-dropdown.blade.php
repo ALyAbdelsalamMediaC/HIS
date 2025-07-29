@@ -1,11 +1,32 @@
-@props(['unreadNotifications' => collect([])])
+ @php
+    use App\Models\Notification;
+    use Illuminate\Support\Facades\Auth;
+    use Carbon\Carbon;
+    use App\Models\User;
+
+    $today = Carbon::today();
+    $yesterday = Carbon::yesterday();
+
+    $unreadNotifications = Notification::with(['sender', 'receiver', 'media'])
+      ->where('seen', false)
+      ->orderBy('created_at', 'desc')
+      ->get();
+
+    $todayNotifications = $unreadNotifications->filter(function ($notification) use ($today) {
+      return Carbon::parse($notification->created_at)->isToday();
+    })->take(3);
+
+    $yesterdayNotifications = $unreadNotifications->filter(function ($notification) use ($yesterday) {
+      return Carbon::parse($notification->created_at)->isYesterday();
+    })->take(3);
+    @endphp
 
 <div class="dropdown">
   <button class="p-0 border-0 btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown"
     aria-expanded="false" aria-label="Notifications">
     @if($unreadNotifications->count() > 0)
     <div class="bell-circle"></div>
-  @endif
+    @endif
     <x-svg-icon name="bell" size="19" color="#ADADAD" />
   </button>
 
@@ -31,29 +52,12 @@
         </form>
       </div>
 
-      @php
-          use Carbon\Carbon;
-          $groupedUnreadNotifications = $unreadNotifications->groupBy(function ($notification) {
-              $date = Carbon::parse($notification->created_at);
-              if ($date->isToday()) {
-                  return 'Today';
-              } elseif ($date->isYesterday()) {
-                  return 'Yesterday';
-              } else {
-                  return $date->format('F d, Y');
-              }
-          });
-      @endphp
-
       @if($unreadNotifications->count() > 0)
-          @foreach($groupedUnreadNotifications as $date => $notificationGroup)
+          @if($todayNotifications->count() > 0)
               <li class="px-3 pt-2 pb-0" style="background:transparent; cursor:default;">
-                  <span class="h5-ragular" style="color:#ADADAD;">{{ $date }}</span>
+                  <span class="h5-ragular" style="color:#ADADAD;">Today</span>
               </li>
-              @php
-                  $max = $date === 'Today' ? 3 : 1;
-              @endphp
-              @foreach($notificationGroup->take($max) as $notification)
+              @foreach($todayNotifications as $notification)
                   <li class="mt-2 list-noti-style dropdown-item">
                       <a href="{{ route('notifications.read', $notification->id) }}" class="notification-item text-decoration-none">
                           <div>
@@ -63,13 +67,39 @@
                               <p class="h6-ragular" style="color:#7B7B7B;">
                                   {{ Str::words($notification->body, 8, '...') }}
                               </p>
-                              <span class="small text-muted">{{ $notification->created_at ? $notification->created_at->format('M d, Y \a\t h:i A') : 'N/A' }}</span>
+                              <span class="small text-muted">
+                                  {{ $notification->created_at ? $notification->created_at->format('h:i A') : 'N/A' }}
+                              </span>
                           </div>
                           <img src="/images/icons/dot_red.svg" alt="unread dot">
                       </a>
                   </li>
               @endforeach
-          @endforeach
+          @endif
+
+          @if($yesterdayNotifications->count() > 0)
+              <li class="px-3 pt-2 pb-0" style="background:transparent; cursor:default;">
+                  <span class="h5-ragular" style="color:#ADADAD;">Yesterday</span>
+              </li>
+              @foreach($yesterdayNotifications as $notification)
+                  <li class="mt-2 list-noti-style dropdown-item">
+                      <a href="{{ route('notifications.read', $notification->id) }}" class="notification-item text-decoration-none">
+                          <div>
+                              <h3 class="h6-semibold" style="color:#000;">
+                                  {{ $notification->sender->name ?? 'System' }}
+                              </h3>
+                              <p class="h6-ragular" style="color:#7B7B7B;">
+                                  {{ Str::words($notification->body, 8, '...') }}
+                              </p>
+                              <span class="small text-muted">
+                                  {{ $notification->created_at ? $notification->created_at->format('h:i A') : 'N/A' }}
+                              </span>
+                          </div>
+                          <img src="/images/icons/dot_red.svg" alt="unread dot">
+                      </a>
+                  </li>
+              @endforeach
+          @endif
       @else
           <li class="mt-3 dropdown-item">
               <p class="mb-0">No new notifications</p>
