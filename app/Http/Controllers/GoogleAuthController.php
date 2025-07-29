@@ -20,7 +20,7 @@ class GoogleAuthController extends Controller
 
         if (!$request->has('code')) {
             $authUrl = $client->createAuthUrl();
-            return view('google-auth', ['authUrl' => $authUrl]);
+            return redirect()->away($authUrl);
         }
 
         try {
