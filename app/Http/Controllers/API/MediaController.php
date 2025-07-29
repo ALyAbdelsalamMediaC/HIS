@@ -292,10 +292,10 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-        $userId = auth()->check() ? auth()->user()->id : null;
+        $userId = $request->user()->id;
 
-        try {
-            if (!auth()->check()) {
+
+            if ($userId === null) {
                 $contentswithout = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->withCount('comments');
@@ -355,10 +355,10 @@ class MediaController extends Controller
     {
 
         try {
-            $userId = auth()->check() ? auth()->user()->id : null;
+            $userId = $request->user()->id;
 
 
-            if (!auth()->check()) {
+            if ($userId === null) {
                 $contents = Category::with(['media' => function ($query) {
                     $query->where('status', 'published')
                         ->where('is_featured', true)
