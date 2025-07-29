@@ -138,7 +138,7 @@ class BookmarkController extends Controller
     }
 
 
-    public function getBookmarks()
+     public function getBookmarks()
     {
         $userId = auth()->check() ? auth()->user()->id : null;
 
@@ -146,49 +146,21 @@ class BookmarkController extends Controller
             ->withCount(['likes', 'comments'])
             ->get();
 
-        // $articleLikes = Article::where('user_id', $userId)
-        //     ->withCount(['likesarticle', 'commentarticle'])
-        //     ->get();
-
         $mediaLikes = $mediaLikes->isEmpty() ? null : $mediaLikes;
-        // $articleLikes = $articleLikes->isEmpty() ? null : $articleLikes;
+        $mediaBookmarks = Bookmark::with(['media' => function ($query) use ($userId) {
+                    $query->where('status', 'published')
+                        ->where('is_featured', true)
+                        ->withCount(['comments', 'likes'])
+                        ->withExists(['likes as is_liked' => function ($q) use ($userId) {
+                            $q->where('user_id', $userId);
+                        }]);
+                }])->orderBy('created_at', 'desc')->take(10)->get();
 
-        // Get bookmarks for articles
-        // $articleBookmarks = Bookmark::where('user_id', $userId)
-        //     ->whereNotNull('article_id')
-        //     ->with(['article' => function ($query) {
-        //         $query->with(['likesarticle', 'commentarticle']);
-        //     }])
-        //     ->get();
-
-        // Get bookmarks for media
-        $mediaBookmarks = Bookmark::where('user_id', $userId)
-        ->whereNotNull('media_id')
-        ->with(['media' => function ($query) {
-            $query->with(['likes', 'comments']);
-        }])
-        ->get()
-        ->map(function ($bookmark) use ($userId) {
-            if ($bookmark->media) {
-                $bookmark->media->is_liked = $bookmark->media->likes->contains('user_id', $userId);
-            }
-            return $bookmark;
-        });
-
-        // Set to null if empty
-        // $articleBookmarks = $articleBookmarks->isEmpty() ? null : $articleBookmarks;
         $mediaBookmarks = $mediaBookmarks->isEmpty() ? null : $mediaBookmarks;
-
-        // Combine all bookmarks if needed
-        $bookmarks = [
-            // 'articleBookmarks' => $articleBookmarks,
-            'mediaBookmarks' => $mediaBookmarks,
-        ];
-
         return response()->json([
             'status' => 'success',
             'data' => [
-                'bookmarks' => $bookmarks,
+                'bookmarks' => $mediaBookmarks,
                 'mediaLikes' => $mediaLikes,
                 // 'articleLikes' => $articleLikes,
             ]
