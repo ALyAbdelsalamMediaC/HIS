@@ -138,7 +138,7 @@ class BookmarkController extends Controller
     }
 
 
-     public function getBookmarks()
+    public function getBookmarks()
     {
         $userId = auth()->check() ? auth()->user()->id : null;
 
@@ -148,11 +148,18 @@ class BookmarkController extends Controller
 
         $mediaLikes = $mediaLikes->isEmpty() ? null : $mediaLikes;
         $mediaBookmarks = Bookmark::with(['media' => function ($query) use ($userId) {
-                    $query->withCount(['comments', 'likes'])
-                        ->withExists(['likes as is_liked' => function ($q) use ($userId) {
-                            $q->where('user_id', $userId);
-                        }]);
-                }])->orderBy('created_at', 'desc')->take(10)->get();
+            $query->where('status', 'published')
+                ->withCount(['comments', 'likes'])
+                ->withExists(['likes as is_liked' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }]);
+        }])
+            ->whereHas('media', function ($query) {
+                $query->where('status', 'published');
+            })
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
 
         $mediaBookmarks = $mediaBookmarks->isEmpty() ? null : $mediaBookmarks;
         return response()->json([
