@@ -64,7 +64,7 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = Notification::with(['sender', 'receiver', 'request'])->get();
+        $notifications = Notification::with(['sender', 'receiver'])->get();
         return view('pages.settings.notifications.index', compact('notifications'));
     }
 }
