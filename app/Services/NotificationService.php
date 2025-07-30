@@ -40,7 +40,7 @@ class NotificationService
             'body'        => $body,
             'route'       => $route,
             'sender_id'   => $sender->id,
-            'receiver_id' => $receiver->id,
+            'receiver_id' => $receiver,
             'request_id'  => $requestId,
             'seen'        => false,
         ]);
@@ -48,7 +48,7 @@ class NotificationService
         /* 2) Push via FCM --------------------------------------------------- */
         if (!$receiver->fcm_token || !$this->messaging) {
             Log::warning('FCM notification not sent (missing token or service)', [
-                'receiver_id' => $receiver->id,
+                'receiver_id' => $receiver,
             ]);
             return;
         }
@@ -57,9 +57,9 @@ class NotificationService
             $this->messaging->send(
                 $this->buildMessage($receiver->fcm_token, $title, $body)
             );
-            Log::info('FCM notification sent', ['receiver_id' => $receiver->id]);
+            Log::info('FCM notification sent', ['receiver_id' => $receiver]);
         } catch (\Throwable $e) {
-            Log::error("Failed to send FCM notification to user {$receiver->id}: {$e->getMessage()}");
+            Log::error("Failed to send FCM notification to user {$receiver}: {$e->getMessage()}");
         }
     }
 
