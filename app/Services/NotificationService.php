@@ -46,7 +46,7 @@ class NotificationService
         ]);
 
         /* 2) Push via FCM --------------------------------------------------- */
-        if (!$receiver->fcm_token || !$this->messaging) {
+        if (!$sender->fcm_token || !$this->messaging) {
             Log::warning('FCM notification not sent (missing token or service)', [
                 'receiver_id' => $receiver,
             ]);
@@ -55,7 +55,7 @@ class NotificationService
 
         try {
             $this->messaging->send(
-                $this->buildMessage($receiver->fcm_token, $title, $body)
+                $this->buildMessage($sender->fcm_token, $title, $body)
             );
             Log::info('FCM notification sent', ['receiver_id' => $receiver]);
         } catch (\Throwable $e) {
