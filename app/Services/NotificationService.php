@@ -26,8 +26,8 @@ class NotificationService
      * Send a push + store a DB copy
      */
     public function sendNotification(
-        User $sender,
-        User $receiver,
+         $sender,
+         $receiver,
         string $title,
         string $body,
         ?string $route = null,
