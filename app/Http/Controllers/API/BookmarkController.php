@@ -153,7 +153,7 @@ class BookmarkController extends Controller
             ->get();
 
         $mediaLikes = $mediaLikes->isEmpty() ? null : $mediaLikes;
-        $mediaBookmarks = Bookmark::with(['media' => function ($query) use ($userId) {
+        $mediaBookmarks = Bookmark::where('user_id',$userId)->with(['media' => function ($query) use ($userId) {
             $query->where('status', 'published')
                 ->withCount(['comments', 'likes'])
                 ->withExists(['likes as is_liked' => function ($q) use ($userId) {
@@ -173,7 +173,6 @@ class BookmarkController extends Controller
             'data' => [
                 'bookmarks' => $mediaBookmarks,
                 'mediaLikes' => $mediaLikes,
-                // 'articleLikes' => $articleLikes,
             ]
         ], 200);
     }
