@@ -37,7 +37,7 @@
           <h3 class="h4-semibold">Notifications</h3>
           <p class="h5-ragular" style="color:#ADADAD;">Stay Update with your latest notification</p>
         </div>
-        <x-link_btn href="#" class="expand-notif-icon">
+        <x-link_btn href="{{ route('notifications.index') }}" class="expand-notif-icon">
           <x-svg-icon name="expand" size="18" color="#000" />
         </x-link_btn>
       </div>
