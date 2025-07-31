@@ -219,7 +219,7 @@ class MediaController extends Controller
             $admins = User::where('role', 'admin')->get();
             $title = "New " . $media->status . " media uploaded: ";
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
-            $route = "/media_details/";
+            $route = "content/videos/".$media->id."/pending/";
             $user_data = User::find($validated['user_id']);
 
             foreach ($admins as $admin) {
