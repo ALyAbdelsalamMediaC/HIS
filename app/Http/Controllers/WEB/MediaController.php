@@ -208,7 +208,7 @@ class MediaController extends Controller
 
         $title = "You are assigned to new media with id: " . $id;
         $body = "The media with id " . $id . " has been uploaded successfully. Please review it.";
-        $route = "content/assigned/" . $id;
+        $route = "content/videos/" . $id."/pending/";
 
         // Send notification to each reviewer
         foreach ($reviewersArray as $reviewer_id) {
