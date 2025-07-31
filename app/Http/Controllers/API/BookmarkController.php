@@ -18,20 +18,18 @@ class BookmarkController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id',
-            'article_id' => 'nullable|integer|exists:articles,id',
             'media_id' => 'nullable|integer|exists:media,id',
             'flag' => 'required|string|max:255',
         ], [
             'user_id.exists' => 'The specified user does not exist.',
-            'article_id.exists' => 'The specified article does not exist.',
             'media_id.exists' => 'The specified media does not exist.',
         ]);
 
         // Ensure exactly one of article_id or media_id is provided
-        if ((!$request->has('article_id') && !$request->has('media_id')) || ($request->has('article_id') && $request->has('media_id'))) {
+        if (!$request->has('media_id')) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Exactly one of article_id or media_id must be provided.'
+                'message' => 'Exactly one media_id must be provided.'
             ], 422);
         }
 
@@ -43,23 +41,15 @@ class BookmarkController extends Controller
             ], 422);
         }
 
-        $userId = $request->input('user_id');
-        $articleId = $request->input('article_id');
-        $mediaId = $request->input('media_id');
-        $flag = $request->input('flag');
-        $media = Media::where('id', $mediaId)->where('status'!='published')->first();
-        if ($media) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'media is not published'
-            ], 200);
-        }
+        $userId = (int) $request->input('user_id');
+        $mediaId =  (int) $request->input('media_id');
+        $flag =  (int) $request->input('flag');
+        $media = Media::where('id', $mediaId)->where('status','published')->first();
+        
         // Check if bookmark already exists
         $existingBookmark = Bookmark::where('user_id', $userId)
-            ->where(function ($query) use ($articleId, $mediaId) {
-                if ($articleId) {
-                    $query->where('article_id', $articleId)->whereNull('media_id');
-                } else {
+            ->where(function ($query) use ($mediaId) {
+                if ($mediaId) {
                     $query->where('media_id', $mediaId)->whereNull('article_id');
                 }
             })->first();
@@ -75,7 +65,6 @@ class BookmarkController extends Controller
         $bookmark = new Bookmark();
         $bookmark->user_id = $userId;
         $bookmark->flag = $flag;
-        $bookmark->article_id = $articleId;
         $bookmark->media_id = $mediaId;
         $bookmark->save();
 
