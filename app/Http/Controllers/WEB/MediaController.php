@@ -170,7 +170,7 @@ class MediaController extends Controller
     public function assignTo(Request $request, $id)
 {
     try {
-        $sender_id = Auth::user()->id;
+        $sender = Auth::user();
         // Validate the request
         $request->validate([
             'reviewer_ids' => 'nullable|array',
@@ -212,9 +212,10 @@ class MediaController extends Controller
 
         // Send notification to each reviewer
         foreach ($reviewersArray as $reviewer_id) {
+            $reviewer = User::find($reviewer_id);
             $this->notificationService->sendNotification(
-                $sender_id,
-                $reviewer_id,
+                $sender,
+                $reviewer,
                 $title,
                 $body,
                 $route,
