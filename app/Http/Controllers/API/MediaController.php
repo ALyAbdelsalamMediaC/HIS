@@ -216,19 +216,22 @@ class MediaController extends Controller
             ]);
             $user_name = User::find($validated['user_id'])->name;
 
-            $user = $validated['user_id'];
+            $admins = User::where('role', 'admin')->get();
             $title = "New " . $media->status . " media uploaded: ";
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
             $route = "/media_details/";
             $user_data = User::find($validated['user_id']);
-            $this->notificationService->sendNotification(
-                $user_data, 
-                $user,            
-                $title,
-                $body,
-                $route,
-                $media->id
-            );
+
+            foreach ($admins as $admin) {
+                $this->notificationService->sendNotification(
+                    $user_data,
+                    $admin,
+                    $title,
+                    $body,
+                    $route,
+                    $media->id
+                );
+            }
 
             return response()->json([
                 'message' => 'Media uploaded successfully.' . ' (Duration: ' . ($duration ? round($duration, 2) : 'N/A') . ' seconds)',
@@ -292,7 +295,7 @@ class MediaController extends Controller
     }
     public function recently_Added(Request $request)
     {
-            $userId = (int) $request->user_id;
+        $userId = (int) $request->user_id;
 
         try {
             if ($userId === 0) {
@@ -569,7 +572,7 @@ class MediaController extends Controller
             $bookmark = Bookmark::where('user_id', $validated['user_id'])
                 ->where('media_id', $media->id)
                 ->first();
-                 $bookmark->delete();
+            $bookmark->delete();
             // Log success
             Log::create([
                 'user_id' => $validated['user_id'],
