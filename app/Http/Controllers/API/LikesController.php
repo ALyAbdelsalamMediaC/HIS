@@ -64,7 +64,7 @@ class LikesController extends Controller
             $receiver = $user_media->user;
             $title = "New like on media id: " . $mediaId ;
             $body = "The use" . $sender->name . " made like on the media id "  . $mediaId ;
-            $route = "content/videos/" . $media->id . $media->status;
+            $route = "content/videos/" . $media->id ."/". $media->status;
 
             $this->notificationService->sendNotification(
                 $sender,
