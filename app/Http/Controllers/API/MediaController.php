@@ -219,7 +219,7 @@ class MediaController extends Controller
             $admins = User::where('role', 'admin')->get();
             $title = "New " . $media->status . " media uploaded: ";
             $body = "The " . $media->title . " uploaded successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
-            $route = "content/videos/".$media->id."/pending/";
+            $route = "content/videos/" . $media->id . "/pending/";
             $user_data = User::find($validated['user_id']);
 
             foreach ($admins as $admin) {
@@ -572,8 +572,10 @@ class MediaController extends Controller
             $bookmark = Bookmark::where('user_id', $validated['user_id'])
                 ->where('id', $media->id)
                 ->first();
-            $bookmark->delete();
-            // Log success
+            if ($bookmark != null) {
+
+                $bookmark->delete();
+            }            // Log success
             Log::create([
                 'user_id' => $validated['user_id'],
                 'type' => 'media_update_success',
