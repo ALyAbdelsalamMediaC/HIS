@@ -96,7 +96,7 @@
                     <div class="selected-flag" id="selected-flag"></div>
                     <x-select id="country_of_practices" name="country_of_practices" :options="[]" 
                         class="country-select" placeholder="Select Country" data-required="true" 
-                        data-name="Country of Practices" :selected="{{ old('country_of_practices', $user->country_of_practices) }}" />
+                        data-name="Country of Practices" :selected="old('country_of_practices', $user->country_of_practices)" />
                 </div>
                 <div id="country_of_practices-error-container">
                     <x-input-error :messages="$errors->get('country_of_practices')" />
@@ -163,7 +163,7 @@
                     <div class="selected-flag" id="selected-flag-graduation"></div>
                     <x-select id="country_of_graduation" name="country_of_graduation" :options="[]" 
                         class="country-select" placeholder="Select Country of Graduation" data-required="true"
-                        data-name="Country of Graduation" :selected="{{ old('country_of_graduation', $user->country_of_graduation) }}" />
+                        data-name="Country of Graduation" :selected="old('country_of_graduation', $user->country_of_graduation)" />
                 </div>
                 <div id="country_of_graduation-error-container">
                     <x-input-error :messages="$errors->get('country_of_graduation')" />
