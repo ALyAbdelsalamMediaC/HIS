@@ -29,7 +29,14 @@ class User extends Authenticatable
         'role',
         'google_id',
         'apple_id',
-        'email_verified_at'
+        'email_verified_at',
+        'academic_title',
+        'job_description',
+        'year_of_graduation',
+        'country_of_practices',
+        'institution',
+        'department',
+        'country_of_graduation',
 
     ];
 

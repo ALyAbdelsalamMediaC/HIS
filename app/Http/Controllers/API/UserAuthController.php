@@ -90,6 +90,13 @@ class UserAuthController extends Controller
                 'phone' => 'required|string|unique:users,phone',
                 'profile_image' => 'nullable|image|max:2048',
                 'password' => 'required|string|min:8|confirmed',
+                'academic_title' => 'nullable|string|max:255',
+                'job_description' => 'nullable|string|max:255',
+                'year_of_graduation' => 'nullable|date',
+                'country_of_practices' => 'nullable|string|max:255',
+                'institution' => 'nullable|string|max:255',
+                'department' => 'nullable|string|max:255',
+                'country_of_graduation' => 'nullable|string|max:255',
             ]);
 
             // Check if device_id already exists
@@ -289,6 +296,14 @@ class UserAuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'phone' => 'required|string|max:20|unique:users,phone,' . $user->id,
+                'academic_title' => 'nullable|string|max:255',
+                'job_description' => 'nullable|string|max:255',
+                'year_of_graduation' => 'nullable|date',
+                'country_of_practices' => 'nullable|string|max:255',
+                'institution' => 'nullable|string|max:255',
+                'department' => 'nullable|string|max:255',
+                'country_of_graduation' => 'nullable|string|max:255',
+
             ]);
 
             // Update user profile

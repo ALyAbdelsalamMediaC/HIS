@@ -113,6 +113,13 @@ class AdminAuthController extends Controller
             'role' => 'required|string',
             'phone' => 'required|string|unique:users,phone',
             'password' => 'required|string|min:8|confirmed',
+            'academic_title' => 'nullable|string|max:255',
+            'job_description' => 'nullable|string|max:255',
+            'year_of_graduation' => 'nullable|date',    
+            'country_of_practices' => 'nullable|string|max:255',
+            'institution' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'country_of_graduation' => 'nullable|string|max:255',   
         ]);
 
 
@@ -137,6 +144,13 @@ class AdminAuthController extends Controller
                 'role' => $data['role'],
                 'phone' => $data['phone'],
                 'password' => Hash::make($data['password']),
+                'academic_title' => $data['academic_title'] ?? null,
+                'job_description' => $data['job_description'] ?? null,
+                'year_of_graduation' => $data['year_of_graduation'] ?? null,
+                'country_of_practices' => $data['country_of_practices'] ?? null,
+                'institution' => $data['institution'] ?? null,
+                'department' => $data['department'] ?? null,
+                'country_of_graduation' => $data['country_of_graduation'] ?? null
             ]);
 
             // Optionally log the event
