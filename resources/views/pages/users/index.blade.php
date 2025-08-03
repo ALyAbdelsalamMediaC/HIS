@@ -124,7 +124,7 @@
 
          <!-- Notification Modal -->
     <x-modal id="sendNotificationModal" title="Send Notification">
-    <form action="" method="POST" id="notificationForm" novalidate>
+    <form action="{{ route('notifications.store') }}" method="POST" id="notificationForm" novalidate>
       @csrf
       <input type="hidden" name="notification_token" value="{{ uniqid() }}">
       <div class="form-infield">
@@ -146,7 +146,7 @@
       <div id="receiverIdsContainer"></div>
 
       <div class="modal-footer">
-        <x-button type="submit" style="background-color:#BB1313; color:#fff;" data-bs-dismiss="modal">Cancel</x-button>
+        <x-button style="background-color:#BB1313; color:#fff;" data-bs-dismiss="modal">Cancel</x-button>
       <x-button type="submit" class="px-4">Send</x-button>
       </div>
     </form>
@@ -166,6 +166,7 @@
 @push('scripts')
     <script src="{{ asset('js/filters.js') }}"></script>
     <script src="{{ asset('js/showToast.js') }}"></script>
+    <script src="{{ asset('js/validations.js') }}"></script>
     <script>
         // Initialize selected users from localStorage
         let selectedUsers = JSON.parse(localStorage.getItem('selected_users')) || [];
