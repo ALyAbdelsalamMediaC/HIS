@@ -87,18 +87,58 @@ class AjaxReviews {
             });
             const data = await response.json();
             if (data.success) {
+                // Clear and reset the textarea
                 const textarea = document.querySelector(`#review-reply-comment-${parentId}`);
                 if (textarea) {
                     textarea.value = '';
                     textarea.style.height = 'auto';
                     textarea.focus(); // Keep focus for better UX
                 }
+                
                 // Update the reply count in the DOM
                 const replyCountSpan = document.getElementById(`reply-count-${parentId}`);
                 if (replyCountSpan) {
                     let current = parseInt(replyCountSpan.textContent) || 0;
                     replyCountSpan.textContent = (current + 1) + ' Replies';
                 }
+
+                // Ensure the replies container exists or create it
+                let repliesContainer = document.querySelector(`#review-replies-${parentId}`);
+                if (!repliesContainer) {
+                    repliesContainer = document.createElement('div');
+                    repliesContainer.id = `review-replies-${parentId}`;
+                    repliesContainer.className = 'replies-container';
+                    repliesContainer.style.marginLeft = '40px';
+                    repliesContainer.style.marginTop = '16px';
+                    const parentReviewContainer = document.querySelector(`#reply-container-${parentId}`);
+                    if (parentReviewContainer) {
+                        parentReviewContainer.appendChild(repliesContainer);
+                    }
+                }
+
+                // Immediately show the new reply while waiting for the server response
+                if (data.reply && data.reply.content) {
+                    const tempReply = document.createElement('div');
+                    tempReply.id = `review-reply-${data.reply.id}`;
+                    tempReply.className = 'mb-2 comment-container';
+                    tempReply.style.border = '1px solid #EDEDED';
+                    tempReply.style.paddingLeft = '16px';
+                    tempReply.innerHTML = `
+                        <div class="gap-3 d-flex align-items-start">
+                            <div class="comment-container-user-icon">
+                                <x-svg-icon name="user" size="18" color="#35758c" />
+                            </div>
+                            <div class="w-100">
+                                <h4 class="h5-semibold">${data.reply.user_name || 'You'}</h4>
+                                <span class="h6-ragular" style="color:#ADADAD;">Just now</span>
+                                <p class="mt-2 h6-ragular">${data.reply.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    repliesContainer.insertAdjacentElement('afterbegin', tempReply);
+                }
+
+                // Still fetch the proper HTML from server to replace the temporary reply
                 await this.fetchAndAddReply(data.reply.id, parentId, mediaId);
                 if (typeof showToast !== 'undefined') showToast('Reply added successfully', 'success');
                 return data;
@@ -123,11 +163,25 @@ class AjaxReviews {
                 const repliesContainer = document.querySelector(`#reply-container-${parentId} .replies-container`)
                     || document.querySelector(`#review-replies-${parentId}`);
                 if (repliesContainer) {
+                    // Remove the temporary reply if it exists
+                    const tempReply = document.querySelector(`#review-reply-${replyId}`);
+                    if (tempReply) {
+                        tempReply.remove();
+                    }
+                    // Add the proper reply HTML
                     repliesContainer.insertAdjacentHTML('afterbegin', html);
+                    
+                    // Make sure the replies container is visible
+                    repliesContainer.style.display = 'block';
+                    const parentContainer = document.querySelector(`#reply-container-${parentId}`);
+                    if (parentContainer) {
+                        parentContainer.style.display = 'block';
+                    }
                 }
             }
         } catch (error) {
-            // Silent fail
+            console.error('Error fetching reply HTML:', error);
+            // Even if fetch fails, the temporary reply will remain visible
         }
     }
     async deleteReply(replyId) {

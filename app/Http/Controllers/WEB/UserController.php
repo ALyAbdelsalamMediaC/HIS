@@ -31,14 +31,14 @@ class UserController extends Controller
     {
         try {
             $query = User::withoutTrashed();
+            $total_users = $query->count();
 
             if ($request->filled('search')) {
                 $search = $request->input('search');
                 $query->where('name', 'like', '%' . $search . '%');
             }
 
-            $users = $query->get();
-            $total_users = $query->count();
+            $users = $query->paginate(20)->withQueryString();
             return view('pages.users.index', compact('users', 'total_users'));
         } catch (\Exception $e) {
             Log::create([
@@ -96,8 +96,9 @@ class UserController extends Controller
     /**
      * Soft delete the specified user.
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
+        $user = User::findOrFail($id);
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
@@ -128,7 +129,7 @@ class UserController extends Controller
 
             // Retrieve soft-deleted users with pagination
             $users = $query->select('id', 'name', 'email', 'phone', 'deleted_at')
-                ->paginate(10);
+                ->paginate(20)->withQueryString();
 
             // Get total number of deleted users (ignoring search filter)
             $totalDeleted = User::onlyTrashed()->count();

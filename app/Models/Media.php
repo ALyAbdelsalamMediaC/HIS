@@ -87,4 +87,11 @@ class Media extends Model
         return $value ? url('/storage/uploads/' . $value) : null;
     }
 
+    public const STATUSES = [
+        'published' => 'Published',
+        'pending' => 'Pending',
+        'declined' => 'Declined',
+        'inreview' => 'In Review',
+    ];
+
 }

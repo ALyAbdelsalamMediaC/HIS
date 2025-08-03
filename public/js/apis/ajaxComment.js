@@ -25,15 +25,31 @@ class AjaxComments {
         this.bindEvents();
         this.initializeReadMore();
         this.setupModalDeleteHandler();
+        // Initialize existing comments and replies
+        this.initializeExistingContent();
+    }
+    
+    initializeExistingContent() {
+        // Initialize all existing comments
+        document.querySelectorAll('.comment-container').forEach(comment => {
+            this.bindEventsForNewComment(comment.id.replace('comment-', ''));
+        });
+        // Initialize all existing replies
+        document.querySelectorAll('[id^="reply-"]').forEach(reply => {
+            this.bindEventsForNewReply(reply.id.replace('reply-', ''));
+        });
     }
     
     bindEvents() {
         // Use event delegation for all dynamic elements
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             // Handle comment submission
             if (e.target.closest('.comment-submit-btn')) {
                 e.preventDefault();
-                this.handleCommentSubmit(e.target.closest('.comment-input-wrapper'));
+                const wrapper = e.target.closest('.comment-input-wrapper');
+                await this.handleCommentSubmit(wrapper);
+                // Force update UI after first submission
+                this.updateCommentsList();
             }
             
             // Handle reply button clicks
@@ -275,6 +291,27 @@ class AjaxComments {
       }
     }
     
+    // Update comments list
+    async updateCommentsList() {
+        const container = document.querySelector('.comments-list-container');
+        if (!container) return;
+        
+        try {
+            const mediaId = container.closest('.comments-container').dataset.mediaId;
+            const response = await fetch(`${this.config.getCommentHtmlEndpoint}?mediaId=${mediaId}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const html = await response.text();
+            if (html.trim()) {
+                container.innerHTML = html;
+                // Reinitialize all comments and replies in the updated list
+                this.initializeExistingContent();
+            }
+        } catch (error) {
+            console.error('Error updating comments list:', error);
+        }
+    }
+
     // Like/Unlike comment
     async toggleLikeComment(commentId, isLiked) {
         try {

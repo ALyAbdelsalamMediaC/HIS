@@ -63,7 +63,7 @@
 
         <div class="gap-4 d-flex align-items-center">
           <div class="notification-bell-btn">
-            <x-notifications-dropdown :unreadNotifications="collect([])" />
+            <x-notifications-dropdown/>
           </div>
           <a href="{{ route('settings.profile') }}" class="gap-3 d-flex align-items-center">
             <span class="h6-semibold" style="color:#fff;">{{ auth()->user()->name }}</span>

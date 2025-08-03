@@ -19,14 +19,23 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\LikesController;
+use App\Http\Controllers\WEB\NotificationController;
 use App\Http\Controllers\WEB\ReviewsController;
 
 Route::middleware('auth')->group(function () {
 
-    // Route::middleware(['auth', 'session.expired'])->group(function () {
-    // Route::get('/', function () {
-    //     return view('pages.admin.dashboard');
-    // })->name('pages.admin.dashboard');
+    Route::get('/test-firebase', function () {
+        $filePath = storage_path('app/firebase/his-2025-cb48bda90205.json');
+        if (file_exists($filePath)) {
+            if (is_readable($filePath)) {
+                return "File exists and is readable: " . $filePath;
+            } else {
+                return "File exists but is not readable: " . $filePath;
+            }
+        } else {
+            return "File does not exist: " . $filePath;
+        }
+    });
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
@@ -44,7 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('content/videos/{id}', [MediaController::class, 'destroy'])->name('content.destroy');
     Route::delete('content/articles/{id}', [ArticleController::class, 'destroy'])->name('article.destroy');
     Route::post('/content/assigned/{id}', [MediaController::class, 'assignTo'])->name('content.assignTo');
-    
+
     Route::get('/content/subcategories', [MediaController::class, 'getSubcategoriesByCategory'])->name('content.subcategories');
     Route::get('/content/months-by-year', [MediaController::class, 'getMonthsByYear'])->name('content.monthsByYear');
     Route::post('/content/videos/upload-chunk', [MediaController::class, 'uploadChunk'])->name('content.uploadChunk');
@@ -57,7 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
     Route::post('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'reply'])->name('comments.reply');
     Route::delete('/comments/{comment_id}', [CommentController::class, 'deleteComment'])->name('comments.delete');
-    
+
     // New routes for AJAX HTML rendering
     Route::get('/comments/{comment_id}/html', [CommentController::class, 'getCommentHtml'])->name('comments.html');
     Route::get('/comments/reply/{reply_id}/{parent_id}/html', [CommentController::class, 'getReplyHtml'])->name('comments.reply.html');
@@ -97,7 +106,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::get('/users/destroy', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::delete('/users/destroy/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/blocked', [UserController::class, 'blocked'])->name('users.blocked');
 
     Route::post('/media/{mediaId}', [LikesController::class, 'getLikesCommentCount'])->name('media.like.count');
@@ -129,7 +138,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
     Route::get('/settings/changePassword', [SettingsController::class, 'showChangePasswordForm'])->name('settings.showChangePasswordForm');
     Route::post('/settings/changePassword', [SettingsController::class, 'changePassword'])->name('settings.changePassword');
-Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
+    Route::get('/settings/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/settings/notifications/send', [NotificationController::class, 'store'])->name('notifications.store');
+    Route::get('/settings/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/settings/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+    Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
 
 
     Route::prefix('settings/policies')->name('policies.')->group(function () {
@@ -147,7 +160,6 @@ Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
             Route::delete('/{category}', [PolicyController::class, 'destroyCategory'])->name('destroy');
         });
     });
-
 });
 
 

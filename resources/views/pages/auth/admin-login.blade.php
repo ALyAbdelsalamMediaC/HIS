@@ -42,9 +42,9 @@
                                 <x-svg-icon name="eye2" size="20" color="#000" class="eye-icon eye-hide" />
                             </div>
                         </div>
-                    </div>
-                    <div id="password-error-container">
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        <div id="password-error-container">
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        </div>
                     </div>
             </div>
 

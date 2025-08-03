@@ -18,23 +18,23 @@
 
 <body class="auth-body">
 
-  <!-- Success Message -->
-  @if(session('success'))
-    <x-toast :messages="session('success')" type="success" />
-  @endif
+ <!-- Success Message -->
+    @if(session('success'))
+        <x-toast :messages="session('success')" type="success" />
+    @endif
 
-  @if(session('status'))
-    <x-toast :messages="session('status')" type="success" />
-  @endif
+    @if(session('status'))
+        <x-toast :messages="session('status')" type="success" />
+    @endif
 
-  <!-- Error Messages -->
-  @if($errors->any())
-    <x-toast :messages="$errors->all()" type="danger" />
-  @endif
+    <!-- Error Messages -->
+    @if($errors->any())
+        <x-toast :messages="$errors->all()" type="danger" />
+    @endif
 
-  @if (session('error'))
-    <x-toast :messages="session('error')" type="danger" />
-  @endif
+    @if (session('error'))
+        <x-toast :messages="session('error')" type="danger" />
+    @endif
 
   <div class="auth-container">
     @yield('content')

@@ -23,20 +23,21 @@
                     @csrf
                     <input type="hidden" name="token" value="{{ $token }}">
 
-                    <div class="form-infield">
-                        <x-text_input type="email" id="email" name="email" :value="old('email')" data-required="true"
-                            data-name="Email" />
-                        <x-text_label for="email">Email Address</x-text_label>
+                    <div class="form-infield-focus">
+                        <x-text_input type="email" id="email" name="email" 
+                            :value="old('email')" data-required="true" data-name="email" class="input-form-inner-login" />
+                        <x-text_label for="email" class="label-form-inner-login">Email</x-text_label>
                         <div id="email-error-container">
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
                     </div>
 
-                    <div class="form-infield">
+                    <div class="form-infield-focus">
                         <div class="input-icon">
-                            <x-text_input type="password" id="password" name="password" data-required="true"
-                                data-name="Password" />
-                            <x-text_label for="password">New Password</x-text_label>
+                            <x-text_input type="password" id="password" name="password"
+                                :value="old('password')" data-required="true" data-name="password" class="input-form-inner-login" />
+                        <x-text_label for="password" class="label-form-inner-login">New Password</x-text_label>
+
                             <div class="input-icon-eye" id="togglePassword">
                                 <x-svg-icon name="eye" size="20" color="#000" class="eye-icon eye-show d-none" />
                                 <x-svg-icon name="eye2" size="20" color="#000" class="eye-icon eye-hide" />
@@ -46,16 +47,20 @@
                             <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
                     </div>
-
-                    <div class="form-infield">
+                    
+                                        <div class="form-infield-focus">
                         <div class="input-icon">
                             <x-text_input type="password" id="password_confirmation" name="password_confirmation"
-                                data-required="true" data-name="Confirm Password" />
-                            <x-text_label for="password_confirmation">Confirm Password</x-text_label>
+                                :value="old('password_confirmation')" data-required="true" data-name="Confirm Password" class="input-form-inner-login" />
+                        <x-text_label for="password_confirmation" class="label-form-inner-login">Confirm Password</x-text_label>
+
                             <div class="input-icon-eye" id="toggleConfirmPassword">
                                 <x-svg-icon name="eye" size="20" color="#000" class="eye-icon eye-show d-none" />
                                 <x-svg-icon name="eye2" size="20" color="#000" class="eye-icon eye-hide" />
                             </div>
+                        </div>
+                        <div id="password_confirmation-error-container">
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
                     </div>
 
@@ -66,7 +71,7 @@
                 </form>
 
                 <div class="mt-3 forget-pass">
-                    <a href="{{ route('login') }}" class="h4-semibold">Back to Login</a>
+                    <a href="{{ route('login') }}" class="h5-semibold">Back to Login</a>
                 </div>
             </div>
         </div>

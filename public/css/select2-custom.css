@@ -1,0 +1,21 @@
+/* Custom Select2 Styles */
+.select2-container {
+    min-width: 200px !important; /* Set a minimum width */
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    min-width: 200px !important;
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single {
+    min-width: 200px !important;
+    width: 100% !important;
+}
+
+/* Ensure dropdown width matches container */
+.select2-dropdown {
+    min-width: 200px !important;
+    width: auto !important;
+}

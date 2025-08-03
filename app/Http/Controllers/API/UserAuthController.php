@@ -15,55 +15,69 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
+
 use Illuminate\Support\Facades\Hash;
 
 class UserAuthController extends Controller
 {
 
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'login'    => 'required|string', // can be phone or email
-            'password' => 'required|string',
+{
+    $credentials = $request->validate([
+        'login'    => 'required|string', // can be phone or email
+        'password' => 'required|string',
+    ]);
+
+    // Determine if login is email or phone
+    $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+    // Build credentials array for Auth::attempt
+    $authCredentials = [
+        $loginField => $credentials['login'],
+        'password'  => $credentials['password'],
+    ];
+
+    if (!Auth::attempt($authCredentials)) {
+        Log::create([
+            'user_id' => null,
+            'type' => 'login_failed',
+            'description' => 'Failed login attempt for ' . $loginField . ': ' . $credentials['login'],
         ]);
+        return response()->json([
+            'error' => 'Invalid credentials',
+        ], 401);
+    }
 
-        // Determine if login is email or phone
-        $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+    $user = Auth::user();
 
-        // Build credentials array for Auth::attempt
-        $authCredentials = [
-            $loginField => $credentials['login'],
-            'password'  => $credentials['password'],
-        ];
-
-        if (!Auth::attempt($authCredentials)) {
-            Log::create([
-                'user_id' => null,
-                'type' => 'login_failed',
-                'description' => 'Failed login attempt for ' . $loginField . ': ' . $credentials['login'],
-            ]);
-            return response()->json([
-                'error' => 'Invalid credentials',
-            ], 401);
-        }
-
-        $user = Auth::user();
-
+    // Check if user has the 'user' role
+    if (!$user->hasRole('user')) {
+        Auth::logout(); // Log out the user if role is not 'user'
         Log::create([
             'user_id' => $user->id,
-            'type' => 'login_success',
-            'description' => 'User logged in: ' . ($user->email ?? $user->phone),
+            'type' => 'login_failed',
+            'description' => 'Unauthorized role for ' . ($user->email ?? $user->phone),
         ]);
-
-        // If you use Laravel Sanctum or Passport, generate token here
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token,
-        ], 200);
+            'error' => 'Unauthorized: Only users with "user" role can log in',
+        ], 403);
     }
+
+    Log::create([
+        'user_id' => $user->id,
+        'type' => 'login_success',
+        'description' => 'User logged in: ' . ($user->email ?? $user->phone),
+    ]);
+
+    // Generate token
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Login successful',
+        'user' => $user,
+        'token' => $token,
+    ], 200);
+}
 
     public function register(Request $request)
     {

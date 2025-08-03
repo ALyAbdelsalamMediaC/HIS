@@ -28,6 +28,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Comment;
 use App\Models\Rate;
 use App\Models\Review;
+use App\Services\NotificationService;
+
 
 class MediaController extends Controller
 {
@@ -36,14 +38,18 @@ class MediaController extends Controller
     protected $driveServicePDF;
     protected $driveServiceImage;
     protected $driveServiceThumbnail;
+    protected $notificationService;
 
     public function __construct(
         GoogleDriveServiceVideo $driveServiceVideo,
         GoogleDriveServicePDF $driveServicePDF,
         GoogleDriveServiceImage $driveServiceImage,
-        GoogleDriveServiceThumbnail $driveServiceThumbnail
+        GoogleDriveServiceThumbnail $driveServiceThumbnail,
+        NotificationService $notificationService
+
     ) {
 
+        $this->notificationService = $notificationService;
 
         $this->driveServiceVideo = $driveServiceVideo;
         $this->client = $this->driveServiceVideo->getClient(); // Ensure this method exists in the service
@@ -68,14 +74,14 @@ class MediaController extends Controller
 
             $categories = Category::all();
             $subCategories = collect(); // Default to empty collection
-            
+
             // Get all subcategories grouped by category for frontend use
             $allSubCategories = SubCategory::with('category')->get();
             $subCategoriesByCategory = $allSubCategories->groupBy('category_id');
-            
+
             // Handle both 'year' and 'category' parameters for backward compatibility
             $yearOrCategory = $request->input('year') ?? $request->input('category');
-            
+
             if ($yearOrCategory) {
                 $category = Category::where('name', $yearOrCategory)->first();
                 if ($category) {
@@ -93,13 +99,26 @@ class MediaController extends Controller
                 ->withCount('comments');
 
             // Apply role-based filtering
-            if ($user->role === 'reviewer') {
-                // For reviewers: get media where they are in assigned_to and status is pending or published
+            if ($user->hasRole('reviewer')) {
+                $categories = Media::where('status', 'inreview')
+                    ->whereJsonContains('assigned_to', $user->id)
+                    ->pluck('category_id')
+                    ->unique()
+                    ->map(function ($id) {
+                        return Category::find($id);
+                    });
+
+                $allowedStatuses = ['all', 'inreview', 'published', 'declined'];
                 $query->whereJsonContains('assigned_to', $user->id)
-                    ->whereIn('status', ['inreview', 'published', 'declined']);
+                    ->whereIn('status', $allowedStatuses);
+
+                // Apply status filter only if it's within allowed statuses
+                if ($request->filled('status') && $request->input('status') !== 'all' && in_array($request->input('status'), $allowedStatuses)) {
+                    $query->where('status', $request->input('status'));
+                }
             } else {
-                // For admins: apply status filter only if provided, otherwise get all media
-                if ($request->filled('status')) {
+                // For admins or other roles
+                if ($request->filled('status') && $request->input('status') !== 'all') {
                     $query->where('status', $request->input('status'));
                 }
             }
@@ -139,45 +158,81 @@ class MediaController extends Controller
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
 
-            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory'));
+            // Pass dynamic statuses
+            $statuses = Media::STATUSES;
+
+            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory', 'statuses'));
         } catch (Exception $e) {
-           LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }
     public function assignTo(Request $request, $id)
-    {
-        try {
-            // Validate the request
-            $request->validate([
-                'reviewer_ids' => 'required|array|min:1',
-                'reviewer_ids.*' => 'exists:users,id'
-            ]);
+{
+    try {
+        $sender = Auth::user();
+        // Validate the request
+        $request->validate([
+            'reviewer_ids' => 'nullable|array',
+            'reviewer_ids.*' => 'exists:users,id'
+        ]);
 
-            // Get reviewers from request body
-            $reviewersArray = $request->input('reviewer_ids', []);
+        // Get reviewers from request body
+        $reviewersArray = $request->input('reviewer_ids', []);
 
-            // Clean up any whitespace, filter out empty values, and cast to int
-            $reviewersArray = array_filter(array_map(function ($id) {
-                return (int) trim($id);
-            }, $reviewersArray));
+        // Clean up any whitespace, filter out empty values, and cast to int
+        $reviewersArray = array_filter(array_map(function ($id) {
+            return (int) trim($id);
+        }, $reviewersArray));
 
+        // Prepare update data
+        $updateData = [];
+
+        if (empty($reviewersArray)) {
+            // If no reviewers provided, clear assigned reviewers and set status to pending
+            $updateData = [
+                'assigned_to' => null,
+                'status' => 'pending'
+            ];
+        } else {
             // Convert to JSON (array of integers)
             $reviewersJson = json_encode(array_values($reviewersArray));
-
-            // Update media table using Eloquent
-            Media::where('id', $id)
-                ->update([
-                    'assigned_to' => $reviewersJson,
-                    'status' => 'inreview'
-                ]);
-
-            return back()->with('success', 'Reviewers assigned successfully.');
-        } catch (Exception $e) {
-            LaravelLog::error('Assign to error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to assign reviewers.');
+            $updateData = [
+                'assigned_to' => $reviewersJson,
+                'status' => 'inreview'
+            ];
         }
+
+        // Update media table using Eloquent
+        Media::where('id', $id)->update($updateData);
+
+        $title = "You are assigned to new media with id: " . $id;
+        $body = "The media with id " . $id . " has been uploaded successfully. Please review it.";
+        $route = "content/videos/" . $id."/inreview/";
+
+        // Send notification to each reviewer
+        foreach ($reviewersArray as $reviewer_id) {
+            $reviewer = User::find($reviewer_id);
+            $this->notificationService->sendNotification(
+                $sender,
+                $reviewer,
+                $title,
+                $body,
+                $route,
+                $id
+            );
+        }
+
+        $message = empty($reviewersArray)
+            ? 'Reviewers removed successfully.'
+            : 'Reviewers assigned successfully.';
+
+        return back()->with('success', $message);
+    } catch (Exception $e) {
+        LaravelLog::error('Assign to error: ' . $e->getMessage());
+        return back()->with('error', 'Failed to process reviewer assignment.');
     }
+}
     public function recently_Added()
     {
         try {
@@ -198,6 +253,9 @@ class MediaController extends Controller
 
     public function getone($id, $status)
     {
+        if (Auth::user()->hasRole('reviewer') && $status === 'pending') {
+            return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+        }
         $media = Media::with(['category', 'likes'])->findOrFail($id);
 
         // Get count of likes
@@ -226,6 +284,9 @@ class MediaController extends Controller
         }
 
         if ($status === 'inreview') {
+            if (Media::where('id', $id)->where('status', '!=', 'inreview')->exists()) {
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+            }
             if ($user && $user->role === 'admin') {
                 $adminComments = AdminComment::where('media_id', $id)
                     ->orderBy('created_at', 'desc')
@@ -257,6 +318,9 @@ class MediaController extends Controller
                     ->value('rate');
                 return view('pages.content.video.single_video_inreview_admin', compact('adminComments', 'media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
             } elseif ($user && $user->role === 'reviewer') {
+                if (Media::where('id', $id)->where('status', '!=', 'inreview')->exists()) {
+                    return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+                }
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
                     ->with(['replies' => function ($query) {
@@ -275,8 +339,14 @@ class MediaController extends Controller
                 return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
             }
         } elseif ($status === 'published') {
+            if (Media::where('id', $id)->where('status', '!=', 'published')->exists()) {
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view published media.');
+            }
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         } elseif ($status === 'pending') {
+            if (Media::where('id', $id)->where('status', '!=', 'pending')->exists()) {
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+            }
             $adminComments = AdminComment::where('media_id', $id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -289,6 +359,9 @@ class MediaController extends Controller
 
             return view('pages.content.video.single_video_pending', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
         } elseif ($status === 'declined') {
+            if (Media::where('id', $id)->where('status', '!=', 'declined')->exists()) {
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view declined media.');
+            }
             $user = Auth::user();
             $adminComments = AdminComment::where('media_id', $id)
                 ->orderBy('created_at', 'desc')
@@ -301,6 +374,10 @@ class MediaController extends Controller
             $reviewers = User::where('role', 'reviewer')->get();
 
             if ($user && $user->role === 'reviewer') {
+                if (Media::where('id', $id)->where('status', '!=', 'declined')->exists()) {
+                    return redirect()->route('content.videos')->with('error', 'You do not have permission to view declined media.');
+                }
+
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
                     ->with(['replies' => function ($query) {
@@ -361,22 +438,22 @@ class MediaController extends Controller
                 'mention' => 'nullable|array',
                 'mention.*' => 'nullable|string|max:255',
             ]);
-    
+
             // Validate uploaded_video_path if provided
             if ($request->input('uploaded_video_path') && !file_exists($request->input('uploaded_video_path'))) {
                 throw new \Exception('Invalid video path provided.');
             }
-    
+
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => Auth::id(),
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
-    
+
             $subCategory = SubCategory::firstOrCreate(
                 [
                     'name' => $validated['month'],
@@ -386,17 +463,17 @@ class MediaController extends Controller
                     'description' => "Subcategory for {$validated['month']} {$validated['year']}"
                 ]
             );
-    
+
             $mentions = collect($request->input('mention', []))
                 ->filter()
                 ->map(fn($item) => trim($item))
                 ->values()
                 ->toArray();
-    
+
             $getID3 = new getID3();
             $duration = null;
             $video = null;
-    
+
             // Handle chunked upload
             $assembledPath = $request->input('uploaded_video_path');
             if ($assembledPath && file_exists($assembledPath)) {
@@ -433,7 +510,7 @@ class MediaController extends Controller
             } else {
                 throw new \Exception('No video file provided.');
             }
-    
+
             $pdf = null;
             if ($request->hasFile('pdf') && $request->file('pdf')->isValid()) {
                 $driveServicePDF = new GoogleDriveServicePDF();
@@ -441,7 +518,7 @@ class MediaController extends Controller
                 $url = $driveServicePDF->uploadPdf($request->file('pdf'), $filename);
                 $pdf = 'https://drive.google.com/file/d/' . $url . '/preview';
             }
-    
+
             $thumbnailPath = null;
             if ($request->hasFile('thumbnail_path') && $request->file('thumbnail_path')->isValid()) {
                 $driveServiceThumbnail = new GoogleDriveServiceThumbnail();
@@ -449,7 +526,7 @@ class MediaController extends Controller
                 $url = $driveServiceThumbnail->uploadThumbnail($request->file('thumbnail_path'), $filename);
                 $thumbnailPath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
             }
-    
+
             $imagePath = null;
             if ($request->hasFile('image_path') && $request->file('image_path')->isValid()) {
                 $driveServiceImage = new GoogleDriveServiceImage();
@@ -457,7 +534,7 @@ class MediaController extends Controller
                 $url = $driveServiceImage->uploadImage($request->file('image_path'), $filename);
                 $imagePath = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
             }
-    
+
             $media = Media::create([
                 'category_id' => $category->id,
                 'sub_category_id' => $subCategory->id,
@@ -473,13 +550,13 @@ class MediaController extends Controller
                 'is_featured' => $request->boolean('is_featured'),
                 'duration' => $duration,
             ]);
-    
+
             Log::create([
                 'user_id' => Auth::id(),
                 'type' => 'media_upload_success',
                 'description' => 'Uploaded media: ' . $media->title,
             ]);
-    
+
             return redirect()->route('content.videos')->with('success', 'Media uploaded successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             LaravelLog::error('Validation error: ' . $e->getMessage(), ['exception' => $e]);
@@ -517,6 +594,7 @@ class MediaController extends Controller
     }
     public function update(Request $request, $id)
     {
+
         try {
             $media = Media::findOrFail($id);
 
@@ -527,6 +605,7 @@ class MediaController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'file' => 'nullable|file|mimes:mp4,avi,mov|max:51200', // 50MB limit
+                'uploaded_video_path' => 'nullable|string',
                 'pdf' => 'nullable|file|mimes:pdf|max:51200', // 50MB limit
                 'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
                 'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB limit
@@ -538,10 +617,10 @@ class MediaController extends Controller
 
             $category = Category::firstOrCreate(
                 [
-                    'name' => $validated['year'],
-                    'user_id' => Auth::id()
+                    'name' => $validated['year']
                 ],
                 [
+                    'user_id' => Auth::id(),
                     'description' => "Category for year {$validated['year']}"
                 ]
             );
@@ -567,16 +646,30 @@ class MediaController extends Controller
             $getID3 = new getID3();
             $duration = $media->duration;
 
-            // Update video duration if new file is uploaded
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            // Handle chunked upload for update (like store)
+            $video = $media->file_path;
+            if ($request->filled('uploaded_video_path')) {
+                $assembledPath = $request->input('uploaded_video_path');
+                if ($assembledPath && file_exists($assembledPath)) {
+                    $videoPath = $assembledPath;
+                    $fileInfo = $getID3->analyze($videoPath);
+                    $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
+                    $driveService = new GoogleDriveServiceVideo();
+                    $filename = time() . '_' . basename($videoPath);
+                    LaravelLog::info('About to upload to Google Drive', ['videoPath' => $videoPath, 'filename' => $filename]);
+                    $url = $driveService->uploadFile(new \Illuminate\Http\File($videoPath), $filename);
+                    LaravelLog::info('Google Drive upload returned', ['url' => $url]);
+                    if (!$url) {
+                        throw new \Exception('Failed to retrieve Google Drive file ID.');
+                    }
+                    $video = 'https://drive.google.com/file/d/' . $url . '/preview';
+                    unlink($videoPath); // Clean up
+                    LaravelLog::info('Google Drive upload complete, file ID: ' . $url);
+                }
+            } else if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $videoPath = $request->file('file')->getRealPath();
                 $fileInfo = $getID3->analyze($videoPath);
                 $duration = isset($fileInfo['playtime_seconds']) ? floatval($fileInfo['playtime_seconds']) : null;
-            }
-
-            // Update video file on Google Drive
-            $video = $media->file_path;
-            if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $driveServiceVideo = new GoogleDriveServiceVideo();
                 // Delete old file from Google Drive if exists
                 if ($media->file_path) {
@@ -741,20 +834,75 @@ class MediaController extends Controller
         }
     }
 
+    /**
+     * Extract Google Drive file ID from various possible URL formats.
+     */
+    private function extractGoogleDriveFileId($url)
+    {
+        // Match /file/d/{id}
+        if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match ?id={id}
+        if (preg_match('/[?&]id=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match /uc?id={id}
+        if (preg_match('/\/uc\?id=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        // Match direct ID (if only the ID is stored)
+        if (preg_match('/^[a-zA-Z0-9_-]{20,}$/', $url)) {
+            return $url;
+        }
+        return null;
+    }
+
     public function stream($id)
     {
         try {
             $media = Media::findOrFail($id);
             $filePath = $media->file_path;
 
-            // Extract Google Drive file ID from the URL
-            $fileId = null;
-            if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $filePath, $matches)) {
-                $fileId = $matches[1];
-            }
+            // Extract Google Drive file ID from the URL (support multiple formats)
+            $fileId = $this->extractGoogleDriveFileId($filePath);
 
             if (!$fileId) {
                 abort(404, 'Google Drive file ID not found.');
+            }
+
+            // Check if the access token is expired and refresh it if needed
+            if ($this->client->isAccessTokenExpired()) {
+                // Get the token path
+                $tokenPath = storage_path('app/google-token.json');
+
+                // Read the existing token
+                if (file_exists($tokenPath)) {
+                    $accessToken = json_decode(file_get_contents($tokenPath), true);
+
+                    // Check if we have a refresh token
+                    if (isset($accessToken['refresh_token'])) {
+                        // Refresh the access token
+                        $newAccessToken = $this->client->fetchAccessTokenWithRefreshToken($accessToken['refresh_token']);
+
+                        if (!isset($newAccessToken['error'])) {
+                            // Update the client with the new access token
+                            $this->client->setAccessToken($newAccessToken);
+
+                            // Save the new token for future use
+                            file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
+                        } else {
+                            // If refresh fails, redirect to get a new token
+                            return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                        }
+                    } else {
+                        // No refresh token available, redirect to get a new token
+                        return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                    }
+                } else {
+                    // No token file, redirect to get a new token
+                    return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
+                }
             }
 
             $driveService = new \Google\Service\Drive($this->client);
@@ -790,12 +938,12 @@ class MediaController extends Controller
             $resumableFilename = $request->input('resumableFilename');
             $resumableChunkNumber = (int)$request->input('resumableChunkNumber');
             $resumableTotalChunks = (int)$request->input('resumableTotalChunks');
-    
+
             if (!$resumableIdentifier || !$resumableFilename || !$resumableChunkNumber || !$resumableTotalChunks) {
                 LaravelLog::error('Missing Resumable.js parameters', ['request' => $request->all()]);
                 return response()->json(['error' => 'Missing upload parameters'], 400);
             }
-    
+
             $tempDir = storage_path('app/resumable-temp/' . $resumableIdentifier);
             if (!file_exists($tempDir)) {
                 if (!mkdir($tempDir, 0755, true)) {
@@ -806,7 +954,7 @@ class MediaController extends Controller
                 LaravelLog::error('Temp directory not writable: ' . $tempDir, ['permissions' => fileperms($tempDir)]);
                 return response()->json(['error' => 'Server error: Temp directory not writable'], 500);
             }
-    
+
             if ($request->hasFile('file')) {
                 LaravelLog::info('Received chunk ' . $resumableChunkNumber . ' for ' . $resumableIdentifier, ['file_size' => $request->file('file')->getSize()]);
                 $chunk = $request->file('file');
@@ -820,7 +968,7 @@ class MediaController extends Controller
                 LaravelLog::error('No chunk file provided', ['request' => $request->all()]);
                 return response()->json(['error' => 'No chunk file provided'], 400);
             }
-    
+
             $allChunksPresent = true;
             for ($i = 1; $i <= $resumableTotalChunks; $i++) {
                 if (!file_exists($tempDir . "/chunk_{$i}")) {
@@ -828,7 +976,7 @@ class MediaController extends Controller
                     break;
                 }
             }
-    
+
             if ($allChunksPresent) {
                 $uniqueName = uniqid() . '_' . $resumableFilename;
                 $uploadsDir = storage_path('app/uploads');
@@ -870,7 +1018,7 @@ class MediaController extends Controller
                 }
                 return response()->json(['path' => $finalPath]);
             }
-    
+
             return response()->json(['chunk' => $resumableChunkNumber, 'success' => true]);
         } catch (\Exception $e) {
             LaravelLog::error('Chunk upload error at chunk ' . $resumableChunkNumber, [

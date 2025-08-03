@@ -16,10 +16,10 @@
                     <x-svg-icon name="content" size="20" />
                     <span>Add Video</span>
                 </x-link_btn>
-                <x-link_btn href="{{ route('articles.store') }}">
+                <!-- <x-link_btn href="{{ route('articles.store') }}">
                     <x-svg-icon name="article" size="20" />
                     <span>Add Article</span>
-                </x-link_btn>
+                </x-link_btn> -->
                 @endif
             </div>
 
@@ -31,9 +31,6 @@
                 $tabs = [
                     ['id' => 'videos', 'label' => 'Videos', 'route' => route('content.videos')],
                 ];
-                if (!auth()->user()->hasRole('reviewer')) {
-                    $tabs[] = ['id' => 'articles', 'label' => 'Articles', 'route' => route('content.articles')];
-                }
             @endphp
             <x-tabs_pages :tabs="$tabs" activeTab="videos" />
         </div>
@@ -50,19 +47,26 @@
                     <div class="gap-2 d-flex align-items-center">
                         @php
                             $filters = [
-          
-                                'status' => [
+                               'status' => [
                                     'placeholder' => '-- Select status --',
-                                    'options' => [
-                                        'published' => 'Published',
-                                        'pending' => 'Pending',
-                                        'declined' => 'Declined',
-                                        'inreview' => 'In review',
-                                    ]
+                                    'options' => array_merge(
+                                        ['all' => 'All'],
+                                        auth()->user()->hasRole('reviewer')
+                                            ? array_intersect_key($statuses, array_flip(['published', 'declined', 'inreview']))
+                                            : $statuses
+                                    )
                                 ],
                                 'year' => [
                                     'placeholder' => '-- Select year --',
-                                    'options' => $categories->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])->toArray()
+                                    'options' => $categories
+                                        ->sortByDesc('name')
+                                        ->filter(function($category) use ($subCategoriesByCategory) {
+                                            // Only show years that have associated media for reviewers
+                                            return !auth()->user()->hasRole('reviewer') || 
+                                                isset($subCategoriesByCategory[$category->id]);
+                                        })
+                                        ->mapWithKeys(fn($item) => [$item->name => ucwords(str_replace('_', ' ', $item->name))])
+                                        ->toArray()
                                 ],
                             ];
                         @endphp

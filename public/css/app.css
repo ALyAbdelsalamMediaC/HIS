@@ -428,9 +428,12 @@ body {
     );
 }
 
-/* When input has content (using a class that we'll add with JavaScript) */
+/* When input has content (using a class that we'll add with JavaScript) or is autofilled */
 .form-infield-focus
     .input-form-inner-login.has-content
+    ~ .label-form-inner-login,
+.form-infield-focus
+    .input-form-inner-login:-webkit-autofill
     ~ .label-form-inner-login {
     top: -15px; /* Move to the top */
     transform: translateX(-10px) scale(0.8); /* Scale and move horizontally */
@@ -447,6 +450,15 @@ body {
         #ffffff 100%
     );
     border-radius: 100px;
+}
+
+/* Style for autofilled inputs */
+.form-infield-focus .input-form-inner-login:-webkit-autofill,
+.form-infield-focus .input-form-inner-login:-webkit-autofill:hover,
+.form-infield-focus .input-form-inner-login:-webkit-autofill:focus {
+    -webkit-text-fill-color: #232323;
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Style the icon container */
@@ -577,9 +589,46 @@ body {
     outline: none;
 }
 
+.country-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.selected-flag {
+    position: absolute;
+    left: 12px;
+    width: 24px;
+    height: 16px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+.selected-flag img {
+    width: 100%;
+    height: auto;
+    border-radius: 2px;
+}
+.country-select {
+    padding-left: 45px !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
 /* ========================================================
     Select 2 Styles
    ======================================================== */
+
+/* Container sizing fixes */
+.select2-container {
+    width: 100% !important;
+    min-width: 200px;
+}
 
 .select2-container .select2-selection--single {
     width: 100%;
@@ -599,6 +648,7 @@ body {
     .select2-selection__rendered {
     color: var(--primary-color);
     padding-left: 0;
+    line-height: normal;
 }
 
 .select2-container--default
@@ -634,7 +684,6 @@ body {
 .select2-dropdown {
     border-color: var(--border-color);
     border-radius: var(--main-border-radius-sm);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .select2-container--default
@@ -648,6 +697,13 @@ body {
     .select2-selection--single
     .select2-selection__placeholder {
     color: var(--medium-grey);
+}
+
+/* Fix text overflow */
+.select2-selection__rendered {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ========================================================
@@ -1958,6 +2014,13 @@ body {
     height: auto; /* or a specific value like 300px */
 }
 
+  .quill-editor, .quill-editor * {
+    pointer-events: none !important;
+  }
+  .quill-editor .ql-editor {
+    pointer-events: auto !important;
+  }
+
 .ql-editor {
     /* This sets a default “rows” look */
     min-height: 200px; /* adjust as needed */
@@ -1976,6 +2039,30 @@ body {
     text-align: justify;
 }
 
+/* Quill content heading styles */
+.quill-content h1 {
+    font-size: 2em;
+    font-weight: bold;
+}
+.quill-content h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* Quill list styles using data attributes */
+.quill-content ol{
+    padding: 1em;
+
+}
+.quill-content [data-list="bullet"] {
+    list-style-type: disc;
+}
+
+.quill-content [data-list="ordered"] {
+    list-style-type: decimal;
+}
+
+
 /* ========================================================
     Article Image
    ======================================================== */
@@ -1989,6 +2076,53 @@ body {
     object-fit: cover;
     border-radius: var(--main-border-radius-md);
 }
+
+/* ========================================================
+    Notifications Page Styles
+   ======================================================== */
+.notification-head .nav-link{
+    background-color: #F1F9FA;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 12px 24px;
+    color: var(--primary-color);
+    border-radius: var(--main-border-radius-md);
+}
+
+.notification-head .nav-link.active{
+    background-color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 12px 24px;
+    color: var(--white-color);
+    border-radius: var(--main-border-radius-md);
+}
+
+.notifications-list {
+    padding: 0 16px;
+}
+
+.notifications-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-radius: var(--main-border-radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+}
+
+.notifications-content-left {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notifications-content-left h5 {
+    color: var(--medium-grey);
+}
+
 
 /* ========================================================
     Media Queries and Responsive Styles

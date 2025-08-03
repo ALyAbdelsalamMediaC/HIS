@@ -59,12 +59,14 @@
   </div>
 
   <div class="gap-3 d-flex align-items-center">
-    <div class="notification-bell-btn">
-      <x-notifications-dropdown :unreadNotifications="collect([])" />
-    </div>
-    <a href="{{ route('settings.profile') }}" class="nav-profile">
-      <x-svg-icon name="user" size="18" color="#fff" />
-    </a>
+    @if(Auth::check())
+      <div class="notification-bell-btn">
+        <x-notifications-dropdown />
+      </div>
+      <a href="{{ route('settings.profile') }}" class="nav-profile">
+        <x-svg-icon name="user" size="18" color="#fff" />
+      </a>
+    @endif
   </div>
 </header>
 

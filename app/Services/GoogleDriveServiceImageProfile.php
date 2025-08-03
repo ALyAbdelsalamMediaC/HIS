@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Google\Client;
@@ -24,13 +25,14 @@ class GoogleDriveServiceImageProfile
         if (file_exists($tokenPath)) {
 
             $accessToken = json_decode(file_get_contents($tokenPath), true);
+            $accessToken['created'] = time();
             $this->client->setAccessToken($accessToken);
         }
 
         // If the access token is expired, refresh it
         if ($this->client->isAccessTokenExpired()) {
-            
-                if ($this->client->isAccessTokenExpired()) {
+
+            if ($this->client->isAccessTokenExpired()) {
                 header('Location: https://his.mc-apps.org/get-google-token.php');
                 exit;
             }
