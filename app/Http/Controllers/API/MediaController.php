@@ -575,7 +575,26 @@ class MediaController extends Controller
             if ($bookmark != null) {
 
                 $bookmark->delete();
-            }            // Log success
+            }   
+            $user_name = User::find($validated['user_id'])->name;
+
+            $admins = User::where('role', 'admin')->get();
+            $title = "and exist media updated ";
+            $body = "The " . $media->title . " updated successfull with status "  . $media->status . " by " . $user_name . ". Please review it.";
+            $route = "content/videos/" . $media->id . "/pending/";
+            $user_data = User::find($validated['user_id']);
+
+            foreach ($admins as $admin) {
+                $this->notificationService->sendNotification(
+                    $user_data,
+                    $admin,
+                    $title,
+                    $body,
+                    $route,
+                    $media->id
+                );
+            }
+                     // Log success
             Log::create([
                 'user_id' => $validated['user_id'],
                 'type' => 'media_update_success',
