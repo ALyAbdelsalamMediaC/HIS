@@ -585,14 +585,8 @@ class MediaController extends Controller
                 'message' => 'Media updated successfully.',
                 'data' => $media
             ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
-            Log::error('Media update error: ' . $e->getMessage());
+            LaravelLog::error('Media update error: ' . $e->getMessage());
 
             Log::create([
                 'user_id' => $validated['user_id'],
