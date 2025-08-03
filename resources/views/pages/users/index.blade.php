@@ -121,6 +121,37 @@
                 </table>
             </div>
         </div>
+
+         <!-- Notification Modal -->
+    <x-modal id="sendNotificationModal" title="Send Notification">
+    <form action="{{ route('notifications.store') }}" method="POST" id="notificationForm" novalidate>
+      @csrf
+      <input type="hidden" name="notification_token" value="{{ uniqid() }}">
+      <div class="form-infield">
+      <x-text_label for="notificationTitle" :required="true">Title</x-text_label>
+      <x-text_input type="text" id="notificationTitle" name="title" placeholder="Enter notification title"
+        data-required="true" data-name="Title" data-validate="Title" />
+      <div id="notificationTitle-error-container">
+        <x-input-error :messages="$errors->get('title')" />
+      </div>
+      </div>
+      <div class="mb-3 form-infield">
+      <x-text_label for="notificationBody" :required="true">Body</x-text_label>
+      <x-textarea name="body" id="notificationBody" placeholder="Enter notification message" rows="4"
+        data-required="true" data-name="Body" data-validate="Body" />
+      <div id="notificationBody-error-container">
+        <x-input-error :messages="$errors->get('body')" />
+      </div>
+      </div>
+      <div id="receiverIdsContainer"></div>
+
+      <div class="modal-footer">
+        <x-button style="background-color:#BB1313; color:#fff;" data-bs-dismiss="modal">Cancel</x-button>
+      <x-button type="submit" class="px-4">Send</x-button>
+      </div>
+    </form>
+    </x-modal>
+
         <div class="bottom-vid-pagination d-flex justify-content-between align-items-center">
             @if($users->count())
                 <x-table-info :paginator="$users" />
@@ -135,6 +166,7 @@
 @push('scripts')
     <script src="{{ asset('js/filters.js') }}"></script>
     <script src="{{ asset('js/showToast.js') }}"></script>
+    <script src="{{ asset('js/validations.js') }}"></script>
     <script>
         // Initialize selected users from localStorage
         let selectedUsers = JSON.parse(localStorage.getItem('selected_users')) || [];
