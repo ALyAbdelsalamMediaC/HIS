@@ -64,9 +64,9 @@
 
   <!-- Account Section -->
   <div class="sidebar-bottom">
-    <form method="POST" action="{{ route('logout') }}">
+    <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form">
       @csrf
-      <x-button type="submit" class="h6-semibold btn-nothing">
+      <x-button type="button" class="h6-semibold btn-nothing" onclick="event.preventDefault(); localStorage.clear(); document.getElementById('sidebar-logout-form').submit();">
         <x-svg-icon name="logout" size="18" />
         <span class="sidebar-menu-text">Log Out</span>
       </x-button>
