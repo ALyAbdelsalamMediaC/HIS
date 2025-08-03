@@ -41,7 +41,7 @@ class NotificationService
             'route'       => $route,
             'sender_id'   => $sender->id,
             'receiver_id' => $receiver->id,
-            'request_id'  => $requestId,
+            'media_id'  => $requestId,
             'seen'        => false,
         ]);
 
