@@ -60,8 +60,8 @@ class CommentsController extends Controller
             $sender = User::find($request->user_id);
             $user_media = Media::where('id', $request->media_id)->with('user')->first();
             $receiver = $user_media->user;
-            $title = "New like on media id: " . $request->media_id;
-            $body = "The use" . $sender->name . " made like on the media id "  . $request->media_id;
+            $title = "New comment on media id: " . $request->media_id;
+            $body = "content: " . $request->content;
             $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
 
             $this->notificationService->sendNotification(
