@@ -5,13 +5,23 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\CommentArticle;
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use App\Services\NotificationService;
+
 class CommentsController extends Controller
 {
+    protected $notificationService;
+    public function __construct(
+        NotificationService $notificationService
+    ) {
+
+        $this->notificationService = $notificationService;
+    }
     public function addComment(Request $request)
     {
         try {
@@ -47,6 +57,22 @@ class CommentsController extends Controller
                 'content' => $request->content,
             ]);
 
+            $sender = User::find($request->user_id);
+            $user_media = Media::where('id', $request->media_id)->with('user')->first();
+            $receiver = $user_media->user;
+            $title = "New like on media id: " . $request->media_id;
+            $body = "The use" . $sender->name . " made like on the media id "  . $request->media_id;
+            $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
+
+            $this->notificationService->sendNotification(
+                $sender,
+                $receiver,
+                $title,
+                $body,
+                $route,
+                $request->media_id
+            );
+
             // Load user data
             $comment->load('user');
 
@@ -55,7 +81,6 @@ class CommentsController extends Controller
                 'message' => 'Comment created successfully.',
                 'data' => $comment,
             ], 200);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -122,7 +147,6 @@ class CommentsController extends Controller
                 'message' => 'Reply created successfully.',
                 'data' => $reply,
             ], 201);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -136,22 +160,22 @@ class CommentsController extends Controller
             ], 500);
         }
     }
-   public function getCommentsByMediaId(Request $request)
+    public function getCommentsByMediaId(Request $request)
     {
         try {
-           
-             $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'media_id'=> 'required|exists:media,id'
-        ], [
-            'user_id.exists' => 'The specified user does not exist.',
-            'media_id' => 'required|exists:media,id',
-        ]);
+
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'media_id' => 'required|exists:media,id'
+            ], [
+                'user_id.exists' => 'The specified user does not exist.',
+                'media_id' => 'required|exists:media,id',
+            ]);
             // Validate the user_id if provided
             $user_id = (int) $validated['user_id'];
             $media_id = (int) $validated['media_id'];
-            
-             $query = Comment::where('media_id', $media_id)
+
+            $query = Comment::where('media_id', $media_id)
                 ->whereNull('parent_id')
                 ->with([
                     'replies' => function ($query) use ($user_id) {
@@ -227,7 +251,7 @@ class CommentsController extends Controller
                 ->whereNull('parent_id')
                 ->with(['replies' => function ($query) {
                     $query->orderBy('created_at', 'asc')
-                          ->with('user');
+                        ->with('user');
                 }, 'user'])
                 ->orderBy('created_at', 'asc');
 
@@ -243,7 +267,6 @@ class CommentsController extends Controller
                 'message' => 'Comments retrieved successfully.',
                 'data' => $comments,
             ], 200);
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
