@@ -16,11 +16,15 @@
                     <span>Blocked Users</span>
                 </x-link_btn>
 
+                <x-button style="background-color: #BB1313;" onclick="openNotificationModal()">
+                    <x-svg-icon name="bell" size="20" />
+                    <span>Send Notification</span>
+                </x-button>
+
                 <x-link_btn href="{{  route('admin.register') }}">
                     <x-svg-icon name="plus3" size="20" />
                     <span>Add new user</span>
                 </x-link_btn>
-
             </div>
         </div>
 
@@ -36,6 +40,13 @@
                         <x-search_input id="search_input" type="text" name="search" placeholder="Search user name..."
                             value="{{ request('search') }}" class="w-100" />
                     </div>
+                    
+                    <div style="visibility: hidden;" id="selection-controls">
+                        <div class="flex-row gap-2 d-flex md-flex-col align-items-center">
+                            <x-button type="button" class="bg-trans-btn selected-count">0 Employees selected</x-button>
+                            <x-button type="button" style="background-color: #BB1313;" onclick="clearSelections()">Clear</x-button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -43,7 +54,10 @@
                 <table class="custom-table">
                     <thead style="background:#F1F9FA;">
                         <tr>
-                            <th style="width:30%;">Name</th>
+                            <th style="width:5%;">
+                                <input type="checkbox" id="selectAll" />
+                            </th>
+                            <th style="width:25%;">Name</th>
                             <th style="width:30%;">Email</th>
                             <th style="width:15%;">Role</th>
                             <th style="width:15%;">Status</th>
@@ -53,6 +67,9 @@
                     <tbody>
                         @forelse ($users as $user)
                             <tr>
+                                <td style="text-align: left;">
+                                <input type="checkbox" class="userCheckbox" name="selected_users[]" value="{{ $user->id }}" />
+                                </td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ ucfirst($user->role) }}</td>
@@ -117,4 +134,148 @@
 
 @push('scripts')
     <script src="{{ asset('js/filters.js') }}"></script>
+    <script src="{{ asset('js/showToast.js') }}"></script>
+    <script>
+        // Initialize selected users from localStorage
+        let selectedUsers = JSON.parse(localStorage.getItem('selected_users')) || [];
+
+        // Get current page user IDs
+        const getCurrentPageUserIds = () => {
+            return Array.from(document.querySelectorAll('.userCheckbox')).map(chk => chk.value);
+        };
+
+        // Update UI based on selected users
+        const updateSelectionUI = () => {
+            const userCheckboxes = document.querySelectorAll('.userCheckbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const selectionControls = document.getElementById('selection-controls');
+            const selectedCountButton = document.querySelector('.selected-count');
+
+            // Update checkbox states
+            userCheckboxes.forEach(chk => {
+                chk.checked = selectedUsers.includes(chk.value);
+            });
+
+            // Update select all checkbox
+            const currentPageUserIds = getCurrentPageUserIds();
+            const allCurrentPageSelected = currentPageUserIds.length > 0 &&
+                currentPageUserIds.every(userId => selectedUsers.includes(userId));
+            selectAllCheckbox.checked = allCurrentPageSelected;
+
+            // Update selected count and visibility
+            const selectedCount = selectedUsers.length;
+            selectedCountButton.textContent = `${selectedCount} User${selectedCount !== 1 ? 's' : ''} selected`;
+            selectionControls.style.visibility = selectedCount > 0 ? 'visible' : 'hidden';
+        };
+
+        // Handle individual checkbox changes
+        const handleCheckboxChange = (checkbox) => {
+            const userId = checkbox.value;
+            if (checkbox.checked) {
+                if (!selectedUsers.includes(userId)) {
+                    selectedUsers.push(userId);
+                }
+            } else {
+                selectedUsers = selectedUsers.filter(id => id !== userId);
+            }
+            localStorage.setItem('selected_users', JSON.stringify(selectedUsers));
+            updateSelectionUI();
+        };
+
+        // Handle select all checkbox
+        const handleSelectAll = () => {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const currentPageUserIds = getCurrentPageUserIds();
+
+            if (selectAllCheckbox.checked) {
+                // Add all current page users to selection
+                currentPageUserIds.forEach(userId => {
+                    if (!selectedUsers.includes(userId)) {
+                        selectedUsers.push(userId);
+                    }
+                });
+            } else {
+                // Remove all current page users from selection
+                selectedUsers = selectedUsers.filter(userId => !currentPageUserIds.includes(userId));
+            }
+
+            localStorage.setItem('selected_users', JSON.stringify(selectedUsers));
+            updateSelectionUI();
+        };
+
+        // Clear selections
+        const clearSelections = () => {
+            selectedUsers = [];
+            localStorage.removeItem('selected_users');
+            updateSelectionUI();
+        };
+
+        // Open notification modal
+        function openNotificationModal() {
+            if (selectedUsers.length === 0) {
+                showToast("Please select at least one user to send a notification.", 'danger');
+                return;
+            }
+
+            const container = document.getElementById('receiverIdsContainer');
+            container.innerHTML = '';
+
+            selectedUsers.forEach(userId => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'receiver_ids[]';
+                hiddenInput.value = userId;
+                container.appendChild(hiddenInput);
+            });
+
+            const modal = new bootstrap.Modal(document.getElementById('sendNotificationModal'));
+            modal.show();
+        }
+
+        // Handle notification form submission
+        const notificationForm = document.getElementById('notificationForm');
+        notificationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+
+                if (response.ok) {
+                    clearSelections();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal'));
+                    modal.hide();
+                    showToast('Notification sent successfully.', 'success');
+                } else {
+                    const errors = await response.json();
+                    showToast('Failed to send notification: ' + (errors.message || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                showToast('An error occurred while sending the notification.', 'danger');
+            }
+        });
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const userCheckboxes = document.querySelectorAll('.userCheckbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+
+            userCheckboxes.forEach(chk => {
+                chk.addEventListener('change', () => handleCheckboxChange(chk));
+            });
+
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', handleSelectAll);
+            }
+
+            updateSelectionUI();
+        });
+    </script>
 @endpush

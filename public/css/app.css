@@ -1317,6 +1317,60 @@ body {
     text-align: center;
 }
 
+/* Narrower checkbox and ID columns */
+.custom-table th:first-child,
+.custom-table td:first-child {
+    width: 5%; /* Very narrow for checkbox */
+    padding-left: 8px; /* Adjusted padding for narrower column */
+}
+
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2) {
+    width: 5%; /* Narrower for ID column */
+    padding-left: 8px; /* Adjusted padding for narrower column */
+}
+
+.custom-table input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    background-color: var(--white-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Style for checked state (with checkmark) */
+.custom-table input[type="checkbox"]:checked {
+    background-color: var(
+        --primary-color
+    ); /* Red background for checked state */
+    border-color: var(--primary-color); /* Red border for consistency */
+}
+
+/* Add a checkmark using the ::after pseudo-element for the checked state */
+.custom-table input[type="checkbox"]:checked::after {
+    content: "✔"; /* Unicode checkmark or use a custom icon */
+    color: var(
+        --white-color
+    ); /* White checkmark to stand out against red background */
+    font-size: 12px; /* Adjust size of checkmark */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the checkmark */
+    line-height: 1; /* Ensure proper vertical alignment */
+}
+
+/* Ensure the checkbox fits within its cell */
+.custom-table td,
+.custom-table th {
+    vertical-align: middle; /* Align checkbox vertically in the cell */
+}
+
 /* ========================================================
     Pages tabs Styles
    ======================================================== */
