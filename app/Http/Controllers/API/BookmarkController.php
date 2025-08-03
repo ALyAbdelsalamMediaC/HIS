@@ -7,13 +7,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
 use App\Models\Article;
 use App\Models\Media;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Services\NotificationService;
 
 class BookmarkController extends Controller
 {
+ protected $notificationService;
+    public function __construct(
+        NotificationService $notificationService
+    ) {
 
+        $this->notificationService = $notificationService;
+    }
     public function addBookmark(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -67,6 +75,22 @@ class BookmarkController extends Controller
         $bookmark->flag = $flag;
         $bookmark->media_id = $mediaId;
         $bookmark->save();
+
+         $sender = User::find($userId);
+            $user_media = Media::where('id',$mediaId)->with('user')->first();
+            $receiver = $user_media->user;
+            $title = "New bookmark on media id: " . $mediaId ;
+            $body = "The use" . $sender->name . " made bookmark on the media id "  . $mediaId ;
+            $route = "content/videos/" . $media->id ."/". $media->status;
+
+            $this->notificationService->sendNotification(
+                $sender,
+                $receiver,
+                $title,
+                $body,
+                $route,
+                $media->id
+            );
 
         return response()->json([
             'status' => 'success',
