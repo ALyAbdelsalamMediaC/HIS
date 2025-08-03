@@ -73,6 +73,13 @@ class UserController extends Controller
             'role' => 'required|in:admin,reviewer,user',
             'phone' => 'required|string',
             'profile_image' => 'nullable|image|max:2048',
+            'academic_title' => 'nullable|string|max:255',
+            'job_description' => 'nullable|string|max:255',
+            'year_of_graduation' => 'nullable|date',
+            'country_of_practices' => 'nullable|string|max:255',
+            'institution' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'country_of_graduation' => 'nullable|string|max:255',
         ]);
 
 
