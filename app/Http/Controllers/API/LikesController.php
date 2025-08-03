@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\API;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Media;
@@ -8,23 +9,32 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Models\LikeComment;
 use App\Models\Log as ModelsLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\NotificationService;
 
 class LikesController extends Controller
 {
-    public function addLike(Request $request,$mediaId)
+    protected $notificationService;
+    public function __construct(
+        NotificationService $notificationService
+    ) {
+
+        $this->notificationService = $notificationService;
+    }
+    public function addLike(Request $request, $mediaId)
     {
         try {
             $request->validate([
                 'user_id' => 'required|integer|exists:users,id',
             ]);
-            
+
             $userId = $request->input('user_id');
-            
+
             // Find the media item
-            $media = Media::where('id',$mediaId)->first();
+            $media = Media::where('id', $mediaId)->first();
             // Check if the user already liked this media
             $existingLike = Like::where('user_id', $userId)
                 ->where('media_id', $mediaId)
@@ -49,6 +59,20 @@ class LikesController extends Controller
                 'type' => 'like_added',
                 'description' => "Liked media: {$media->title}",
             ]);
+            $sender = User::find($userId);
+            $receiver = Media::where('media_id',$mediaId)->with('user')->get();
+            $title = "New like on media id: " . $mediaId ;
+            $body = "The use" . $sender->name . " made like on the media id "  . $mediaId ;
+            $route = "content/videos/" . $media->id . $media->status;
+
+            $this->notificationService->sendNotification(
+                $sender,
+                $receiver,
+                $title,
+                $body,
+                $route,
+                $media->id
+            );
 
             return response()->json([
                 'success' => true,
@@ -58,7 +82,6 @@ class LikesController extends Controller
                     'media_id' => $mediaId
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
 
@@ -69,7 +92,7 @@ class LikesController extends Controller
         }
     }
 
-    public function removeLike(Request $request,$mediaId)
+    public function removeLike(Request $request, $mediaId)
     {
         try {
             $request->validate([
@@ -107,7 +130,6 @@ class LikesController extends Controller
                 'success' => true,
                 'message' => 'Like removed successfully.'
             ], 200);
-
         } catch (\Exception $e) {
             Log::error('Like removal failed: ' . $e->getMessage());
 
@@ -118,7 +140,7 @@ class LikesController extends Controller
         }
     }
 
-    public function addLikeComment(Request $request,$commentId)
+    public function addLikeComment(Request $request, $commentId)
     {
         try {
             $request->validate([
@@ -163,7 +185,6 @@ class LikesController extends Controller
                     'comment_id' => $commentId
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Like addition failed: ' . $e->getMessage());
 
@@ -174,7 +195,7 @@ class LikesController extends Controller
         }
     }
 
-    public function removeLikeComment(Request $request ,$commentId)
+    public function removeLikeComment(Request $request, $commentId)
     {
         try {
             $request->validate([
@@ -212,7 +233,6 @@ class LikesController extends Controller
                 'success' => true,
                 'message' => 'Like removed successfully.'
             ], 200);
-
         } catch (\Exception $e) {
             Log::error('Like removal failed: ' . $e->getMessage());
 
