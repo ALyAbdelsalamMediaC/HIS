@@ -23,6 +23,8 @@ Route::get('/media/show', [MediaController::class, 'show']);
 Route::get('/media/featured', [MediaController::class, 'featured']);
 Route::get('/media/recently_Added', [MediaController::class, 'recently_Added']);
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
+
     Route::get('/user_media', [MediaController::class, 'getMediaByUserId']);
     Route::get('/media_details', [MediaController::class, 'getMediaByMediaId']);
     Route::get('/category_media', [MediaController::class, 'getMediaByCategoryId']);
@@ -59,7 +61,6 @@ Route::get('/show/admin-comments', [AdminCommentController::class, 'showAdminCom
 Route::post('/add/admin-comments', [AdminCommentController::class, 'addComment'])->name('admin.comments.show');
 Route::post('/reply/admin-comments', [AdminCommentController::class, 'reply']);
 
-Route::get('/bookmarks', [BookmarkController::class, 'getBookmarks']);
 Route::post('/bookmarks/add', [BookmarkController::class, 'addBookmark']);
 Route::post('/bookmarks/remove', [BookmarkController::class, 'removeBookmark']);
 Route::get('/policies', [PolicyController::class, 'index']);
