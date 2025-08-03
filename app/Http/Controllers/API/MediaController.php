@@ -570,7 +570,7 @@ class MediaController extends Controller
                 'duration' => $duration,
             ]);
             $bookmark = Bookmark::where('user_id', $validated['user_id'])
-                ->where('media_id', $media->id)
+                ->where('id', $media->id)
                 ->first();
             $bookmark->delete();
             // Log success
