@@ -60,7 +60,8 @@ class LikesController extends Controller
                 'description' => "Liked media: {$media->title}",
             ]);
             $sender = User::find($userId);
-            $receiver = Media::where('id',$mediaId)->with('user')->get();
+            $user_media = Media::where('id',$mediaId)->with('user')->first();
+            $receiver = $user_media->user;
             $title = "New like on media id: " . $mediaId ;
             $body = "The use" . $sender->name . " made like on the media id "  . $mediaId ;
             $route = "content/videos/" . $media->id . $media->status;
