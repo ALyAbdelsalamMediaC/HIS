@@ -70,14 +70,14 @@ class NotificationController extends Controller
 
         // Store notifications in the database
         foreach ($request->receiver_ids as $receiverId) {
-            Notification::create([
-                'title' => $request->title,
-                'body' => $request->body,
-                'route' => $request->route ?? null,
-                'sender_id' => Auth::id(), // Corrected: sender is the authenticated user
-                'receiver_id' => $receiverId, // Corrected: receiver is the target user
-                'seen' => false,
-            ]);
+            // Notification::create([
+            //     'title' => $request->title,
+            //     'body' => $request->body,
+            //     'route' => $request->route ?? null,
+            //     'sender_id' => Auth::id(), // Corrected: sender is the authenticated user
+            //     'receiver_id' => $receiverId, // Corrected: receiver is the target user
+            //     'seen' => false,
+            // ]);
 
             // Send notification via service
             $receiver = User::find($receiverId);
