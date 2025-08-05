@@ -100,7 +100,7 @@ class NotificationController extends Controller
     public function index()
     {
         try {
-            $notifications = Notification::with(['sender', 'receiver', 'media'])
+            $notifications = Notification::where('receiver_id',auth()->id())->with(['sender', 'receiver', 'media'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(20); // Fixed: removed duplicate paginate call
 
