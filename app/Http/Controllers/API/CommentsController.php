@@ -56,7 +56,6 @@ class CommentsController extends Controller
                 'parent_id' => $request->parent_id,
                 'content' => $request->content,
             ]);
-            $comment->load('user');
 
             $sender = User::find($request->user_id);
             $user_media = Media::where('id', $request->media_id)->with('user')->first();
@@ -75,6 +74,7 @@ class CommentsController extends Controller
             );
 
             // Load user data
+            $comment->load('user');
 
             return response()->json([
                 'status' => 'success',
@@ -141,7 +141,30 @@ class CommentsController extends Controller
 
             // Load user data
             $reply->load('user');
-             $sender = User::find($request->user_id);
+
+
+            $sender = User::find($request->user_id);
+            $user_media = Media::where('id', $request->media_id)->with('user')->first();
+            $receiver = $user_media->user;
+            $title = "New comment on media id: " . $request->media_id;
+            $body = "content: " . $request->content;
+            $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
+
+            $this->notificationService->sendNotification(
+                $sender,
+                $receiver,
+                $title,
+                $body,
+                $route,
+                $request->media_id
+            );
+            //notify the parent comment author
+            $parentId = $request->parent_id;
+            $sender = User::find($request->user_id);
+            // $receiver = User::find($request->parent_id);
+            $user_media = Media::where('id', $request->media_id)->with(['user' => function ($query) use ($parentId) {
+                $query->where('id', $parentId);
+            }])->first();
             $user_media = Media::where('id', $request->media_id)->with('user')->first();
             $receiver = $user_media->user;
             $title = "New comment on media id: " . $request->media_id;
@@ -157,23 +180,6 @@ class CommentsController extends Controller
                 $request->media_id
             );
 
-            //notify the parent comment author
-            $sender = User::find($request->user_id);
-            $receiver = User::find($request->parent_id);            
-            $user_media = Media::where('id', $request->media_id)->with('user')->first();
-            // $receiver = $user_media->user;
-            $title = "New comment on media id: " . $request->media_id;
-            $body = "content: " . $request->content;
-            $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
-
-            $this->notificationService->sendNotification(
-                $sender,
-                $receiver,
-                $title,
-                $body,
-                $route,
-                $request->media_id
-            );
 
 
             return response()->json([
