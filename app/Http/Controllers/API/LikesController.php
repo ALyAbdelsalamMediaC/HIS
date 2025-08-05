@@ -60,11 +60,11 @@ class LikesController extends Controller
                 'description' => "Liked media: {$media->title}",
             ]);
             $sender = User::find($userId);
-            $user_media = Media::where('id',$mediaId)->with('user')->first();
+            $user_media = Media::where('id', $mediaId)->with('user')->first();
             $receiver = $user_media->user;
-            $title = "New like on media id: " . $mediaId ;
-            $body = "The use" . $sender->name . " made like on the media id "  . $mediaId ;
-            $route = "content/videos/" . $media->id ."/". $media->status;
+            $title = "New like on media id: " . $mediaId;
+            $body = $sender->name . " made like on the media id "  . $mediaId;
+            $route = "content/videos/" . $media->id . "/" . $media->status;
 
             $this->notificationService->sendNotification(
                 $sender,
@@ -170,6 +170,24 @@ class LikesController extends Controller
                 'user_id' => $userId,
                 'comment_id' => $commentId,
             ]);
+            $media = Media::where('id', $comment->media_id)->first();
+            $mediaId = $media->id;
+
+            $sender = User::find($userId);
+            $user_media = Media::where('id', $mediaId)->with('user')->first();
+            $receiver = $user_media->user;
+            $title = "New like on media id: " . $mediaId;
+            $body = $sender->name . " made like on the media id "  . $mediaId;
+            $route = "content/videos/" . $media->id . "/" . $media->status;
+
+            $this->notificationService->sendNotification(
+                $sender,
+                $receiver,
+                $title,
+                $body,
+                $route,
+                $media->id
+            );
 
             // Log the action
             ModelsLog::create([
