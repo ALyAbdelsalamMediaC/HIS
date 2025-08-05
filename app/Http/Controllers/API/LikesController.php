@@ -189,6 +189,20 @@ class LikesController extends Controller
                 $media->id
             );
 
+            $comment_author = User::find($comment->user_id);
+        if ($comment_author && $comment_author->id != $sender->id && $comment_author->id != $user_media->id) {
+            $title = "New like on your comment for media id: " . $media->id;
+            $body = $sender->name . " liked your comment: " . $comment->content;
+            $this->notificationService->sendNotification(
+                $sender,
+                $comment_author,
+                $title,
+                $body,
+                $route,
+                $media->id
+            );
+        }
+
             // Log the action
             ModelsLog::create([
                 'user_id' => $userId,
