@@ -796,7 +796,7 @@ class MediaController extends Controller
             // Query for Media
             $mediaQuery = Media::where('id', $media_id)
                 ->with(['category'])
-                ->withCount(['comments', 'likes'])
+                ->withCount(['AdminComment','comments', 'likes'])
                 ->when($userId, function ($query) use ($userId) {
                     return $query->withExists(['likes as is_liked' => function ($query) use ($userId) {
                         $query->where('user_id', $userId);
