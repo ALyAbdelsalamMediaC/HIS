@@ -14,9 +14,9 @@
     @endif
 @elseif($media->status === 'revise')
     @if(auth()->user()->hasRole('admin'))
-        @include('pages.content.video.single_video_inreview_admin')
+        @include('pages.content.video.single_video_revise_admin')
     @elseif(auth()->user()->hasRole('reviewer'))
-        @include('pages.content.video.single_video_revise_reviwer')
+        @include('pages.content.video.single_video_revise_reviewer')
     @else
         <section>
         <div class="gap-3 mb-4 d-flex align-items-center">
