@@ -108,7 +108,7 @@ class MediaController extends Controller
                         return Category::find($id);
                     });
 
-                $allowedStatuses = ['all', 'inreview', 'published', 'declined'];
+                $allowedStatuses = ['all', 'inreview','revise', 'published', 'declined'];
                 $query->whereJsonContains('assigned_to', $user->id)
                     ->whereIn('status', $allowedStatuses);
 
@@ -399,9 +399,12 @@ class MediaController extends Controller
             }
             return view('pages.content.video.single_video_published', compact('media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked'));
         } elseif ($status === 'pending') {
+
             if (Media::where('id', $id)->where('status', '!=', 'pending')->exists()) {
                 return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
             }
+                        
+
             $adminComments = AdminComment::where('media_id', $id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -411,7 +414,6 @@ class MediaController extends Controller
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
-
             return view('pages.content.video.single_video_pending', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
         } elseif ($status === 'declined') {
             if (Media::where('id', $id)->where('status', '!=', 'declined')->exists()) {
@@ -1107,7 +1109,7 @@ class MediaController extends Controller
     public function changeStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:pending,inreview,published,declined',
+            'status' => 'required|string|in:pending,inreview,published,revise,declined',
         ]);
         $media = Media::findOrFail($id);
         $currentStatus = $media->status;
