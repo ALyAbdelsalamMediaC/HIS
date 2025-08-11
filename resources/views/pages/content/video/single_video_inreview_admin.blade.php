@@ -256,20 +256,21 @@
         />
     </div>
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
-      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
+      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" class="d-flex align-items-end" style="gap: 12px;">
         @csrf
-        <input type="hidden" name="status" value="declined">
-        <x-button class="bg-danger" type="submit">Declined</x-button>
-      </form>
-      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
-        @csrf
-        <input type="hidden" name="status" value="pending">
-        <x-button style="color: #e0b610; background-color: #fbfdd0;" type="submit">Previous (Pending)</x-button>
-      </form>
-      <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" style="display:inline;">
-        @csrf
-        <input type="hidden" name="status" value="published">
-        <x-button style="background-color:#f1f9fa; color: #35758c;" type="submit">Next (Published)</x-button>
+        <div class="form-infield" style="min-width: 240px;">
+          <x-text_label for="status-select-{{ $media->id }}">Change status</x-text_label>
+          <x-select id="status-select-{{ $media->id }}" name="status"
+            :options="[
+              'declined' => 'Declined',
+              'pending' => 'Pending',
+              'inreview' => 'In Review',
+              'published' => 'Published',
+              'revise' => 'Revise',
+            ]"
+            placeholder="Select status" />
+        </div>
+        <x-button type="submit">Change</x-button>
       </form>
     </div>
     </div>
