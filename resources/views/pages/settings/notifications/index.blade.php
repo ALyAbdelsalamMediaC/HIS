@@ -38,7 +38,7 @@
         <button class="gap-1 border-0 nav-link h3-ragular d-flex align-items-center" id="unread-tab" data-bs-toggle="tab"
           data-bs-target="#unread-notifications" type="button" role="tab" aria-controls="unread-notifications"
           aria-selected="false">
-          Unread <span>({{ $notifications->where('seen', false)->count() }})</span>
+          Unread <span>({{ $unreadCount }})</span>
         </button>
         </li>
       </ul>
@@ -50,113 +50,86 @@
       <!-- All notifications tab -->
       <div class="tab-pane fade show active" id="all-notifications" role="tabpanel" aria-labelledby="all-tab">
       <div class="notifications-list">
-        @php
-        use Carbon\Carbon;
-        $groupedNotifications = $notifications->groupBy(function ($notification) {
-        $date = Carbon::parse($notification->created_at);
-        if ($date->isToday()) {
-        return 'Today';
-        } elseif ($date->isYesterday()) {
-        return 'Yesterday';
-        } else {
-        return $date->format('F d, Y');
-        }
-        });
-    @endphp
-
-        @forelse($groupedNotifications as $date => $notificationGroup)
-      <h3 class="mt-4 mb-2 h4-semibold" style="color: #ADADAD;">{{ $date }}</h3>
-
-      @foreach($notificationGroup as $notification)
-      <div class="notifications-content">
-      <a href="{{ route('notifications.read', $notification->id) }}">
-      <div class="notifications-content-left">
-      <div class="notifications-icon">
-      @if(isset($notification->sender) && $notification->sender->profile_image)
-      <img src="{{ $notification->sender->profile_image}}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
-                @else
-                <div class="comment-container-user-icon">
-                  <x-svg-icon name="user" size="18" color="#35758c" />
-                </div>
-                @endif
-      </div>
-      <div class="gap-1 d-flex flex-column">
-      <h3 class="h6-semibold" style="color: black;">{{ $notification->title }}</h3>
-      <h4 class="h6-ragular" style="color: #adadad;">{{ $notification->body }}</h4>
-      <h5 style="color: #adadad; font-size: 12px; font-weight: 400;">
-      {{ $notification->created_at ? $notification->created_at->format('M d, Y \a\t h:i A') : 'N/A' }}
-      </h5>
-      </div>
-      </div>
-      </a>
-
-      @if(!$notification->seen)
-      <img src="/images/icons/dot_red.svg" alt="dot_red">
-    @endif
-      </div>
-    @endforeach
-    @empty
-    <div class="mt-4 text-center">
-    <p class="h4-ragular">No notifications found</p>
-    </div>
-  @endforelse
-      </div>
-      </div>
+        
+        <div class="mt-4">
+          @forelse($notifications as $notification)
+          <div class="mb-1 notifications-content">
+          <a href="{{ route('notifications.read', $notification->id) }}">
+          <div class="notifications-content-left">
+          <div class="notifications-icon">
+          @if(isset($notification->sender) && $notification->sender->profile_image)
+          <img src="{{ $notification->sender->profile_image}}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
+                    @else
+                    <div class="comment-container-user-icon">
+                      <x-svg-icon name="user" size="18" color="#35758c" />
+                    </div>
+                    @endif
+          </div>
+          <div class="gap-1 d-flex flex-column">
+          <h3 class="h6-semibold" style="color: black;">{{ $notification->title }}</h3>
+          <h4 class="h6-ragular" style="color: #adadad;">{{ $notification->body }}</h4>
+          <h5 style="color: #adadad; font-size: 12px; font-weight: 400;">
+          {{ $notification->created_at ? $notification->created_at->format('M d, Y \a\t h:i A') : 'N/A' }}
+          </h5>
+          </div>
+          </div>
+          </a>
+    
+          @if(!$notification->seen)
+          <img src="/images/icons/dot_red.svg" alt="dot_red">
+        @endif
+          </div>
+        @empty
+        <div class="mt-4 text-center">
+        <p class="h4-ragular">No notifications found</p>
+        </div>
+      @endforelse
+          </div>
+          </div>
+        </div>
 
       <!-- Unread notifications tab -->
       <div class="tab-pane fade" id="unread-notifications" role="tabpanel" aria-labelledby="unread-tab">
       <div class="notifications-list">
         @php
         $unreadNotifications = $notifications->where('seen', false);
-        $groupedUnreadNotifications = $unreadNotifications->groupBy(function ($notification) {
-        $date = Carbon::parse($notification->created_at);
-        if ($date->isToday()) {
-        return 'Today';
-        } elseif ($date->isYesterday()) {
-        return 'Yesterday';
-        } else {
-        return $date->format('F d, Y');
-        }
-        });
-    @endphp
+        @endphp
+        <div class="mt-4">
 
-        @forelse($groupedUnreadNotifications as $date => $notificationGroup)
-      <h3 class="mt-4 mb-2 h4-semibold" style="color: #ADADAD;">{{ $date }}</h3>
-
-      @foreach($notificationGroup as $notification)
-      <div class="notifications-content">
-      <a href="{{ route('notifications.read', $notification->id) }}">
-      <div class="notifications-content-left">
-      <div class="notifications-icon">
-      @if(isset($notification->sender) && $notification->sender->profile_image)
-      <img src="{{ $notification->sender->profile_image}}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
-      @else
-      <div class="comment-container-user-icon">
-        <x-svg-icon name="user" size="18" color="#35758c" />
+          @forelse($unreadNotifications as $notification)
+        <div class="mb-1 notifications-content">
+        <a href="{{ route('notifications.read', $notification->id) }}">
+        <div class="notifications-content-left">
+        <div class="notifications-icon">
+        @if(isset($notification->sender) && $notification->sender->profile_image)
+        <img src="{{ $notification->sender->profile_image}}" class="user-profile-img" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="User Image" />
+        @else
+        <div class="comment-container-user-icon">
+          <x-svg-icon name="user" size="18" color="#35758c" />
+        </div>
+        @endif
+        </div>
+        <div class="gap-1 d-flex flex-column">
+        <h3 class="h6-semibold" style="color: black;">{{ $notification->title }}</h3>
+        <h4 class="h6-ragular" style="color: #adadad;">{{ $notification->body }}</h4>
+        <h5 style="color: #adadad; font-size: 12px; font-weight: 400;">
+        {{ $notification->created_at ? $notification->created_at->format('M d, Y \a\t h:i A') : 'N/A' }}
+        </h5>
+        </div>
+        </div>
+        </a>
+  
+        <img src="/images/icons/dot_red.svg" alt="dot_red">
+        </div>
+      @empty
+      <div class="mt-4 text-center">
+      <p class="h5-ragular">No unread notifications</p>
       </div>
-      @endif
+    @endforelse
+        </div>
+        </div>
       </div>
-      <div class="gap-1 d-flex flex-column">
-      <h3 class="h6-semibold" style="color: black;">{{ $notification->title }}</h3>
-      <h4 class="h6-ragular" style="color: #adadad;">{{ $notification->body }}</h4>
-      <h5 style="color: #adadad; font-size: 12px; font-weight: 400;">
-      {{ $notification->created_at ? $notification->created_at->format('M d, Y \a\t h:i A') : 'N/A' }}
-      </h5>
-      </div>
-      </div>
-      </a>
-
-      <img src="/images/icons/dot_red.svg" alt="dot_red">
-      </div>
-    @endforeach
-    @empty
-    <div class="mt-4 text-center">
-    <p class="h5-ragular">No unread notifications</p>
-    </div>
-  @endforelse
-      </div>
-      </div>
-    </div>
+        </div>
     </div>
 
     <!-- Table Info and Pagination -->

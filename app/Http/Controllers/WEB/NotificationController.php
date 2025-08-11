@@ -104,7 +104,12 @@ class NotificationController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(20); // Fixed: removed duplicate paginate call
 
-            return view('pages.settings.notifications.index', compact('notifications'));
+            // Total unread count independent of pagination
+            $unreadCount = Notification::where('receiver_id', auth()->id())
+                ->where('seen', false)
+                ->count();
+
+            return view('pages.settings.notifications.index', compact('notifications', 'unreadCount'));
         } catch (\Exception $e) {
             LaravelLog::error('Failed to fetch notifications: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to load notifications');
