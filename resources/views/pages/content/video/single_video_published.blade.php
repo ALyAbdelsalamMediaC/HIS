@@ -173,14 +173,17 @@
     <div class="gap-2 mt-5 d-flex justify-content-end align-items-center">
       <form action="{{ route('media.changeStatus', $media->id) }}" method="POST" class="d-flex align-items-end" style="gap: 12px;">
         @csrf
+        @php
+            $statusOptions = [
+                'inreview' => 'In Review',
+            ];
+            if (auth()->user()->hasRole('admin')) {
+                $statusOptions['revise'] = 'Revise';
+            }
+        @endphp
         <div class="form-infield" style="min-width: 240px;">
           <x-text_label for="status-select-{{ $media->id }}">Change status</x-text_label>
-          <x-select id="status-select-{{ $media->id }}" name="status"
-            :options="[
-              'inreview' => 'In Review',
-              @if(auth()->user()->hasRole('admin')) 'revise' => 'Revise', @endif
-            ]"
-            placeholder="Select status" />
+          <x-select id="status-select-{{ $media->id }}" name="status" :options="$statusOptions" placeholder="Select status" />
         </div>
         <x-button type="submit">Change</x-button>
       </form>
