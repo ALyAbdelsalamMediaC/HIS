@@ -285,7 +285,7 @@ class MediaController extends Controller
 
         if ($status === 'inreview') {
             if (Media::where('id', $id)->where('status', '!=', 'inreview')->exists()) {
-                return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view inreview media.');
             }
             if ($user && $user->role === 'admin') {
                 $adminComments = AdminComment::where('media_id', $id)
@@ -319,7 +319,7 @@ class MediaController extends Controller
                 return view('pages.content.video.single_video_inreview_admin', compact('adminComments', 'media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
             } elseif ($user && $user->role === 'reviewer') {
                 if (Media::where('id', $id)->where('status', '!=', 'inreview')->exists()) {
-                    return redirect()->route('content.videos')->with('error', 'You do not have permission to view pending media.');
+                    return redirect()->route('content.videos')->with('error', 'You do not have permission to view inreview media.');
                 }
                 $commentsData = Review::where('media_id', $id)
                     ->whereNull('parent_id')
@@ -337,6 +337,61 @@ class MediaController extends Controller
                     ->where('user_id', $user->id)
                     ->value('rate');
                 return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
+            }
+        }elseif ($status === 'revise') {
+            if (Media::where('id', $id)->where('status', '!=', 'revise')->exists()) {
+                return redirect()->route('content.videos')->with('error', 'You do not have permission to view revise media.');
+            }
+            if ($user && $user->role === 'admin') {
+                $adminComments = AdminComment::where('media_id', $id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                $reviewers = Review::where('media_id', $id)
+                    ->whereNull('parent_id')
+                    ->with(['replies' => function ($query) {
+                        $query->orderBy('created_at', 'desc')
+                            ->with('user');
+                    }, 'user'])
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->map(function ($review) use ($id) {
+                        // Get the rate for this reviewer and media
+                        $rate = Rate::where('media_id', $id)
+                            ->where('user_id', $review->user_id)
+                            ->value('rate');
+                        $review->rate = $rate;
+                        return $review;
+                    });
+                $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replysCount = $replys->count();
+                $assignedReviewers = json_decode($media->assigned_to, true) ?? [];
+                $assignedReviewersCount = count($assignedReviewers);
+                // Fetch admin's own rate
+                $myRate = Rate::where('media_id', $id)
+                    ->where('user_id', $user->id)
+                    ->value('rate');
+                return view('pages.content.video.single_video_revise_admin', compact('adminComments', 'media', 'likesCount', 'commentsCount', 'commentsData', 'userLiked', 'reviewers', 'replys', 'replysCount', 'assignedReviewersCount', 'myRate'));
+            } elseif ($user && $user->role === 'reviewer') {
+                if (Media::where('id', $id)->where('status', '!=', 'revise')->exists()) {
+                    return redirect()->route('content.videos')->with('error', 'You do not have permission to view revise media.');
+                }
+                $commentsData = Review::where('media_id', $id)
+                    ->whereNull('parent_id')
+                    ->with(['replies' => function ($query) {
+                        $query->orderBy('created_at', 'desc')
+                            ->with('user');
+                    }, 'user'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                $replys = Review::where('media_id', $id)->whereNotNull('parent_id')->get();
+                $replysCount = $replys->count();
+                $commentsCount = $commentsData->count();
+                // Fetch reviewer's own rate
+                $myRate = Rate::where('media_id', $id)
+                    ->where('user_id', $user->id)
+                    ->value('rate');
+                return view('pages.content.video.single_video_revise_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
             }
         } elseif ($status === 'published') {
             if (Media::where('id', $id)->where('status', '!=', 'published')->exists()) {
