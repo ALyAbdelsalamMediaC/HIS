@@ -2152,10 +2152,6 @@ body {
     border-radius: var(--main-border-radius-md);
 }
 
-.notifications-list {
-    padding: 0 16px;
-}
-
 .notifications-content {
     display: flex;
     justify-content: space-between;
