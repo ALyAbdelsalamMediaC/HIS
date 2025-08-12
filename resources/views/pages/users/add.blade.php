@@ -89,11 +89,11 @@
     </div>
 
     <div class="form-infield">
-      <x-text_label for="country_of_practices" :required="true">Country of Practices</x-text_label>
+      <x-text_label for="country_of_practices">Country of Practices</x-text_label>
       <div class="country-select-wrapper">
         <div class="selected-flag" id="selected-flag"></div>
         <x-select id="country_of_practices" name="country_of_practices" :options="[]" 
-          class="country-select" placeholder="Select Country" data-required="true" data-name="Country of Practices" />
+          class="country-select" placeholder="Select Country" data-name="Country of Practices" />
       </div>
       <div id="country_of_practices-error-container">
         <x-input-error :messages="$errors->get('country_of_practices')" />
@@ -101,56 +101,56 @@
     </div>
 
     <div class="form-infield">
-      <x-text_label for="academic_title" :required="true">Academic Title</x-text_label>
+      <x-text_label for="academic_title">Academic Title</x-text_label>
       <x-text_input type="text" id="academic_title" name="academic_title" value="{{ old('academic_title') }}" placeholder="Enter your Academic Title"
-      data-required="true" data-name="Academic Title" />
+       data-name="Academic Title" />
       <div id="academic_title-error-container">
       <x-input-error :messages="$errors->get('academic_title')" />
       </div>
     </div>
 
     <div class="form-infield">
-      <x-text_label for="job_description" :required="true">Job Description</x-text_label>
+      <x-text_label for="job_description">Job Description</x-text_label>
       <x-textarea id="job_description" name="job_description" value="{{ old('job_description') }}" 
-        placeholder="Enter your job description" data-required="true" data-name="Job Description" rows="4" />
+        placeholder="Enter your job description" data-name="Job Description" rows="4" />
       <div id="job_description-error-container">
         <x-input-error :messages="$errors->get('job_description')" />
       </div>
     </div>
 
     <div class="form-infield">
-      <x-text_label for="institution" :required="true">Institution / University</x-text_label>
+      <x-text_label for="institution" >Institution / University</x-text_label>
       <x-text_input type="text" id="institution" name="institution" value="{{ old('institution') }}" 
-        placeholder="Enter your institution or university" data-required="true" data-name="Institution" />
+        placeholder="Enter your institution or university" data-name="Institution" />
       <div id="institution-error-container">
         <x-input-error :messages="$errors->get('institution')" />
       </div>
     </div>
 
     <div class="form-infield">
-      <x-text_label for="department" :required="true">Department</x-text_label>
+      <x-text_label for="department" >Department</x-text_label>
       <x-text_input type="text" id="department" name="department" value="{{ old('department') }}" 
-        placeholder="Enter your department" data-required="true" data-name="Department" />
+        placeholder="Enter your department" data-name="Department" />
       <div id="department-error-container">
         <x-input-error :messages="$errors->get('department')" />
       </div>
     </div>
 
     <div class="form-infield">
-      <x-text_label for="year_of_graduation" :required="true">Year of Graduation</x-text_label>
+      <x-text_label for="year_of_graduation" >Year of Graduation</x-text_label>
       <x-text_input type="date" id="year_of_graduation" name="year_of_graduation" 
-        value="{{ old('year_of_graduation') }}" data-required="true" data-name="Year of Graduation" />
+        value="{{ old('year_of_graduation') }}" data-name="Year of Graduation" />
       <div id="year_of_graduation-error-container">
         <x-input-error :messages="$errors->get('year_of_graduation')" />
       </div>
     </div>
 
     <div class="form-infield">
-      <x-text_label for="country_of_graduation" :required="true">Country of Graduation</x-text_label>
+      <x-text_label for="country_of_graduation" >Country of Graduation</x-text_label>
       <div class="country-select-wrapper">
         <div class="selected-flag" id="selected-flag-graduation"></div>
         <x-select id="country_of_graduation" name="country_of_graduation" :options="[]" 
-          class="country-select" placeholder="Select Country of Graduation" data-required="true" data-name="Country of Graduation" />
+          class="country-select" placeholder="Select Country of Graduation"data-name="Country of Graduation" />
       </div>
       <div id="country_of_graduation-error-container">
         <x-input-error :messages="$errors->get('country_of_graduation')" />

@@ -11,6 +11,12 @@ class ReviewersQuestionController extends Controller
     public function index()
     {
         // Logic to display the form for adding a new question
+        return view('pages.reviewersQuestions.index');
+    }
+    
+    public function view_add()
+    {
+        // Logic to display the form for adding a new question
         return view('pages.reviewersQuestions.add');
     }
 
@@ -24,7 +30,7 @@ class ReviewersQuestionController extends Controller
 
         // Save the question to the database (not implemented here)
         
-        return redirect()->route('pages.reviewersQuestions.index')->with('success', 'Question added successfully.');
+        return redirect()->route('pages.reviewersQuestions.add')->with('success', 'Question added successfully.');
     }
 
     public function edit(Request $request, $id)
@@ -32,7 +38,7 @@ class ReviewersQuestionController extends Controller
         // Logic to handle editing an existing question
         // Not implemented here
 
-        return redirect()->route('pages.reviewersQuestions.index')->with('success', 'Question updated successfully.');
+        return redirect()->route('pages.reviewersQuestions.edit')->with('success', 'Question updated successfully.');
     }
 
     

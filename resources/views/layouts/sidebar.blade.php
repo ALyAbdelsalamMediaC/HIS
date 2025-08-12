@@ -47,7 +47,7 @@
         </li>
 
         <li class="sidebar-menu-li">
-          <a href="" class="h6-semibold">
+          <a href="{{route('reviewersQuestions.index')}}" class="h6-semibold">
             <x-svg-icon name="article" size="18" />
             <span class="sidebar-menu-text">Reviewers Questions</span>
           </a>
