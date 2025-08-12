@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\LikesController;
 use App\Http\Controllers\WEB\NotificationController;
+use App\Http\Controllers\WEB\ReviewersQuestionController;
 use App\Http\Controllers\WEB\ReviewsController;
 
 Route::middleware('auth')->group(function () {
@@ -58,6 +59,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/content/months-by-year', [MediaController::class, 'getMonthsByYear'])->name('content.monthsByYear');
     Route::post('/content/videos/upload-chunk', [MediaController::class, 'uploadChunk'])->name('content.uploadChunk');
     Route::get('/content/videos/upload-chunk', [MediaController::class, 'testChunk'])->name('content.testChunk');
+    Route::get('/reviewersQuestions/add', [ReviewersQuestionController::class, 'index'])->name('content.testChunk');
+    Route::post('/reviewersQuestions/add', [ReviewersQuestionController::class, 'add'])->name('content.testChunk');
+    Route::post('/reviewersQuestions/add', [ReviewersQuestionController::class, 'edit'])->name('content.testChunk');
 
 
 
