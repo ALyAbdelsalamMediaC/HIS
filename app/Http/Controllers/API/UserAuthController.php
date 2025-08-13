@@ -377,6 +377,7 @@ class UserAuthController extends Controller
     public function userInformation(Request $request)
     {
         $user = Auth::user();
+        
         try {
 
             if (!$user) {
@@ -385,10 +386,10 @@ class UserAuthController extends Controller
                     'message' => 'User not authenticated',
                 ], 401);
             }
-
+            $user_data = User::where('id',$user->id)->first();
             return response()->json([
                 'message' => 'User information retrieved successfully',
-                'user' => new UserResource($user),
+                'user' => $user_data,
             ], 200);
         } catch (Exception $e) {
             LaravelLog::error($e->getMessage());
