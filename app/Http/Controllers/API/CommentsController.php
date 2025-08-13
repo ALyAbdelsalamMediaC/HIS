@@ -96,103 +96,103 @@ class CommentsController extends Controller
     }
 
     public function reply(Request $request)
-{
-    try {
-        // Validate the request
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'media_id' => 'required|exists:media,id',
-            'parent_id' => 'required|exists:comments,id',
-            'content' => 'required|string|min:1|max:5000',
-        ]);
+    {
+        try {
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required|exists:users,id',
+                'media_id' => 'required|exists:media,id',
+                'parent_id' => 'required|exists:comments,id',
+                'content' => 'required|string|min:1|max:5000',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Check if the user has a valid email
+            $user = User::findOrFail($request->user_id);
+            if (empty($user->email)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'The specified user does not have a valid email address.',
+                ], 422);
+            }
+
+            // Verify that parent comment and media_id are consistent
+            $parentComment = Comment::findOrFail($request->parent_id);
+            if ($parentComment->media_id != $request->media_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'The parent comment does not belong to the specified media.',
+                ], 422);
+            }
+
+            // Create the reply
+            $reply = Comment::create([
+                'user_id' => $request->user_id,
+                'media_id' => $request->media_id,
+                'parent_id' => $request->parent_id,
+                'content' => $request->content,
+            ]);
+
+            // Load user data
+            $reply->load('user');
+
+            // Notify the media author
+            $sender = User::find($request->user_id);
+            $user_media = Media::where('id', $request->media_id)->with('user')->first();
+            $media_author = $user_media->user;
+            $title = "New reply on your media id: " . $request->media_id;
+            $body = "Content: " . $request->content;
+            $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
+
+            if ($media_author->id != $sender->id) { // Avoid sending notification to the same user
+                $this->notificationService->sendNotification(
+                    $sender,
+                    $media_author,
+                    $title,
+                    $body,
+                    $route,
+                    $request->media_id
+                );
+            }
+
+            // Notify the parent comment author
+            $parent_comment_author = User::find($parentComment->user_id);
+            if ($parent_comment_author && $parent_comment_author->id != $sender->id && $parent_comment_author->id != $media_author->id) {
+                $title = "New reply to your comment on media id: " . $request->media_id;
+                $this->notificationService->sendNotification(
+                    $sender,
+                    $parent_comment_author,
+                    $title,
+                    $body,
+                    $route,
+                    $request->media_id
+                );
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reply created successfully.',
+                'data' => $reply,
+            ], 201);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        // Check if the user has a valid email
-        $user = User::findOrFail($request->user_id);
-        if (empty($user->email)) {
+                'message' => 'User, media, or parent comment not found.',
+            ], 404);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'The specified user does not have a valid email address.',
-            ], 422);
+                'message' => 'An unexpected error occurred while creating the reply.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Verify that parent comment and media_id are consistent
-        $parentComment = Comment::findOrFail($request->parent_id);
-        if ($parentComment->media_id != $request->media_id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'The parent comment does not belong to the specified media.',
-            ], 422);
-        }
-
-        // Create the reply
-        $reply = Comment::create([
-            'user_id' => $request->user_id,
-            'media_id' => $request->media_id,
-            'parent_id' => $request->parent_id,
-            'content' => $request->content,
-        ]);
-
-        // Load user data
-        $reply->load('user');
-
-        // Notify the media author
-        $sender = User::find($request->user_id);
-        $user_media = Media::where('id', $request->media_id)->with('user')->first();
-        $media_author = $user_media->user;
-        $title = "New reply on your media id: " . $request->media_id;
-        $body = "Content: " . $request->content;
-        $route = "content/videos/" . $request->media_id . "/" . $user_media->status;
-
-        if ($media_author->id != $sender->id) { // Avoid sending notification to the same user
-            $this->notificationService->sendNotification(
-                $sender,
-                $media_author,
-                $title,
-                $body,
-                $route,
-                $request->media_id
-            );
-        }
-
-        // Notify the parent comment author
-        $parent_comment_author = User::find($parentComment->user_id);
-        if ($parent_comment_author && $parent_comment_author->id != $sender->id && $parent_comment_author->id != $media_author->id) {
-            $title = "New reply to your comment on media id: " . $request->media_id;
-            $this->notificationService->sendNotification(
-                $sender,
-                $parent_comment_author,
-                $title,
-                $body,
-                $route,
-                $request->media_id
-            );
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Reply created successfully.',
-            'data' => $reply,
-        ], 201);
-    } catch (ModelNotFoundException $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'User, media, or parent comment not found.',
-        ], 404);
-    } catch (Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'An unexpected error occurred while creating the reply.',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
     public function getCommentsByMediaId(Request $request)
     {
         try {
@@ -304,6 +304,40 @@ class CommentsController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An unexpected error occurred while retrieving comments.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function deleteComment(Request $request)
+    {
+        try {
+            // Validate the comment ID
+            $comment = Comment::findOrFail($request->comment_id);
+            $user_id = (int) $request->user_id;
+            // Check if the user is authorized to delete the comment
+            if ($comment->user_id !== $user_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not authorized to delete this comment.',
+                ], 403);
+            }
+
+            // Delete the comment
+            $comment->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Comment deleted successfully.',
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found.',
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while deleting the comment.',
                 'error' => $e->getMessage(),
             ], 500);
         }

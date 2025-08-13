@@ -22,62 +22,62 @@ class UserAuthController extends Controller
 {
 
     public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'login'    => 'required|string', // can be phone or email
-        'password' => 'required|string',
-    ]);
-
-    // Determine if login is email or phone
-    $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-
-    // Build credentials array for Auth::attempt
-    $authCredentials = [
-        $loginField => $credentials['login'],
-        'password'  => $credentials['password'],
-    ];
-
-    if (!Auth::attempt($authCredentials)) {
-        Log::create([
-            'user_id' => null,
-            'type' => 'login_failed',
-            'description' => 'Failed login attempt for ' . $loginField . ': ' . $credentials['login'],
+    {
+        $credentials = $request->validate([
+            'login'    => 'required|string', // can be phone or email
+            'password' => 'required|string',
         ]);
-        return response()->json([
-            'error' => 'Invalid credentials',
-        ], 401);
-    }
 
-    $user = Auth::user();
+        // Determine if login is email or phone
+        $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
-    // Check if user has the 'user' role
-    if (!$user->hasRole('user')) {
-        Auth::logout(); // Log out the user if role is not 'user'
+        // Build credentials array for Auth::attempt
+        $authCredentials = [
+            $loginField => $credentials['login'],
+            'password'  => $credentials['password'],
+        ];
+
+        if (!Auth::attempt($authCredentials)) {
+            Log::create([
+                'user_id' => null,
+                'type' => 'login_failed',
+                'description' => 'Failed login attempt for ' . $loginField . ': ' . $credentials['login'],
+            ]);
+            return response()->json([
+                'error' => 'Invalid credentials',
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        // Check if user has the 'user' role
+        if (!$user->hasRole('user')) {
+            Auth::logout(); // Log out the user if role is not 'user'
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'login_failed',
+                'description' => 'Unauthorized role for ' . ($user->email ?? $user->phone),
+            ]);
+            return response()->json([
+                'error' => 'Unauthorized: Only users with "user" role can log in',
+            ], 403);
+        }
+
         Log::create([
             'user_id' => $user->id,
-            'type' => 'login_failed',
-            'description' => 'Unauthorized role for ' . ($user->email ?? $user->phone),
+            'type' => 'login_success',
+            'description' => 'User logged in: ' . ($user->email ?? $user->phone),
         ]);
+
+        // Generate token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'error' => 'Unauthorized: Only users with "user" role can log in',
-        ], 403);
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
     }
-
-    Log::create([
-        'user_id' => $user->id,
-        'type' => 'login_success',
-        'description' => 'User logged in: ' . ($user->email ?? $user->phone),
-    ]);
-
-    // Generate token
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login successful',
-        'user' => $user,
-        'token' => $token,
-    ], 200);
-}
 
     public function register(Request $request)
     {
@@ -117,17 +117,17 @@ class UserAuthController extends Controller
                 ], 200); // 409 Conflict
             }
 
-             $profile_image = null;
+            $profile_image = null;
 
-        if ($request->hasFile('profile_image')) {
-            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-            if ($request->file('profile_image')->isValid()) {
-                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            if ($request->hasFile('profile_image')) {
+                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                if ($request->file('profile_image')->isValid()) {
+                    $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                    $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                    $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+                }
             }
-        }
-        $validated['profile_image'] = $profile_image;
+            $validated['profile_image'] = $profile_image;
             // Create user
             $user = User::create($validated);
 
@@ -137,7 +137,7 @@ class UserAuthController extends Controller
                 'type' => 'user_create_success',
                 'description' => 'User created: ' . $user->email,
             ]);
-    $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'message' => 'User created successfully',
@@ -160,66 +160,66 @@ class UserAuthController extends Controller
             ], 500);
         }
     }
-    
+
     public function updateProfileImage(Request $request)
-{
-    try {
-        // Validate input
-        $validated = $request->validate([
-               
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+
                 'user_id' => 'required',
                 'profile_image' => 'nullable|image|max:2048',
             ]);
 
-                    $userId = (int) $validated['user_id'];
-        // Get the authenticated user
-        $user = User::where('id',$userId)->first();
+            $userId = (int) $validated['user_id'];
+            // Get the authenticated user
+            $user = User::where('id', $userId)->first();
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'User not authenticated or Deleted.',
+                ], 401);
+            }
+            $profile_image = $user->profile_image; // Retain existing image if upload fails
+
+            // Handle profile image upload
+            if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
+                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            }
+
+            // Update user's profile image
+            $user->update(['profile_image' => $profile_image]);
+
+            // Log success
+            Log::create([
+                'user_id' => $validated['user_id'],
+                'type' => 'profile_image_update_success',
+                'description' => 'Profile image updated for user: ' . $user->email,
+            ]);
+
             return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'User not authenticated or Deleted.',
-            ], 401);
+                'message' => 'Profile image updated successfully',
+                'user' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            LaravelLog::error($e->getMessage());
+
+            Log::create([
+                'user_id' => Auth::id(),
+                'type' => 'profile_image_update_error',
+                'description' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update profile image',
+                'message' => $e->getMessage(),
+            ], 500);
         }
-        $profile_image = $user->profile_image; // Retain existing image if upload fails
-
-        // Handle profile image upload
-        if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
-            $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-            $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-            $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-            $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-        }
-
-        // Update user's profile image
-        $user->update(['profile_image' => $profile_image]);
-
-        // Log success
-        Log::create([
-            'user_id' => $validated['user_id'],
-            'type' => 'profile_image_update_success',
-            'description' => 'Profile image updated for user: ' . $user->email,
-        ]);
-
-        return response()->json([
-            'message' => 'Profile image updated successfully',
-            'user' => $user,
-        ], 200);
-    } catch (\Exception $e) {
-        LaravelLog::error($e->getMessage());
-
-        Log::create([
-            'user_id' => Auth::id(),
-            'type' => 'profile_image_update_error',
-            'description' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to update profile image',
-            'message' => $e->getMessage(),
-        ], 500);
     }
-}
 
     public function resetPassword(Request $request)
     {
@@ -370,6 +370,36 @@ class UserAuthController extends Controller
 
             return response()->json([
                 'error' => 'Failed to delete account',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function userInformation(Request $request)
+    {
+        
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+            $user_data = User::where('id',$user->id)->first();
+            return response()->json([
+                'message' => 'User information retrieved successfully',
+                'user' => $user_data,
+            ], 200);
+        } catch (Exception $e) {
+            LaravelLog::error($e->getMessage());
+            Log::create([
+                'user_id' => $user->id,
+                'type' => 'user_information_error',
+                'description' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'error' => 'Failed to retrieve user information',
                 'message' => $e->getMessage(),
             ], 500);
         }
