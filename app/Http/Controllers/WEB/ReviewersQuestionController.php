@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\WEB;
+
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\Question;
@@ -9,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ReviewersQuestionController extends Controller
 {
- 
+
     public function index()
     {
         // Logic to display the form for adding a new question
@@ -19,22 +20,26 @@ class ReviewersQuestionController extends Controller
     {
         $questionGroup = QuestionGroup::all();
         // Logic to display the form for adding a new question
-        return view('pages.reviewersQuestions.add',compact('questionGroup'));
+        return view('pages.reviewersQuestions.add', compact('questionGroup'));
     }
 
     public function add(Request $request)
     {
+        $user_id = auth()->user()->id;
         // Validate the incoming request
         $validatedData = $request->validate([
             'question_group_id' => 'required|exists:question_groups,id',
-            'text_question' => 'required|string|max:255',
+            'question' => 'required|string|max:255',
+            'question_type' => 'required|string|max:255',
             'answers' => 'required|string', // Expecting comma-separated answers
         ]);
 
         // Create a new question
         $question = Question::create([
+            'user_id' => $user_id,
             'question_group_id' => $validatedData['question_group_id'],
-            'text_question' => $validatedData['text_question'],
+            'question' => $validatedData['question'],
+            'question_type' => $validatedData['question_type'],
         ]);
 
         // Split the answers string into an array and save each answer
@@ -42,8 +47,9 @@ class ReviewersQuestionController extends Controller
         foreach ($answers as $answerText) {
             if (!empty($answerText)) {
                 Answer::create([
+                    'user_id' => $user_id,
                     'question_id' => $question->id,
-                    'text_answer' => $answerText,
+                    'content' => $answerText,
                 ]);
             }
         }
@@ -69,7 +75,7 @@ class ReviewersQuestionController extends Controller
         return redirect()->route('pages.reviewersQuestions.edit')->with('success', 'Question updated successfully.');
     }
 
-    
-        // Logic to handle deleting a question
-        // Not implemented here 
+
+    // Logic to handle deleting a question
+    // Not implemented here 
 }
