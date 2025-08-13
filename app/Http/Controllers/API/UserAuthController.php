@@ -376,9 +376,9 @@ class UserAuthController extends Controller
     }
     public function userInformation(Request $request)
     {
-        $user = Auth::user();
         
         try {
+            $user = Auth::user();
 
             if (!$user) {
                 return response()->json([
