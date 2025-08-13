@@ -21,7 +21,9 @@
     <div class="gap-3 d-flex align-items-end justify-content-between w-100">
       <div class="form-infield" style="width: 75%;">
       <x-text_label for="group_name" :required="true">Questions Group Name</x-text_label>
-      <x-select id="group_name" name="group_name" :options="[]" placeholder="Enter group name" data-name="Help Category" :selected="old('group_name')" />
+      <x-select id="group_name" name="group_name" :options="$questionGroup->mapWithKeys(function ($questionGroup) {
+    return [$questionGroup->id => $questionGroup->name];
+    })->all()" placeholder="Enter group name" data-name="Help Category" :selected="old('group_name')" />
       </div>
       <div class="gap-2 d-flex align-items-center" style="width: 25%;">
         <x-button type="button" data-bs-toggle="modal" data-bs-target="#editGroupModal" id="editGroupBtn">

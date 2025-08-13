@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\WEB;
 use App\Http\Controllers\Controller;
-
+use App\Models\Answer;
+use App\Models\Question;
+use App\Models\QuestionGroup;
 use Illuminate\Http\Request;
 
 class ReviewersQuestionController extends Controller
@@ -13,24 +15,50 @@ class ReviewersQuestionController extends Controller
         // Logic to display the form for adding a new question
         return view('pages.reviewersQuestions.index');
     }
-    
     public function view_add()
     {
+        $questionGroup = QuestionGroup::all();
         // Logic to display the form for adding a new question
-        return view('pages.reviewersQuestions.add');
+        return view('pages.reviewersQuestions.add',compact('questionGroup'));
     }
 
     public function add(Request $request)
     {
-        // Logic to handle the addition of a new question
+        // Validate the incoming request
         $validatedData = $request->validate([
-            'question' => 'required|string|max:255',
-            'details' => 'required|string',
+            'question_group_id' => 'required|exists:question_groups,id',
+            'text_question' => 'required|string|max:255',
+            'answers' => 'required|string', // Expecting comma-separated answers
         ]);
 
-        // Save the question to the database (not implemented here)
-        
-        return redirect()->route('pages.reviewersQuestions.add')->with('success', 'Question added successfully.');
+        // Create a new question
+        $question = Question::create([
+            'question_group_id' => $validatedData['question_group_id'],
+            'text_question' => $validatedData['text_question'],
+        ]);
+
+        // Split the answers string into an array and save each answer
+        $answers = array_map('trim', explode(',', $validatedData['answers']));
+        foreach ($answers as $answerText) {
+            if (!empty($answerText)) {
+                Answer::create([
+                    'question_id' => $question->id,
+                    'text_answer' => $answerText,
+                ]);
+            }
+        }
+
+        // Retrieve existing questions and their answers for the given question_group_id
+        $questionGroup = QuestionGroup::findOrFail($validatedData['question_group_id']);
+        $existingQuestions = Question::where('question_group_id', $validatedData['question_group_id'])
+            ->with('answers') // Assuming a 'answers' relationship is defined in the Question model
+            ->get();
+
+        // Return to the view with success message and data
+        return redirect()->route('pages.reviewersQuestions.add')
+            ->with('success', 'Question added successfully.')
+            ->with('questionGroup', $questionGroup)
+            ->with('existingQuestions', $existingQuestions);
     }
 
     public function edit(Request $request, $id)
