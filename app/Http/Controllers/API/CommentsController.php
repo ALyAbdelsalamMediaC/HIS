@@ -315,7 +315,7 @@ class CommentsController extends Controller
             $comment = Comment::findOrFail($request->comment_id);
 
             // Check if the user is authorized to delete the comment
-            if ($comment->user_id !== $request->user()->id) {
+            if ($comment->user_id !== $request->user_id) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'You are not authorized to delete this comment.',
