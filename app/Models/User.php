@@ -100,4 +100,18 @@ class User extends Authenticatable
     {
         return in_array($this->role, $roles);
     }
+    public function questionGroups()
+    {
+        return $this->hasMany(QuestionGroup::class);
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+    }
 }
