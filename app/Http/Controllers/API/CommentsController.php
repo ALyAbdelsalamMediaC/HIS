@@ -308,4 +308,38 @@ class CommentsController extends Controller
             ], 500);
         }
     }
+    public function deleteComment(Request $request)
+    {
+        try {
+            // Validate the comment ID
+            $comment = Comment::findOrFail($request->comment_id);
+
+            // Check if the user is authorized to delete the comment
+            if ($comment->user_id !== $request->user()->id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not authorized to delete this comment.',
+                ], 403);
+            }
+
+            // Delete the comment
+            $comment->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Comment deleted successfully.',
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found.',
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while deleting the comment.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

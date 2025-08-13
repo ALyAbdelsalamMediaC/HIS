@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 
 Route::post('/comments', [CommentsController::class, 'addComment']);
 Route::post('/comments/reply', [CommentsController::class, 'reply']);
+Route::post('/delete/comment/', [CommentsController::class, 'deleteComment']);
+
 Route::post('/media/store', [MediaController::class, 'store']);
 Route::get('/media/show', [MediaController::class, 'show']);
 Route::get('/media/featured', [MediaController::class, 'featured']);
@@ -33,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
     Route::post('/notifications/fcm-token', [NotificationController::class, 'updateFcmToken']);
+    Route::get('/user_info', [UserAuthController::class, 'userInformation']);
+    
 });
 Route::post('/article/store', [ArticleController::class, 'store']);
 Route::get('/article/show', [ArticleController::class, 'show']);
