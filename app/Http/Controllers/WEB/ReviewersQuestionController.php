@@ -69,13 +69,50 @@ class ReviewersQuestionController extends Controller
 
     public function edit(Request $request, $id)
     {
-        // Logic to handle editing an existing question
-        // Not implemented here
-
+       
         return redirect()->route('pages.reviewersQuestions.edit')->with('success', 'Question updated successfully.');
     }
 
+    public function editGroup(Request $request, $id)
+    {
+        $questionGroup = QuestionGroup::findOrFail($id);
 
-    // Logic to handle deleting a question
-    // Not implemented here 
+        if ($questionGroup->user_id !== auth()->user()->id) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+            ]);
+
+            $questionGroup->update([
+                'name' => $validatedData['name'],
+            ]);
+
+            return redirect()->route('question_groups.index') // Adjust to your index route
+                ->with('success', 'Question Group updated successfully.');
+        
+
+        return view('pages.question_groups.edit', compact('questionGroup'));
+    }
+
+    public function delete($id)
+    {
+        $questionGroup = QuestionGroup::findOrFail($id);
+
+        if ($questionGroup->user_id !== auth()->user()->id) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        if ($questionGroup->questions()->exists()) {
+            return redirect()->back()->with('error', 'Cannot delete Question Group with associated questions.');
+        }
+
+        $questionGroup->delete();
+
+        return redirect()->route('question_groups.index') // Adjust to your index route
+            ->with('success', 'Question Group deleted successfully.');
+    }
+
+    
 }
