@@ -73,6 +73,27 @@ class ReviewersQuestionController extends Controller
         return redirect()->route('pages.reviewersQuestions.edit')->with('success', 'Question updated successfully.');
     }
 
+    public function addGroup(Request $request)
+    {
+            // Validate the request
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+            ]);
+
+            // Create a new QuestionGroup
+            QuestionGroup::create([
+                'user_id' => auth()->user()->id,
+                'name' => $validatedData['name'],
+            ]);
+
+            return redirect()->route('question_groups.index')
+                ->with('success', 'Question Group added successfully.');
+        
+
+        // Display the add form
+        return view('pages.question_groups.add');
+    }
+
     public function editGroup(Request $request, $id)
     {
         $questionGroup = QuestionGroup::findOrFail($id);
@@ -96,7 +117,7 @@ class ReviewersQuestionController extends Controller
         return view('pages.question_groups.edit', compact('questionGroup'));
     }
 
-    public function delete($id)
+    public function deleteGroup($id)
     {
         $questionGroup = QuestionGroup::findOrFail($id);
 
