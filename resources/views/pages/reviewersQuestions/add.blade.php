@@ -16,14 +16,13 @@
   </div>
 
   <!-- Questions Group -->
-  <form method="POST" action="" class="mt-4" novalidate enctype="multipart/form-data">
-  @csrf
+
     <div class="gap-3 d-flex align-items-end justify-content-between w-100">
       <div class="form-infield" style="width: 75%;">
-      <x-text_label for="group_name" :required="true">Questions Group Name</x-text_label>
-      <x-select id="group_name" name="group_name" :options="$questionGroup->mapWithKeys(function ($questionGroup) {
+      <x-text_label for="question_group_id" :required="true">Questions Group Name</x-text_label>
+      <x-select id="question_group_id" name="question_group_id" :options="$questionGroup->mapWithKeys(function ($questionGroup) {
     return [$questionGroup->id => $questionGroup->name];
-    })->all()" placeholder="Enter group name" data-name="Help Category" :selected="old('group_name')" />
+    })->all()" placeholder="Enter group name" data-name="Help Category" :selected="old('question_group_id')" />
       </div>
       <div class="gap-2 d-flex align-items-center" style="width: 25%;">
         <x-button type="button" data-bs-toggle="modal" data-bs-target="#editGroupModal" id="editGroupBtn">
@@ -35,7 +34,6 @@
         </x-button>
       </div>
     </div>
-  </form>
 
   <!-- Create New Question -->
   <div class="create-question-containuer">
@@ -43,29 +41,29 @@
     <p class="h6-ragular" style="color:#ADADAD;">Select a question type and fill in the details.</p>
 
       <div class="gap-4 mt-4 d-flex align-items-start">
-      <!-- question type -->
-      <div class="question-types">
-        <h4 class="h6-semibold">Question Type</h4>
+        <!-- question type -->
+        <div class="question-types">
+          <h4 class="h6-semibold">Question Type</h4>
 
-        <div class="types-of-question">
-          <div class="types-of active" data-type="text" role="button" tabindex="0">
-            <x-svg-icon name="text-question" size="18" color="#ADADAD" />
-            <span class="h6-semibold" style="margin-left:9px;">Text</span>
-          </div>
-          <div class="types-of" data-type="multiple" role="button" tabindex="0">
-            <x-svg-icon name="multiple-choice" size="18" color="#ADADAD" />
-            <span class="h6-semibold" style="margin-left:10px;">Multiple Choice</span>
-          </div>
-          <div class="types-of" data-type="single" role="button" tabindex="0">
-            <x-svg-icon name="single-check" size="18" color="#ADADAD" />
-            <span class="h6-semibold" style="margin-left:10px;">Single Choice</span>
+          <div class="types-of-question">
+            <div class="types-of active" data-type="text" role="button" tabindex="0">
+              <x-svg-icon name="text-question" size="18" color="#ADADAD" />
+              <span class="h6-semibold" style="margin-left:9px;">Text</span>
+            </div>
+            <div class="types-of" data-type="multiple" role="button" tabindex="0">
+              <x-svg-icon name="multiple-choice" size="18" color="#ADADAD" />
+              <span class="h6-semibold" style="margin-left:10px;">Multiple Choice</span>
+            </div>
+            <div class="types-of" data-type="single" role="button" tabindex="0">
+              <x-svg-icon name="single-check" size="18" color="#ADADAD" />
+              <span class="h6-semibold" style="margin-left:10px;">Single Choice</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- question -->
-      <div class="the-question">
-        <h4 class="h6-semibold">Question Title</h4>
+        <!-- question -->
+        <div class="the-question">
+          <h4 class="h6-semibold">Question Title</h4>
 
         <!-- text -->
         <div class="question-of" data-type="text">
@@ -165,13 +163,13 @@
 
   <!-- Add Group Modal -->
   <x-modal id="addGroupModal" title="Create Group">
-    <form method="POST" action="" class="mt-4" novalidate>
+    <form method="POST" action="{{ route('question_groups.store') }}" class="mt-4" novalidate>
     @csrf
       <div class="form-infield">
         <x-text_label for="group_name" :required="true">Group Name</x-text_label>
-        <x-text_input type="text" id="group_name" name="group_name" placeholder="Group Name" data-required="true" data-name="Group Name" />
+        <x-text_input type="text" id="group_name" name="name" placeholder="Group Name" data-required="true" data-name="Group Name" />
         <div id="group_name-error-container">
-          <x-input-error :messages="$errors->get('group_name')" />
+          <x-input-error :messages="$errors->get('name')" />
         </div>
       </div>
       <div class="mt-3 d-flex justify-content-end">
@@ -184,28 +182,52 @@
   <!-- Edit Groups Modal -->
   <x-modal id="editGroupModal" title="Edit Groups">
     <div class="groups-list">
-      <!-- Rows populated dynamically -->
+      @forelse($questionGroup as $group)
+      <div class="p-2 group-item d-flex align-items-center justify-content-between border-bottom">
+        <div class="group-title d-flex align-items-center flex-grow-1" data-id="{{ $group->id }}">
+          <span class="group-text">{{ $group->name }}</span>
+          <form action="{{ route('question_groups.update', $group) }}" method="POST" class="edit-group-form d-none w-100">
+            @csrf
+            @method('PUT')
+            <div class="d-flex">
+              <x-text_input type="text" name="name" placeholder="Group name" class="group-input" value="{{ $group->name }}" />
+            </div>
+          </form>
+        </div>
+        <div class="mx-2 group-actions">
+          <button type="button" class="p-0 border-0 btn btn-link edit-group-btn me-2" data-id="{{ $group->id }}">
+            <x-svg-icon name="edit-pen2" size="18" color="#adadad" />
+          </button>
+          <button type="button" class="p-0 border-0 btn btn-link delete-group-btn" data-bs-toggle="modal" data-bs-target="#deleteGroupModal{{ $group->id }}">
+            <x-svg-icon name="trash" size="18" color="#adadad" />
+          </button>
+        </div>
+      </div>
+      @empty
+        <p class="p-3 text-center">No groups found.</p>
+      @endforelse
     </div>
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="button" class="bg-trans-btn" data-bs-dismiss="modal">Close</x-button>
     </div>
   </x-modal>
 
-  <!-- Delete Group Modal -->
-  <x-modal id="deleteGroupModal" title="Delete Group">
+  <!-- Delete Group Modals -->
+  @foreach($questionGroup as $group)
+  <x-modal id="deleteGroupModal{{ $group->id }}" title="Delete Group">
     <div class="my-3">
-      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the group ?</p>
+      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the group "{{ $group->name }}"?</p>
     </div>
     <div class="modal-footer">
       <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-      <form action="" method="POST" novalidate>
-      @csrf
-      @method('DELETE')
-      <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+      <form action="{{ route('question_groups.delete', $group) }}" method="POST">
+        @csrf
+        @method('DELETE')
+        <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
       </form>
     </div>
   </x-modal>
-
+  @endforeach
 </section>
 
 @endsection
@@ -225,6 +247,12 @@
           const isActive = btn.dataset.type === selectedType;
           btn.classList.toggle('active', isActive);
         });
+
+        // Update the hidden question_type field (guard if not present)
+        const questionTypeField = document.getElementById('question_type');
+        if (questionTypeField) {
+          questionTypeField.value = selectedType;
+        }
 
         questionBlocks.forEach(block => {
           const isMatch = block.dataset.type === selectedType;
@@ -282,6 +310,37 @@
           }
         });
       });
-    });
+
+      // Handle edit group button clicks
+      const editGroupButtons = document.querySelectorAll('.edit-group-btn');
+      editGroupButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const groupId = this.getAttribute('data-id');
+          const groupItem = document.querySelector(`.group-title[data-id="${groupId}"]`);
+          const textElement = groupItem.querySelector('.group-text');
+          const formElement = groupItem.querySelector('.edit-group-form');
+
+          // Hide text, show form
+          textElement.classList.add('d-none');
+          formElement.classList.remove('d-none');
+
+          // Focus on input
+          const inputElement = formElement.querySelector('.group-input');
+          inputElement.focus();
+          inputElement.select();
+
+          // Add event listener for enter key to submit
+          inputElement.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              formElement.submit();
+            } else if (e.key === 'Escape') {
+              textElement.classList.remove('d-none');
+              formElement.classList.add('d-none');
+            }
+          });
+        });
+      });
+    })
   </script>
 @endpush

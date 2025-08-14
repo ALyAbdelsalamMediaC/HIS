@@ -31,7 +31,7 @@ class ReviewersQuestionController extends Controller
             'question_group_id' => 'required|exists:question_groups,id',
             'question' => 'required|string|max:255',
             'question_type' => 'required|string|max:255',
-            'answers' => 'required|string', // Expecting comma-separated answers
+            'answers' => 'nullable|array', // Answers array for multiple/single choice questions
         ]);
 
         // Create a new question
@@ -42,15 +42,16 @@ class ReviewersQuestionController extends Controller
             'question_type' => $validatedData['question_type'],
         ]);
 
-        // Split the answers string into an array and save each answer
-        $answers = array_map('trim', explode(',', $validatedData['answers']));
-        foreach ($answers as $answerText) {
-            if (!empty($answerText)) {
-                Answer::create([
-                    'user_id' => $user_id,
-                    'question_id' => $question->id,
-                    'content' => $answerText,
-                ]);
+        // Handle answers array and save each answer
+        if (isset($validatedData['answers']) && is_array($validatedData['answers'])) {
+            foreach ($validatedData['answers'] as $answerText) {
+                if (!empty(trim($answerText))) {
+                    Answer::create([
+                        'user_id' => $user_id,
+                        'question_id' => $question->id,
+                        'content' => trim($answerText),
+                    ]);
+                }
             }
         }
 
@@ -61,7 +62,7 @@ class ReviewersQuestionController extends Controller
             ->get();
 
         // Return to the view with success message and data
-        return redirect()->route('pages.reviewersQuestions.add')
+        return redirect()->route('reviewersQuestions.view_add')
             ->with('success', 'Question added successfully.')
             ->with('questionGroup', $questionGroup)
             ->with('existingQuestions', $existingQuestions);
@@ -70,28 +71,24 @@ class ReviewersQuestionController extends Controller
     public function edit(Request $request, $id)
     {
        
-        return redirect()->route('pages.reviewersQuestions.edit')->with('success', 'Question updated successfully.');
+        return redirect()->route('reviewersQuestions.view_add')->with('success', 'Question updated successfully.');
     }
 
     public function addGroup(Request $request)
     {
-            // Validate the request
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-            ]);
+        // Validate the request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
 
-            // Create a new QuestionGroup
-            QuestionGroup::create([
-                'user_id' => auth()->user()->id,
-                'name' => $validatedData['name'],
-            ]);
+        // Create a new QuestionGroup
+        QuestionGroup::create([
+            'user_id' => auth()->user()->id,
+            'name' => $validatedData['name'],
+        ]);
 
-            return redirect()->route('question_groups.index')
-                ->with('success', 'Question Group added successfully.');
-        
-
-        // Display the add form
-        return view('pages.question_groups.add');
+        return redirect()->route('reviewersQuestions.view_add')
+            ->with('success', 'Question Group added successfully.');
     }
 
     public function editGroup(Request $request, $id)
@@ -102,19 +99,16 @@ class ReviewersQuestionController extends Controller
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-            ]);
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
 
-            $questionGroup->update([
-                'name' => $validatedData['name'],
-            ]);
+        $questionGroup->update([
+            'name' => $validatedData['name'],
+        ]);
 
-            return redirect()->route('question_groups.index') // Adjust to your index route
-                ->with('success', 'Question Group updated successfully.');
-        
-
-        return view('pages.question_groups.edit', compact('questionGroup'));
+        return redirect()->route('reviewersQuestions.view_add')
+            ->with('success', 'Question Group updated successfully.');
     }
 
     public function deleteGroup($id)
@@ -131,7 +125,7 @@ class ReviewersQuestionController extends Controller
 
         $questionGroup->delete();
 
-        return redirect()->route('question_groups.index') // Adjust to your index route
+        return redirect()->route('reviewersQuestions.view_add') // Adjust to your index route
             ->with('success', 'Question Group deleted successfully.');
     }
 
