@@ -165,11 +165,12 @@
 
   <!-- Add Group Modal -->
   <x-modal id="addGroupModal" title="Create Group">
-    <form id="addGroupForm">
+    <form method="POST" action="" class="mt-4" novalidate>
+    @csrf
       <div class="form-infield">
-        <x-text_label for="modal_group_name" :required="true">Group Name</x-text_label>
-        <x-text_input type="text" id="modal_group_name" name="group_name" placeholder="Group Name" data-required="true" data-name="Group Name" autocomplete="off" />
-        <div id="modal_group_name-error-container">
+        <x-text_label for="group_name" :required="true">Group Name</x-text_label>
+        <x-text_input type="text" id="group_name" name="group_name" placeholder="Group Name" data-required="true" data-name="Group Name" />
+        <div id="group_name-error-container">
           <x-input-error :messages="$errors->get('group_name')" />
         </div>
       </div>
@@ -185,26 +186,6 @@
     <div class="groups-list">
       <!-- Rows populated dynamically -->
     </div>
-    <template id="groupRowTemplate">
-      <div class="p-2 group-item d-flex align-items-center justify-content-between border-bottom">
-        <div class="group-title d-flex align-items-center flex-grow-1" data-value="">
-          <span class="group-text"></span>
-          <form class="edit-group-form d-none w-100">
-            <div class="d-flex">
-              <x-text_input type="text" name="title" placeholder="Group name" class="group-input" value="" />
-            </div>
-          </form>
-        </div>
-        <div class="mx-2 group-actions">
-          <button type="button" class="p-0 border-0 btn btn-link edit-group-btn me-2">
-            <x-svg-icon name="edit-pen2" size="18" color="#adadad" />
-          </button>
-          <button type="button" class="p-0 border-0 btn btn-link delete-group-btn" data-bs-toggle="modal" data-bs-target="#deleteGroupModal">
-            <x-svg-icon name="trash" size="18" color="#adadad" />
-          </button>
-        </div>
-      </div>
-    </template>
     <div class="mt-3 d-flex justify-content-end">
       <x-button type="button" class="bg-trans-btn" data-bs-dismiss="modal">Close</x-button>
     </div>
@@ -213,11 +194,15 @@
   <!-- Delete Group Modal -->
   <x-modal id="deleteGroupModal" title="Delete Group">
     <div class="my-3">
-      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the group "<span id="delete_group_name"></span>"?</p>
+      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the group ?</p>
     </div>
     <div class="modal-footer">
       <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-      <x-button type="button" id="confirmDeleteGroupBtn" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+      <form action="" method="POST" novalidate>
+      @csrf
+      @method('DELETE')
+      <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+      </form>
     </div>
   </x-modal>
 
@@ -233,12 +218,6 @@
     document.addEventListener('DOMContentLoaded', function () {
       const typeButtons = document.querySelectorAll('.question-types .types-of');
       const questionBlocks = document.querySelectorAll('.the-question .question-of');
-      const editGroupsModalEl = document.getElementById('editGroupModal');
-      const editGroupsList = document.querySelector('#editGroupModal .groups-list');
-      const groupRowTemplate = document.getElementById('groupRowTemplate');
-      const deleteGroupModalEl = document.getElementById('deleteGroupModal');
-      const deleteGroupNameSpan = document.getElementById('delete_group_name');
-      const confirmDeleteGroupBtn = document.getElementById('confirmDeleteGroupBtn');
       let pendingDeleteValue = null;
 
       function setActiveType(selectedType) {
@@ -270,106 +249,6 @@
 
       // Initialize default selection
       setActiveType('text');
-
-      // Handle Add Group Modal submit (client-side add to select)
-      const addGroupForm = document.getElementById('addGroupForm');
-      const groupSelect = document.getElementById('group_name');
-      addGroupForm?.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const input = document.getElementById('modal_group_name');
-        const value = (input?.value || '').trim();
-        if (!value) {
-          input?.focus();
-          return;
-        }
-        if (groupSelect) {
-          const existingOption = Array.from(groupSelect.options).find(o => o.value === value);
-          if (!existingOption) {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            groupSelect.appendChild(option);
-          }
-          groupSelect.value = value;
-        }
-        if (typeof bootstrap !== 'undefined') {
-          const modalEl = document.getElementById('addGroupModal');
-          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-          modal.hide();
-        }
-        input.value = '';
-      });
-
-      // Populate Edit Groups modal with current select options
-      function renderGroupsList() {
-        if (!groupSelect || !editGroupsList || !groupRowTemplate) return;
-        editGroupsList.innerHTML = '';
-        const options = Array.from(groupSelect.options);
-        options.forEach(option => {
-          const node = groupRowTemplate.content.cloneNode(true);
-          const titleWrap = node.querySelector('.group-title');
-          const spanText = node.querySelector('.group-text');
-          const form = node.querySelector('.edit-group-form');
-          const input = node.querySelector('.group-input');
-          const editBtn = node.querySelector('.edit-group-btn');
-          const deleteBtn = node.querySelector('.delete-group-btn');
-
-          titleWrap.dataset.value = option.value;
-          spanText.textContent = option.textContent;
-          input.value = option.textContent;
-
-          editBtn.addEventListener('click', function () {
-            spanText.classList.add('d-none');
-            form.classList.remove('d-none');
-            input.focus();
-            input.select();
-          });
-
-          input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              const newTitle = input.value.trim();
-              if (!newTitle) return;
-              option.textContent = newTitle;
-              spanText.textContent = newTitle;
-              spanText.classList.remove('d-none');
-              form.classList.add('d-none');
-            } else if (e.key === 'Escape') {
-              spanText.classList.remove('d-none');
-              form.classList.add('d-none');
-              input.value = option.textContent;
-            }
-          });
-
-          deleteBtn.addEventListener('click', function () {
-            pendingDeleteValue = option.value;
-            if (deleteGroupNameSpan) deleteGroupNameSpan.textContent = option.textContent;
-          });
-
-          editGroupsList.appendChild(node);
-        });
-      }
-
-      editGroupsModalEl?.addEventListener('show.bs.modal', renderGroupsList);
-
-      // Confirm delete group
-      confirmDeleteGroupBtn?.addEventListener('click', function () {
-        if (!groupSelect || !pendingDeleteValue) return;
-        const toRemove = Array.from(groupSelect.options).find(o => o.value === pendingDeleteValue);
-        if (toRemove) {
-          const wasSelected = groupSelect.value === pendingDeleteValue;
-          toRemove.remove();
-          if (wasSelected) {
-            groupSelect.value = '';
-          }
-        }
-        pendingDeleteValue = null;
-        if (typeof bootstrap !== 'undefined' && deleteGroupModalEl) {
-          const modal = bootstrap.Modal.getOrCreateInstance(deleteGroupModalEl);
-          modal.hide();
-        }
-        renderGroupsList();
-      });
 
       // Handle dynamic answer inputs for Multiple Choice and Single Choice
       const answerLists = document.querySelectorAll('.answer-list');
