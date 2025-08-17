@@ -19,7 +19,7 @@ class ReviewersQuestionController extends Controller
     public function view_add()
     {
         $questionGroup = QuestionGroup::all();
-        $selectedGroupId = session('selected_group_id');
+        $selectedGroupId = request('question_group_id', session('selected_group_id'));
         
         // If a group is selected, fetch existing questions for that group
         $existingQuestions = collect();
@@ -40,11 +40,10 @@ class ReviewersQuestionController extends Controller
         $validatedData = $request->validate([
             'question_group_id' => 'required|exists:question_groups,id',
             'question' => 'required|string|max:255',
-            'question_type' => 'required|string|max:255',
+            'question_type' => 'required|in:text,multiple_choice,single_choice',
             'answers' => 'nullable|array', // Answers array for multiple/single choice questions
         ]);
-        dd($validatedData);
-        // dd($validatedData);
+
         // Create a new question
         $question = Question::create([
             'user_id' => $user_id,

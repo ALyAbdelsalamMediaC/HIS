@@ -2237,24 +2237,50 @@ body {
 
 .existing-question{
     padding: 24px 0;
-    border-bottom: 1px solid var(--border-color);
-
 }
 
 .existing-question-type{
     padding: 4px 12px;
     border-radius: var(--main-border-radius-lg);
-    background-color: #F1F9FA;
 }
 
 .existing-question-type span{
     color: var(--primary-color);
 }
 
+/* Question type specific styles */
+.existing-question-type.text-type {
+    background-color: #FFF5EF;
+}
+
+.existing-question-type.text-type span {
+    color: #973C00;
+}
+
+.existing-question-type.multiple-choice-type {
+    background-color: #F1F9FA;
+}
+
+.existing-question-type.multiple-choice-type span {
+    color: #35758C;
+}
+
+.existing-question-type.single-choice-type {
+    background-color: #E7FFEE;
+}
+
+.existing-question-type.single-choice-type span {
+    color: #087A2A;
+}
+
 .answer-list{
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.order-icon{
+    cursor: grab;
 }
 
 /* ========================================================
