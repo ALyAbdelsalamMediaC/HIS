@@ -43,13 +43,14 @@ class ReviewersQuestionController extends Controller
             'question_type' => 'required|string|max:255',
             'answers' => 'nullable|array', // Answers array for multiple/single choice questions
         ]);
-
+        dd($validatedData);
+        // dd($validatedData);
         // Create a new question
         $question = Question::create([
             'user_id' => $user_id,
             'question_group_id' => $validatedData['question_group_id'],
-            'question' => $validatedData['question'],
-            'question_type' => $validatedData['question_type'],
+            'content' => $validatedData['question'],
+            'type' => $validatedData['question_type'],
         ]);
 
         // Handle answers array and save each answer
