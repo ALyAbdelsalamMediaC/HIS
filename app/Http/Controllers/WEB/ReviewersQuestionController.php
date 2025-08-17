@@ -35,94 +35,95 @@ class ReviewersQuestionController extends Controller
     }
 
     public function switchOrder(Request $request)
-{
-    $user_id = auth()->user()->id;
+    {
+        $user_id = auth()->user()->id;
 
-    // Validate the incoming request
-    $validatedData = $request->validate([
-        'question_id_1' => 'required|exists:questions,id',
-        'question_id_2' => 'required|exists:questions,id',
-    ]);
-
-    try {
-        // Find both questions and ensure they belong to the authenticated user and same group
-        $question1 = Question::where('id', $validatedData['question_id_1'])
-            ->where('user_id', $user_id)
-            ->firstOrFail();
-        $question2 = Question::where('id', $validatedData['question_id_2'])
-            ->where('user_id', $user_id)
-            ->where('question_group_id', $question1->question_group_id)
-            ->firstOrFail();
-
-        // Swap the order values
-        $tempOrder = $question1->order;
-        $question1->order = $question2->order;
-        $question2->order = $tempOrder;
-
-        // Save both questions
-        $question1->save();
-        $question2->save();
-
-        // Return JSON response for the popup
-        return response()->json([
-            'success' => true,
-            'message' => 'Question order swapped successfully.',
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'question_id_1' => 'required|exists:questions,id',
+            'question_id_2' => 'required|exists:questions,id',
         ]);
-    } catch (\Exception $e) {
-        // Return error response
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to swap question order: ' . $e->getMessage(),
-        ], 500);
-    }
-}
 
-public function reorder(Request $request)
-{
-    $user_id = auth()->user()->id;
+        try {
+            // Find both questions and ensure they belong to the authenticated user and same group
+            $question1 = Question::where('id', $validatedData['question_id_1'])
+                ->where('user_id', $user_id)
+                ->firstOrFail();
+            $question2 = Question::where('id', $validatedData['question_id_2'])
+                ->where('user_id', $user_id)
+                ->where('question_group_id', $question1->question_group_id)
+                ->firstOrFail();
 
-    // Validate the incoming request
-    $validatedData = $request->validate([
-        'question_group_id' => 'required|exists:question_groups,id',
-        'question_ids' => 'required|array',
-        'question_ids.*' => 'exists:questions,id',
-    ]);
+            // Swap the order values
+            $tempOrder = $question1->order;
+            $question1->order = $question2->order;
+            $question2->order = $tempOrder;
 
-    try {
-        // Fetch all questions for the group to ensure they belong to the user
-        $questions = Question::where('question_group_id', $validatedData['question_group_id'])
-            ->where('user_id', $user_id)
-            ->get();
+            // Save both questions
+            $question1->save();
+            $question2->save();
 
-        // Verify all provided question IDs belong to the group
-        $existingQuestionIds = $questions->pluck('id')->toArray();
-        if (count(array_diff($validatedData['question_ids'], $existingQuestionIds)) > 0) {
+            // Return JSON response for the popup
+            return response()->json([
+                'success' => true,
+                'message' => 'Question order swapped successfully.',
+            ]);
+        } catch (\Exception $e) {
+            // Return error response
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid question IDs provided.',
-            ], 400);
+                'message' => 'Failed to swap question order: ' . $e->getMessage(),
+            ], 500);
         }
+    }
 
-        // Update order based on the provided question_ids array
-        DB::transaction(function () use ($validatedData, $user_id) {
-            foreach ($validatedData['question_ids'] as $index => $questionId) {
-                Question::where('id', $questionId)
-                    ->where('user_id', $user_id)
-                    ->update(['order' => $index + 1]);
-            }
-        });
+    public function reorder(Request $request)
+    {
+        $user_id = auth()->user()->id;
 
-        // Return JSON response
-        return response()->json([
-            'success' => true,
-            'message' => 'Questions reordered successfully.',
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'question_group_id' => 'required|exists:question_groups,id',
+            'question_ids' => 'required|array',
+            'question_ids.*' => 'exists:questions,id',
         ]);
-    } catch (\Exception $e) {
-        // Return error response
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to reorder questions: ' . $e->getMessage(),
-        ], 500);
+
+        try {
+            // Fetch all questions for the group to ensure they belong to the user
+            $questions = Question::where('question_group_id', $validatedData['question_group_id'])
+                ->where('user_id', $user_id)
+                ->get();
+
+            // Verify all provided question IDs belong to the group
+            $existingQuestionIds = $questions->pluck('id')->toArray();
+            if (count(array_diff($validatedData['question_ids'], $existingQuestionIds)) > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid question IDs provided.',
+                ], 400);
+            }
+
+            // Update order based on the provided question_ids array
+            DB::transaction(function () use ($validatedData, $user_id) {
+                foreach ($validatedData['question_ids'] as $index => $questionId) {
+                    Question::where('id', $questionId)
+                        ->where('user_id', $user_id)
+                        ->update(['order' => $index + 1]);
+                }
+            });
+
+            // Return JSON response
+            return response()->json([
+                'success' => true,
+                'message' => 'Questions reordered successfully.',
+            ]);
+        } catch (\Exception $e) {
+            // Return error response
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reorder questions: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function add(Request $request)
