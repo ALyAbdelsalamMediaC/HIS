@@ -65,7 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/reviewersQuestions/add', [ReviewersQuestionController::class, 'view_add'])->name('reviewersQuestions.view_add');
     Route::post('/reviewersQuestions/add', [ReviewersQuestionController::class, 'add'])->name('reviewersQuestions.add');
     Route::get('/reviewersQuestions/edit', [ReviewersQuestionController::class, 'view_edit'])->name('reviewersQuestions.view_edit');
+    Route::post('questions/switch-order', [ReviewersQuestionController::class, 'switchOrder'])->name('questions.switchOrder');
+    Route::post('questions/reorder', [ReviewersQuestionController::class, 'reorder'])->name('questions.reorder');
     Route::put('/reviewersQuestions/edit/{id}', [ReviewersQuestionController::class, 'edit'])->name('reviewersQuestions.edit');
+    Route::delete('/reviewersQuestions/delete/{id}', [ReviewersQuestionController::class, 'delete'])->name('reviewersQuestions.delete');
     Route::get('/question-group/add', [ReviewersQuestionController::class, 'addGroup'])->name('question_groups.add');
     Route::post('/question-group/add', [ReviewersQuestionController::class, 'addGroup'])->name('question_groups.store');
     Route::put('/question-group/{id}/edit', [ReviewersQuestionController::class, 'editGroup'])->name('question_groups.edit');

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    protected $fillable = ['question_group_id','user_id', 'content', 'type'];
+    protected $fillable = ['question_group_id','user_id','order', 'content', 'type'];
 
     protected $casts = [
         'type' => 'string', // Ensures enum is treated as string
