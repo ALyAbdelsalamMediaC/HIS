@@ -18,6 +18,7 @@
     
     <!-- QuillJS CSS (should be after custom CSS) -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+
 </head>
 
 <body>
@@ -83,6 +84,9 @@
 
     <!-- Resumable.js for chunked uploads -->
     <script src="https://cdn.jsdelivr.net/npm/resumablejs@1.1.0/resumable.min.js"></script>
+
+    <!-- Sortable js -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     @stack('scripts')
 
