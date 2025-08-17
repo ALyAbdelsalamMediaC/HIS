@@ -19,8 +19,18 @@ class ReviewersQuestionController extends Controller
     public function view_add()
     {
         $questionGroup = QuestionGroup::all();
+        $selectedGroupId = session('selected_group_id');
+        
+        // If a group is selected, fetch existing questions for that group
+        $existingQuestions = collect();
+        if ($selectedGroupId) {
+            $existingQuestions = Question::where('question_group_id', $selectedGroupId)
+                ->with('answers')
+                ->get();
+        }
+        
         // Logic to display the form for adding a new question
-        return view('pages.reviewersQuestions.add', compact('questionGroup'));
+        return view('pages.reviewersQuestions.add', compact('questionGroup', 'existingQuestions', 'selectedGroupId'));
     }
 
     public function add(Request $request)
@@ -55,17 +65,10 @@ class ReviewersQuestionController extends Controller
             }
         }
 
-        // Retrieve existing questions and their answers for the given question_group_id
-        $questionGroup = QuestionGroup::findOrFail($validatedData['question_group_id']);
-        $existingQuestions = Question::where('question_group_id', $validatedData['question_group_id'])
-            ->with('answers') // Assuming a 'answers' relationship is defined in the Question model
-            ->get();
-
         // Return to the view with success message and data
         return redirect()->route('reviewersQuestions.view_add')
             ->with('success', 'Question added successfully.')
-            ->with('questionGroup', $questionGroup)
-            ->with('existingQuestions', $existingQuestions);
+            ->with('selected_group_id', $validatedData['question_group_id']);
     }
 
     public function edit(Request $request, $id)

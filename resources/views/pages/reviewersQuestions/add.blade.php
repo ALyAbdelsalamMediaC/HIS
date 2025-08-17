@@ -17,29 +17,32 @@
 
   <!-- Questions Group -->
 
-    <div class="gap-3 d-flex align-items-end justify-content-between w-100">
-      <div class="form-infield" style="width: 75%;">
-      <x-text_label for="question_group_id" :required="true">Questions Group Name</x-text_label>
-      <x-select id="question_group_id" name="question_group_id" :options="$questionGroup->mapWithKeys(function ($questionGroup) {
+    <form method="POST" action="{{ route('reviewersQuestions.add') }}" novalidate>
+      @csrf
+      <input type="hidden" id="question_type" name="question_type" value="text">
+      
+      <!-- Question Group Selection -->
+      <div class="gap-3 mb-4 d-flex align-items-end justify-content-between w-100">
+        <div class="form-infield" style="width: 75%;">
+        <x-text_label for="question_group_id" :required="true">Questions Group Name</x-text_label>
+        <x-select id="question_group_id" name="question_group_id" :options="$questionGroup->mapWithKeys(function ($questionGroup) {
     return [$questionGroup->id => $questionGroup->name];
-    })->all()" placeholder="Enter group name" data-name="Help Category" :selected="old('question_group_id')" />
+    })->all()" placeholder="Enter group name" data-name="Help Category" :selected="old('question_group_id', session('selected_group_id'))" />
+        <div id="question_group_id-error-container">
+          <x-input-error :messages="$errors->get('question_group_id')" />
+        </div>
+        </div>
+        <div class="gap-2 d-flex align-items-center" style="width: 25%;">
+          <x-button type="button" data-bs-toggle="modal" data-bs-target="#editGroupModal" id="editGroupBtn">
+            Edit Group
+          </x-button>
+          <x-button type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+            <x-svg-icon name="plus3" size="16" />
+            Create Group
+          </x-button>
+        </div>
       </div>
-      <div class="gap-2 d-flex align-items-center" style="width: 25%;">
-        <x-button type="button" data-bs-toggle="modal" data-bs-target="#editGroupModal" id="editGroupBtn">
-          Edit Group
-        </x-button>
-        <x-button type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
-          <x-svg-icon name="plus3" size="16" />
-          Create Group
-        </x-button>
-      </div>
-    </div>
-
-  <!-- Create New Question -->
-  <div class="create-question-containuer">
-    <h3 class="h3-semibold">Create New Question</h3>
-    <p class="h6-ragular" style="color:#ADADAD;">Select a question type and fill in the details.</p>
-
+      
       <div class="gap-4 mt-4 d-flex align-items-start">
         <!-- question type -->
         <div class="question-types">
@@ -68,14 +71,14 @@
         <!-- text -->
         <div class="question-of" data-type="text">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question" name="text_question" placeholder="Enter text question" data-name="Text question" />
+              <x-text_input type="text" id="text_question" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
         </div>
 
         <!-- Multiple Choice -->
         <div class="question-of d-none" data-type="multiple">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question_multiple" name="text_question" placeholder="Enter text question" data-name="Text question" />
+              <x-text_input type="text" id="text_question_multiple" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
 
               <div class="form-infield">
@@ -97,7 +100,7 @@
         <!-- Single Choice -->
         <div class="question-of d-none" data-type="single">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question_single" name="text_question" placeholder="Enter text question" data-name="Text question" />
+              <x-text_input type="text" id="text_question_single" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
 
             <div class="form-infield">
@@ -117,24 +120,34 @@
         </div>
         
         <div class="mt-3 d-flex justify-content-end">
-          <x-button>Save</x-button>
+          <x-button type="submit">Save</x-button>
         </div>
       </div>
+    </form>
     </div>
-  </div>
 
-  <!-- Existing Questions (3) -->
+  <!-- Existing Questions -->
+  @if($existingQuestions && $existingQuestions->count() > 0)
   <div class="create-question-containuer">
     <div style="border-bottom: 1px solid #EDEDED; padding-bottom:20px;">
-      <h3 class="h3-semibold">Existing Questions (3)</h3>
+      <h3 class="h3-semibold">Existing Questions ({{ $existingQuestions->count() }})</h3>
     </div>
 
     <div>
+      @foreach($existingQuestions as $question)
       <div class="existing-question">
         <div class="d-flex justify-content-between align-items-center">
           <div class="existing-question-type">
-            <x-svg-icon name="multiple-choice" size="15" color="#35758C" />
-            <span class="h6-semibold">Multiple Choice</span>
+            @if($question->question_type === 'text')
+              <x-svg-icon name="text-question" size="15" color="#35758C" />
+              <span class="h6-semibold">Text</span>
+            @elseif($question->question_type === 'multiple')
+              <x-svg-icon name="multiple-choice" size="15" color="#35758C" />
+              <span class="h6-semibold">Multiple Choice</span>
+            @elseif($question->question_type === 'single')
+              <x-svg-icon name="single-check" size="15" color="#35758C" />
+              <span class="h6-semibold">Single Choice</span>
+            @endif
           </div>
   
           <div class="gap-2 d-flex align-items-center">
@@ -144,22 +157,21 @@
         </div>
 
         <div class="mt-3">
-          <h3 class="h6-semibold">Lorem ipsum dolor sit amet consectetur?</h3>
+          <h3 class="h6-semibold">{{ $question->question }}</h3>
 
-          <div class="mt-2 d-flex align-items-center" style="gap:100px;">
-            <h4 class="h6-ragular">lorem ipsum</h4>
-            <h4 class="h6-ragular">lorem ipsum</h4>
-          </div>
-          <div class="mt-2 d-flex align-items-center" style="gap:100px;">
-            <h4 class="h6-ragular">lorem ipsum</h4>
-            <h4 class="h6-ragular">lorem ipsum</h4>
-          </div>
+          @if($question->answers && $question->answers->count() > 0)
+            <div class="flex-wrap mt-2 d-flex align-items-center" style="gap:20px;">
+              @foreach($question->answers as $answer)
+                <h4 class="h6-ragular">{{ $answer->content }}</h4>
+              @endforeach
+            </div>
+          @endif
         </div>
-    </div>
-
-      
+      </div>
+      @endforeach
     </div>
   </div>
+  @endif
 
   <!-- Add Group Modal -->
   <x-modal id="addGroupModal" title="Create Group">
@@ -248,7 +260,7 @@
           btn.classList.toggle('active', isActive);
         });
 
-        // Update the hidden question_type field (guard if not present)
+        // Update the hidden question_type field
         const questionTypeField = document.getElementById('question_type');
         if (questionTypeField) {
           questionTypeField.value = selectedType;
@@ -258,14 +270,12 @@
           const isMatch = block.dataset.type === selectedType;
           block.classList.toggle('d-none', !isMatch);
 
-          const inputs = block.querySelectorAll('input, select, textarea, button');
+          const inputs = block.querySelectorAll('input, select, textarea');
           inputs.forEach(input => {
             if (isMatch) {
               input.removeAttribute('disabled');
             } else {
-              if (input.type !== 'button' && input.type !== 'submit') {
-                input.setAttribute('disabled', 'disabled');
-              }
+              input.setAttribute('disabled', 'disabled');
             }
           });
         });
@@ -275,8 +285,76 @@
         btn.addEventListener('click', () => setActiveType(btn.dataset.type));
       });
 
-      // Initialize default selection
-      setActiveType('text');
+      // Initialize default selection - try to restore from session or use default
+      const lastQuestionType = '{{ old("question_type", "text") }}';
+      setActiveType(lastQuestionType);
+
+      // Form validation
+      const form = document.querySelector('form');
+      form.addEventListener('submit', function(e) {
+        const questionGroupId = document.getElementById('question_group_id').value;
+        const questionType = document.getElementById('question_type').value;
+        let questionValue = '';
+        
+        // Get question value based on active type
+        if (questionType === 'text') {
+          questionValue = document.getElementById('text_question').value.trim();
+        } else if (questionType === 'multiple') {
+          questionValue = document.getElementById('text_question_multiple').value.trim();
+        } else if (questionType === 'single') {
+          questionValue = document.getElementById('text_question_single').value.trim();
+        }
+
+        if (!questionGroupId) {
+          e.preventDefault();
+          alert('Please select a question group.');
+          return false;
+        }
+
+        if (!questionValue) {
+          e.preventDefault();
+          alert('Please enter a question.');
+          return false;
+        }
+
+        // For multiple/single choice, validate that at least one answer is provided
+        if ((questionType === 'multiple' || questionType === 'single') && questionType !== 'text') {
+          const answers = document.querySelectorAll('input[name="answers[]"]');
+          let hasAnswer = false;
+          answers.forEach(answer => {
+            if (answer.value.trim()) {
+              hasAnswer = true;
+            }
+          });
+          
+          if (!hasAnswer) {
+            e.preventDefault();
+            alert('Please provide at least one answer option.');
+            return false;
+          }
+        }
+      });
+
+      // Clear form after successful submission (if success message is present)
+      @if(session('success'))
+        // Reset form fields
+        document.getElementById('text_question').value = '';
+        document.getElementById('text_question_multiple').value = '';
+        document.getElementById('text_question_single').value = '';
+        
+        // Clear answer fields
+        const answerInputs = document.querySelectorAll('input[name="answers[]"]');
+        answerInputs.forEach((input, index) => {
+          if (index > 0) {
+            input.closest('.answer-row').remove();
+          } else {
+            input.value = '';
+          }
+        });
+        
+        // Reset to default question type
+        setActiveType('text');
+      @endif
 
       // Handle dynamic answer inputs for Multiple Choice and Single Choice
       const answerLists = document.querySelectorAll('.answer-list');

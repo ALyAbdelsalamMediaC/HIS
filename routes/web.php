@@ -73,7 +73,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/question-group/{id}', [ReviewersQuestionController::class, 'deleteGroup'])->name('question_groups.delete');
 
 
-
     // Route::get('/comments/add/{media_id}', [CommentController::class, 'showAddCommentForm'])->name('comments.add.form');
     Route::post('/comments/add/{media_id}', [CommentController::class, 'addComment'])->name('comments.add');
     Route::get('/comments/reply/{media_id}/{parent_id}', [CommentController::class, 'showReplyForm'])->name('comments.reply.form');
