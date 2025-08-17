@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('question_group_id');
             $table->text('content');
             $table->enum('type', ['text', 'single_choice', 'multiple_choice']);
+            $table->unsignedInteger('order')->default(0); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;
             $table->foreign('question_group_id')->references('id')->on('question_groups')->onDelete('cascade');
             $table->timestamps();
