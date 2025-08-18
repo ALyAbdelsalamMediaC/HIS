@@ -7,6 +7,7 @@ use App\Models\Answer;
 use App\Models\Question;
 use App\Models\QuestionGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReviewersQuestionController extends Controller
 {
