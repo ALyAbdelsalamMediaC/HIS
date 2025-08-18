@@ -182,15 +182,15 @@ class MediaController extends Controller
         // Get reviewers and question_group_id from request body
         $reviewersArray = $request->input('reviewer_ids', []);
         $questionGroupId = $request->input('question_group_id') ? (int) $request->input('question_group_id') : null;
-
+        $id = (int) $id;
         // Clean up reviewers: trim, filter, cast to int
         $reviewersArray = array_filter(array_map(function ($id) {
             return (int) trim($id);
         }, $reviewersArray));
-
+        
         // Prepare update data
         $updateData = [];
-
+        
         // Handle reviewers
         if (empty($reviewersArray)) {
             $updateData['assigned_to'] = null;
@@ -199,10 +199,10 @@ class MediaController extends Controller
             $updateData['assigned_to'] = json_encode(array_values($reviewersArray));
             $updateData['status'] = 'inreview';
         }
-
+        
         // Handle question_group_id
         $updateData['question_group_id'] = $questionGroupId;
-
+        
         // Update media table using Eloquent
         Media::where('id', $id)->update($updateData);
 
@@ -227,15 +227,12 @@ class MediaController extends Controller
                 );
             }
         }
-
         // Prepare success message
         $message = '';
-        if (empty($reviewersArray) && !$questionGroupId) {
-            $message = 'Reviewers and question group removed successfully.';
-        } elseif (empty($reviewersArray)) {
-            $message = 'Question group assigned successfully, reviewers removed.';
+        if (empty($reviewersArray)) {
+            $message = 'Question group assigned successfully, reviewers empty.';
         } elseif (!$questionGroupId) {
-            $message = 'Reviewers assigned successfully, question group removed.';
+            $message = 'Reviewers assigned successfully, question group empty.';
         } else {
             $message = 'Reviewers and question group assigned successfully.';
         }
