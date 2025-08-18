@@ -277,7 +277,7 @@
 
                             <div class="form-infield">
                                 <x-text_label for="question_group_id">Questions Group Name</x-text_label>
-                                <x-select id="question_group_id" name="question_group_id" class="filter-select" :options="$QuestionGroup->mapWithKeys(function ($questionGroup) {
+                                <x-select id="question_group_id" name="question_group_id" :options="$QuestionGroup->mapWithKeys(function ($questionGroup) {
                                 return [$questionGroup->id => $questionGroup->name];
                                 })->all()" placeholder="select a questions group name"/>
                                 </div>
