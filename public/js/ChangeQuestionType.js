@@ -5,8 +5,8 @@ class QuestionTypeManager {
         this.typeButtons = document.querySelectorAll('.question-types .types-of');
         this.questionBlocks = document.querySelectorAll('.the-question .question-of');
         this.questionTypeField = document.getElementById('question_type');
-        this.answerLists = document.querySelectorAll('.the-question .answer-list'); // Only target main form
-        this.form = document.querySelector('form:not([action*="edit"])'); // Only target add form
+        this.answerLists = document.querySelectorAll('.the-question .answer-list');
+        this.form = document.querySelector('form[action*="reviewersQuestions/add"]');
         this.initialize();
     }
 
@@ -124,17 +124,17 @@ class QuestionTypeManager {
 
     // Validate form before submission
     validateForm(e) {
-        const questionGroupId = document.getElementById('form_question_group_id').value;
+        const questionGroupId = document.getElementById('form_question_group_id')?.value;
         const questionType = this.getCurrentType();
         let questionValue = '';
         
         // Get question value based on active type
         if (questionType === 'text') {
-            questionValue = document.getElementById('text_question').value.trim();
+            questionValue = document.getElementById('text_question')?.value.trim();
         } else if (questionType === 'multiple_choice') {
-            questionValue = document.getElementById('text_question_multiple').value.trim();
+            questionValue = document.getElementById('text_question_multiple')?.value.trim();
         } else if (questionType === 'single_choice') {
-            questionValue = document.getElementById('text_question_single').value.trim();
+            questionValue = document.getElementById('text_question_single')?.value.trim();
         }
 
         if (!questionGroupId) {

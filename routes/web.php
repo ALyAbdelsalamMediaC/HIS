@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reviewersQuestions', [ReviewersQuestionController::class, 'index'])->name('reviewersQuestions.index');
     Route::get('/reviewersQuestions/add', [ReviewersQuestionController::class, 'view_add'])->name('reviewersQuestions.view_add');
     Route::post('/reviewersQuestions/add', [ReviewersQuestionController::class, 'add'])->name('reviewersQuestions.add');
-    Route::get('/reviewersQuestions/edit', [ReviewersQuestionController::class, 'view_edit'])->name('reviewersQuestions.view_edit');
+    Route::get('/reviewersQuestions/edit/{id}', [ReviewersQuestionController::class, 'view_edit'])->name('reviewersQuestions.view_edit');
     Route::post('questions/switch-order', [ReviewersQuestionController::class, 'switchOrder'])->name('questions.switchOrder');
     Route::put('/reviewersQuestions/edit/{id}', [ReviewersQuestionController::class, 'edit'])->name('reviewersQuestions.edit');
     Route::delete('/reviewersQuestions/delete/{id}', [ReviewersQuestionController::class, 'delete'])->name('reviewersQuestions.delete');

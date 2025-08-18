@@ -248,7 +248,7 @@
             <x-svg-icon name="edit-pen2" size="18" color="#adadad" />
           </button>
           <button type="button" class="p-0 border-0 btn btn-link delete-group-btn" data-bs-toggle="modal" data-bs-target="#deleteGroupModal{{ $group->id }}">
-            <x-svg-icon name="trash" size="18" color="#adadad" />
+            <x-svg-icon name="trash" size="18" color="#BB1313" />
           </button>
         </div>
       </div>
