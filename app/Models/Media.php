@@ -88,6 +88,11 @@ class Media extends Model
         return $value ? url('/storage/uploads/' . $value) : null;
     }
 
+    public function questionGroup()
+    {
+        return $this->belongsTo(QuestionGroup::class, 'question_group_id');
+    }
+
     public const STATUSES = [
         'published' => 'Published',
         'pending' => 'Pending',

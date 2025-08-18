@@ -163,6 +163,16 @@
         @endif
     </div>
 
+    <!-- Question Group -->
+    @if($media->questionGroup)
+        <div class="mt-2">
+            <div class="gap-2 d-flex align-items-center">
+                <h3 class="h5-semibold" style="color:black;">Group:</h3>
+                <span class="h5-ragular" style="color:#ADADAD;">{{ $media->questionGroup->name }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Assign Reviewer Modal -->
     <x-modal id="assignReviewerModal{{ $media->id }}" title="Assign Reviewers">
         <form action="{{ route('content.assignTo', $media->id) }}" method="POST" class="mt-3" novalidate>
@@ -185,7 +195,14 @@
                     <x-input-error :messages="$errors->get('reviewer_ids')" class="mt-2" />
                 </div>
             </div>
-            <div class="modal-footer">
+
+             <div class="form-infield">
+                                <x-text_label for="question_group_id">Questions Group Name</x-text_label>
+                                <x-select id="question_group_id" name="question_group_id" :options="$QuestionGroup->mapWithKeys(function ($questionGroup) {
+                                return [$questionGroup->id => $questionGroup->name];
+                                })->all()" placeholder="select a questions group name"/>
+                                </div>
+            <div class="mt-4 modal-footer">
                 <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
                 <x-button type="submit" class="px-4">Assign Reviewers</x-button>
             </div>
