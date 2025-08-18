@@ -122,8 +122,7 @@ class ReviewersQuestionController extends Controller
         }
 
         // Return to the view with success message and data
-        return redirect()->route('reviewersQuestions.view_add')
-            ->with('success', 'Question added successfully.')
+        return back()->with('success', 'Question added successfully.')
             ->with('selected_group_id', $validatedData['question_group_id']);
     }
 
