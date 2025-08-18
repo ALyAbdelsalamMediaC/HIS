@@ -6,7 +6,7 @@ class QuestionTypeManager {
         this.questionBlocks = document.querySelectorAll('.the-question .question-of');
         this.questionTypeField = document.getElementById('question_type');
         this.answerLists = document.querySelectorAll('.the-question .answer-list');
-        this.form = document.querySelector('form[action*="reviewersQuestions/add"]');
+        this.form = document.querySelector('.create-question-containuer form');
         this.initialize();
     }
 
@@ -21,6 +21,17 @@ class QuestionTypeManager {
         // Add click event listeners to type buttons
         this.typeButtons.forEach(btn => {
             btn.addEventListener('click', () => this.setActiveType(btn.dataset.type));
+        });
+
+        // Sync values between question fields as user types
+        const textFields = ['text_question', 'text_question_multiple', 'text_question_single'];
+        textFields.forEach(id => {
+            const field = document.getElementById(id);
+            if (field) {
+                field.addEventListener('input', () => {
+                    this.syncQuestionValues();
+                });
+            }
         });
     }
 
@@ -40,12 +51,6 @@ class QuestionTypeManager {
         this.questionBlocks.forEach(block => {
             const isMatch = block.dataset.type === selectedType;
             block.classList.toggle('d-none', !isMatch);
-
-            // Enable/disable inputs based on active type
-            const inputs = block.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.removeAttribute('disabled');
-            });
         });
     }
 
@@ -56,7 +61,46 @@ class QuestionTypeManager {
 
     // Method to set type programmatically (useful for form restoration)
     setType(type) {
-        this.setActiveType(type);
+        // Sync values between question fields before switching
+        this.syncQuestionValues(type);
+        
+        this.questionTypeField.value = type;
+        
+        // Update type buttons
+        this.typeButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.type === type);
+        });
+        
+        // Update question blocks - only show/hide, don't disable inputs
+        this.questionBlocks.forEach(block => {
+            const isActive = block.dataset.type === type;
+            block.classList.toggle('d-none', !isActive);
+        });
+    }
+
+    syncQuestionValues(targetType = null) {
+        const activeType = targetType || this.getCurrentType();
+        const textFields = {
+            text: document.getElementById('text_question'),
+            multiple_choice: document.getElementById('text_question_multiple'),
+            single_choice: document.getElementById('text_question_single')
+        };
+
+        // Get the current value from the active field
+        const activeField = textFields[activeType];
+        let currentValue = '';
+        if (activeField) {
+            currentValue = activeField.value;
+        }
+
+        // If there's a current value, sync it to other fields
+        if (currentValue) {
+            Object.values(textFields).forEach(field => {
+                if (field && field !== activeField) {
+                    field.value = currentValue;
+                }
+            });
+        }
     }
 
     // Initialize answer management for multiple/single choice questions
@@ -129,24 +173,33 @@ class QuestionTypeManager {
         let questionValue = '';
         
         // Get question value based on active type
+        let activeQuestionInput = null;
         if (questionType === 'text') {
-            questionValue = document.getElementById('text_question')?.value.trim();
+            activeQuestionInput = document.getElementById('text_question');
         } else if (questionType === 'multiple_choice') {
-            questionValue = document.getElementById('text_question_multiple')?.value.trim();
+            activeQuestionInput = document.getElementById('text_question_multiple');
         } else if (questionType === 'single_choice') {
-            questionValue = document.getElementById('text_question_single')?.value.trim();
+            activeQuestionInput = document.getElementById('text_question_single');
         }
+        
+        questionValue = activeQuestionInput?.value.trim();
 
         if (!questionGroupId) {
             e.preventDefault();
-            alert('Please select a question group.');
+            showToast('Please select a question group.');
             return false;
         }
 
         if (!questionValue) {
             e.preventDefault();
-            alert('Please enter a question.');
+            showToast('Please enter a question.');
             return false;
+        }
+
+        // Populate the hidden question field with the actual question value
+        const hiddenQuestionField = document.getElementById('question_field');
+        if (hiddenQuestionField) {
+            hiddenQuestionField.value = questionValue;
         }
 
         // For multiple/single choice, validate that at least one answer is provided
@@ -161,7 +214,7 @@ class QuestionTypeManager {
             
             if (!hasAnswer) {
                 e.preventDefault();
-                alert('Please provide at least one answer option.');
+                showToast('Please provide at least one answer option.');
                 return false;
             }
         }

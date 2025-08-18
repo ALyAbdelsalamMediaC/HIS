@@ -18,7 +18,7 @@
   <!-- Question Group Info - Non-editable -->
   <div class="filters-container w-100">
     <div class="d-flex justify-content-between align-items-end">
-      <div style="width:70%;">
+      <div style="width:80%;">
         <div class="form-infield">
           <x-text_label>Question Group Name</x-text_label>
           <div class="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; color: #6c757d;">
@@ -27,13 +27,9 @@
         </div>
       </div>
       
-      <div class="gap-2 d-flex align-items-center">
+      <div>
         <x-button type="button" data-bs-toggle="modal" data-bs-target="#editGroupNameModal">
           Edit Group Name
-        </x-button>
-        <x-button type="button" data-bs-toggle="modal" data-bs-target="#deleteGroupModal" style="background-color: #BB1313; color: white;">
-          <x-svg-icon name="trash" size="16" />
-          Delete Group
         </x-button>
       </div>
     </div>
@@ -77,14 +73,14 @@
           <!-- text -->
           <div class="question-of" data-type="text">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+              <x-text_input type="text" name="text_question" id="text_question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
           </div>
 
           <!-- Multiple Choice -->
           <div class="question-of d-none" data-type="multiple_choice">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question_multiple" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+              <x-text_input type="text" name="text_question_multiple" id="text_question_multiple" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
 
             <div class="form-infield">
@@ -106,7 +102,7 @@
           <!-- Single Choice -->
           <div class="question-of d-none" data-type="single_choice">
             <div class="form-infield">
-              <x-text_input type="text" id="text_question_single" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+              <x-text_input type="text" name="text_question_single" id="text_question_single" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
             </div>
 
             <div class="form-infield">
@@ -125,6 +121,9 @@
             </div>  
           </div>
 
+          <!-- Hidden question field that will be populated by JavaScript -->
+          <input type="hidden" id="question_field" name="question" value="">
+          
           <div class="mt-3 d-flex justify-content-end">
             <x-button type="submit">Save</x-button>
           </div>
@@ -225,22 +224,6 @@
     </form>
   </x-modal>
 
-  <!-- Delete Group Modal -->
-  <x-modal id="deleteGroupModal" title="Delete Question Group">
-    <div class="my-3">
-      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the question group "{{ $questionGroup->name }}"?</p>
-      <p class="text-muted">This will also delete all {{ $existingQuestions->count() }} questions and their answers within this group.</p>
-    </div>
-    <div class="modal-footer">
-      <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
-      <form action="{{ route('question_groups.delete', $questionGroup) }}" method="POST">
-        @csrf
-        @method('DELETE')
-        <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
-      </form>
-    </div>
-  </x-modal>
-
   <!-- Edit Question Modals -->
   @foreach($existingQuestions as $question)
   <x-modal id="editQuestionModal{{ $question->id }}" title="Edit Question">
@@ -334,20 +317,6 @@
       const lastQuestionType = '{{ old("question_type", "text") }}';
       if (window.questionTypeManager) {
         window.questionTypeManager.setType(lastQuestionType);
-      }
-
-      // Ensure only active question field is enabled
-      const questionTypeField = document.getElementById('question_type');
-      if (questionTypeField) {
-        const activeType = questionTypeField.value;
-        const questionBlocks = document.querySelectorAll('.the-question .question-of');
-        
-        questionBlocks.forEach(block => {
-          const inputs = block.querySelectorAll('input[name="question"]');
-          inputs.forEach(input => {
-            input.disabled = (block.dataset.type !== activeType);
-          });
-        });
       }
 
       // Clear form after successful submission (if success message is present)
