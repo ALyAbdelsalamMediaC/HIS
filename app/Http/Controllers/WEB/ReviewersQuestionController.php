@@ -14,9 +14,9 @@ class ReviewersQuestionController extends Controller
 
     public function index()
     {
-        $questionGroup = QuestionGroup::with('questions.answers')->get();
+        $questionGroups = QuestionGroup::with('questions.answers')->get();
         // Logic to display the form for adding a new question
-        return view('pages.reviewersQuestions.index',compact('questionGroup'));
+        return view('pages.reviewersQuestions.index',compact('questionGroups'));
     }
     public function view_add()
     {
@@ -128,17 +128,25 @@ class ReviewersQuestionController extends Controller
 
     public function view_edit(Request $request)
     {
-        $validatedData = $request->validate([
-            'question_id' => 'required|exists:questions,id',
+        $questionGroupId = $request->route('id') ?? $request->get('question_group_id');
+        
+        if (!$questionGroupId) {
+            return redirect()->route('reviewersQuestions.index')->with('error', 'Question group not specified.');
+        }
 
-        ]);
         $user_id = auth()->user()->id;
-
-        $question_answers = Question::where('id', $validatedData['question_id'])->where('user_id', $user_id)
+        
+        // Get the question group
+        $questionGroup = QuestionGroup::findOrFail($questionGroupId);
+        
+        // Get all questions for this group
+        $existingQuestions = Question::where('question_group_id', $questionGroupId)
+            ->where('user_id', $user_id)
             ->with('answers')
+            ->orderBy('order', 'asc')
             ->get();
 
-        return view('pages.reviewersQuestions.add', compact('question_answers'));
+        return view('pages.reviewersQuestions.edit', compact('questionGroup', 'existingQuestions'));
     }
 
     public function edit(Request $request, $id)

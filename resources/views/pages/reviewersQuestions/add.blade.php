@@ -79,17 +79,17 @@
            <h4 class="h6-semibold">Question Title</h4>
  
            <!-- text -->
-           <div class="question-of" data-type="text">
-             <div class="form-infield">
-               <x-text_input type="text" id="text_question" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
-             </div>
-           </div>
- 
-           <!-- Multiple Choice -->
-           <div class="question-of d-none" data-type="multiple_choice">
-               <div class="form-infield">
-                 <x-text_input type="text" id="text_question_multiple" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
-               </div>
+          <div class="question-of" data-type="text">
+            <div class="form-infield">
+              <x-text_input type="text" name="text_question"  id="text_question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+            </div>
+          </div>
+
+          <!-- Multiple Choice -->
+          <div class="question-of d-none" data-type="multiple_choice">
+              <div class="form-infield">
+                <x-text_input type="text" name="text_question_multiple"  id="text_question_multiple" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+              </div>
  
                  <div class="form-infield">
                    <x-text_label for="answer-1">Answers</x-text_label>
@@ -110,7 +110,7 @@
                       <!-- Single Choice -->
            <div class="question-of d-none" data-type="single_choice">
                <div class="form-infield">
-                 <x-text_input type="text" id="text_question_single" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
+                 <x-text_input type="text" name="text_question_single"  id="text_question_single" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
                </div>
 
                <div class="form-infield">
@@ -128,6 +128,9 @@
                  </div>
                </div>  
            </div>
+         
+         <!-- Hidden question field that will be populated by JavaScript -->
+         <input type="hidden" id="question_field" name="question" value="">
          
          <div class="mt-3 d-flex justify-content-end">
            <x-button type="submit">Save</x-button>
@@ -248,7 +251,7 @@
             <x-svg-icon name="edit-pen2" size="18" color="#adadad" />
           </button>
           <button type="button" class="p-0 border-0 btn btn-link delete-group-btn" data-bs-toggle="modal" data-bs-target="#deleteGroupModal{{ $group->id }}">
-            <x-svg-icon name="trash" size="18" color="#adadad" />
+            <x-svg-icon name="trash" size="18" color="#BB1313" />
           </button>
         </div>
       </div>

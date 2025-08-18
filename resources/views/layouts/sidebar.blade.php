@@ -46,12 +46,14 @@
           </a>
         </li>
 
+          @if(auth()->check() && auth()->user()->hasRole('admin'))
         <li class="sidebar-menu-li">
           <a href="{{route('reviewersQuestions.index')}}" class="h6-semibold">
             <x-svg-icon name="article" size="18" />
             <span class="sidebar-menu-text">Reviewers Questions</span>
           </a>
         </li>
+          @endif
         <!-- <li class="sidebar-menu-li">
           <a href="{{ route('categories.index') }}" class="h6-semibold">
             <x-svg-icon name="article" size="18" />
