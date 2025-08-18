@@ -259,11 +259,11 @@
                         <form action="{{ route('content.assignTo', $item->id) }}" method="POST" class="mt-3" novalidate>
                             @csrf
                             <div class="mb-4 form-infield assignment-select">
-                                <x-text_label for="reviewer_ids_{{ $item->id }}" :required="true">Assign to Reviewers</x-text_label>
+                                <x-text_label for="reviewer_ids_{{ $item->id }}">Assign to Reviewers</x-text_label>
                                 <p class="mb-1 h5-ragular" style="color:#adadad; margin-top:-6px;">You can select multiple reviewers
                                 </p>
                                 <select class="select2-reviewers form-control" name="reviewer_ids[]" multiple="multiple"
-                                    id="reviewer_ids_{{ $item->id }}" required>
+                                    id="reviewer_ids_{{ $item->id }}">
                                     @foreach($reviewers as $reviewer)
                                         <option 
                                             value="{{ $reviewer->id }}" 
@@ -273,11 +273,15 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <div id="reviewer_ids-error-container_{{ $item->id }}">
-                                    <x-input-error :messages="$errors->get('reviewer_ids')" class="mt-2" />
-                                </div>
                             </div>
-                            <div class="modal-footer">
+
+                            <div class="form-infield">
+                                <x-text_label for="question_group_id">Questions Group Name</x-text_label>
+                                <x-select id="question_group_id" name="question_group_id" class="filter-select" :options="$QuestionGroup->mapWithKeys(function ($questionGroup) {
+                                return [$questionGroup->id => $questionGroup->name];
+                                })->all()" placeholder="select a questions group name"/>
+                                </div>
+                            <div class="mt-4 modal-footer">
                                 <x-button type="button" class="px-4 bg-trans-btn" data-bs-dismiss="modal">Cancel</x-button>
                                 <x-button type="submit" class="px-4">Assign Reviewers</x-button>
                             </div>
