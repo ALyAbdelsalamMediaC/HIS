@@ -176,23 +176,17 @@ class MediaController extends Controller
         $request->validate([
             'reviewer_ids' => 'nullable|array',
             'reviewer_ids.*' => 'exists:users,id',
-            'assign_questions' => 'nullable|array',
-            'assign_questions.*' => 'exists:questions,id' // Assuming questions are stored in a 'questions' table
+            'question_group_id' => 'required|exists:question_groups,id',
         ]);
 
-        // Get reviewers and questions from request body
+        // Get reviewers and question_group_id from request body
         $reviewersArray = $request->input('reviewer_ids', []);
-        $questionsArray = $request->input('assign_questions', []);
+        $questionGroupId = $request->input('question_group_id') ? (int) $request->input('question_group_id') : null;
 
         // Clean up reviewers: trim, filter, cast to int
         $reviewersArray = array_filter(array_map(function ($id) {
             return (int) trim($id);
         }, $reviewersArray));
-
-        // Clean up questions: trim, filter, cast to int
-        $questionsArray = array_filter(array_map(function ($id) {
-            return (int) trim($id);
-        }, $questionsArray));
 
         // Prepare update data
         $updateData = [];
@@ -206,8 +200,8 @@ class MediaController extends Controller
             $updateData['status'] = 'inreview';
         }
 
-        // Handle questions
-        $updateData['assign_questions'] = empty($questionsArray) ? null : json_encode(array_values($questionsArray));
+        // Handle question_group_id
+        $updateData['question_group_id'] = $questionGroupId;
 
         // Update media table using Eloquent
         Media::where('id', $id)->update($updateData);
@@ -216,8 +210,8 @@ class MediaController extends Controller
         if (!empty($reviewersArray)) {
             $title = "You are assigned to new media with id: " . $id;
             $body = "The media with id " . $id . " has been uploaded successfully. Please review it.";
-            if (!empty($questionsArray)) {
-                $body .= " Questions have been assigned for review.";
+            if ($questionGroupId) {
+                $body .= " A question group (ID: $questionGroupId) has been assigned for review.";
             }
             $route = "content/videos/" . $id . "/inreview/";
 
@@ -236,20 +230,20 @@ class MediaController extends Controller
 
         // Prepare success message
         $message = '';
-        if (empty($reviewersArray) && empty($questionsArray)) {
-            $message = 'Reviewers and questions removed successfully.';
+        if (empty($reviewersArray) && !$questionGroupId) {
+            $message = 'Reviewers and question group removed successfully.';
         } elseif (empty($reviewersArray)) {
-            $message = 'Questions assigned successfully, reviewers removed.';
-        } elseif (empty($questionsArray)) {
-            $message = 'Reviewers assigned successfully, questions removed.';
+            $message = 'Question group assigned successfully, reviewers removed.';
+        } elseif (!$questionGroupId) {
+            $message = 'Reviewers assigned successfully, question group removed.';
         } else {
-            $message = 'Reviewers and questions assigned successfully.';
+            $message = 'Reviewers and question group assigned successfully.';
         }
 
         return back()->with('success', $message);
     } catch (Exception $e) {
         LaravelLog::error('Assign to error: ' . $e->getMessage());
-        return back()->with('error', 'Failed to process reviewer or question assignment.');
+        return back()->with('error', 'Failed to process reviewer or question group assignment.');
     }
 }
     public function recently_Added()
