@@ -176,7 +176,7 @@ class MediaController extends Controller
         $request->validate([
             'reviewer_ids' => 'nullable|array',
             'reviewer_ids.*' => 'exists:users,id',
-            'question_group_id' => 'required|exists:question_groups,id',
+            'question_group_id' => 'nullable|exists:question_groups,id',
         ]);
 
         // Get reviewers and question_group_id from request body
