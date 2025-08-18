@@ -215,8 +215,7 @@ class ReviewersQuestionController extends Controller
             'name' => $validatedData['name'],
         ]);
 
-        return redirect()->route('reviewersQuestions.view_add')
-            ->with('success', 'Question Group added successfully.');
+        return back()->with('success', 'Question Group added successfully.');
     }
 
     public function editGroup(Request $request, $id)
@@ -235,8 +234,7 @@ class ReviewersQuestionController extends Controller
             'name' => $validatedData['name'],
         ]);
 
-        return redirect()->route('reviewersQuestions.view_add')
-            ->with('success', 'Question Group updated successfully.');
+        return back()->with('success', 'Question Group updated successfully.');
     }
 
     public function deleteGroup($id)
@@ -253,7 +251,6 @@ class ReviewersQuestionController extends Controller
 
         $questionGroup->delete();
 
-        return redirect()->route('reviewersQuestions.view_add') // Adjust to your index route
-            ->with('success', 'Question Group deleted successfully.');
+        return back()->with('success', 'Question Group deleted successfully.');
     }
 }
