@@ -26,6 +26,7 @@ use getID3;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Comment;
+use App\Models\QuestionGroup;
 use App\Models\Rate;
 use App\Models\Review;
 use App\Services\NotificationService;
@@ -157,80 +158,98 @@ class MediaController extends Controller
 
             // Get all users with role 'reviewer'
             $reviewers = User::where('role', 'reviewer')->get();
-
+            $QuestionGroup = QuestionGroup::all();
             // Pass dynamic statuses
             $statuses = Media::STATUSES;
 
-            return view('pages.content.videos', compact('media', 'reviewers', 'categories', 'subCategories', 'subCategoriesByCategory', 'statuses'));
+            return view('pages.content.videos', compact('media', 'reviewers','QuestionGroup', 'categories', 'subCategories', 'subCategoriesByCategory', 'statuses'));
         } catch (Exception $e) {
             LaravelLog::error('Media getall error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }
-    public function assignTo(Request $request, $id)
+   public function assignTo(Request $request, $id)
 {
     try {
         $sender = Auth::user();
         // Validate the request
         $request->validate([
             'reviewer_ids' => 'nullable|array',
-            'reviewer_ids.*' => 'exists:users,id'
+            'reviewer_ids.*' => 'exists:users,id',
+            'assign_questions' => 'nullable|array',
+            'assign_questions.*' => 'exists:questions,id' // Assuming questions are stored in a 'questions' table
         ]);
 
-        // Get reviewers from request body
+        // Get reviewers and questions from request body
         $reviewersArray = $request->input('reviewer_ids', []);
+        $questionsArray = $request->input('assign_questions', []);
 
-        // Clean up any whitespace, filter out empty values, and cast to int
+        // Clean up reviewers: trim, filter, cast to int
         $reviewersArray = array_filter(array_map(function ($id) {
             return (int) trim($id);
         }, $reviewersArray));
 
+        // Clean up questions: trim, filter, cast to int
+        $questionsArray = array_filter(array_map(function ($id) {
+            return (int) trim($id);
+        }, $questionsArray));
+
         // Prepare update data
         $updateData = [];
 
+        // Handle reviewers
         if (empty($reviewersArray)) {
-            // If no reviewers provided, clear assigned reviewers and set status to pending
-            $updateData = [
-                'assigned_to' => null,
-                'status' => 'pending'
-            ];
+            $updateData['assigned_to'] = null;
+            $updateData['status'] = 'pending';
         } else {
-            // Convert to JSON (array of integers)
-            $reviewersJson = json_encode(array_values($reviewersArray));
-            $updateData = [
-                'assigned_to' => $reviewersJson,
-                'status' => 'inreview'
-            ];
+            $updateData['assigned_to'] = json_encode(array_values($reviewersArray));
+            $updateData['status'] = 'inreview';
         }
+
+        // Handle questions
+        $updateData['assign_questions'] = empty($questionsArray) ? null : json_encode(array_values($questionsArray));
 
         // Update media table using Eloquent
         Media::where('id', $id)->update($updateData);
 
-        $title = "You are assigned to new media with id: " . $id;
-        $body = "The media with id " . $id . " has been uploaded successfully. Please review it.";
-        $route = "content/videos/" . $id."/inreview/";
+        // Send notification to each reviewer (if reviewers are assigned)
+        if (!empty($reviewersArray)) {
+            $title = "You are assigned to new media with id: " . $id;
+            $body = "The media with id " . $id . " has been uploaded successfully. Please review it.";
+            if (!empty($questionsArray)) {
+                $body .= " Questions have been assigned for review.";
+            }
+            $route = "content/videos/" . $id . "/inreview/";
 
-        // Send notification to each reviewer
-        foreach ($reviewersArray as $reviewer_id) {
-            $reviewer = User::find($reviewer_id);
-            $this->notificationService->sendNotification(
-                $sender,
-                $reviewer,
-                $title,
-                $body,
-                $route,
-                $id
-            );
+            foreach ($reviewersArray as $reviewer_id) {
+                $reviewer = User::find($reviewer_id);
+                $this->notificationService->sendNotification(
+                    $sender,
+                    $reviewer,
+                    $title,
+                    $body,
+                    $route,
+                    $id
+                );
+            }
         }
 
-        $message = empty($reviewersArray)
-            ? 'Reviewers removed successfully.'
-            : 'Reviewers assigned successfully.';
+        // Prepare success message
+        $message = '';
+        if (empty($reviewersArray) && empty($questionsArray)) {
+            $message = 'Reviewers and questions removed successfully.';
+        } elseif (empty($reviewersArray)) {
+            $message = 'Questions assigned successfully, reviewers removed.';
+        } elseif (empty($questionsArray)) {
+            $message = 'Reviewers assigned successfully, questions removed.';
+        } else {
+            $message = 'Reviewers and questions assigned successfully.';
+        }
 
         return back()->with('success', $message);
     } catch (Exception $e) {
         LaravelLog::error('Assign to error: ' . $e->getMessage());
-        return back()->with('error', 'Failed to process reviewer assignment.');
+        return back()->with('error', 'Failed to process reviewer or question assignment.');
     }
 }
     public function recently_Added()

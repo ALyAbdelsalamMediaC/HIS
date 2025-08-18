@@ -25,6 +25,7 @@ class Media extends Model
         'is_featured',
         'assigned_to',
         'mention',
+        'assign_questions'
     ];
 
     public function category()
