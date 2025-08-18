@@ -14,8 +14,9 @@ class ReviewersQuestionController extends Controller
 
     public function index()
     {
+        $questionGroup = QuestionGroup::with('questions.answers')->get();
         // Logic to display the form for adding a new question
-        return view('pages.reviewersQuestions.index');
+        return view('pages.reviewersQuestions.index',compact('questionGroup'));
     }
     public function view_add()
     {
