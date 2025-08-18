@@ -182,8 +182,7 @@ class ReviewersQuestionController extends Controller
             }
         }
 
-        return redirect()->route('reviewersQuestions.view_add')
-            ->with('success', 'Question updated successfully.')
+        return back()->with('success', 'Question updated successfully.')
             ->with('selected_group_id', $validatedData['question_group_id']);
     }
 
@@ -200,8 +199,7 @@ class ReviewersQuestionController extends Controller
         // Delete the question
         $question->delete();
 
-        return redirect()->route('reviewersQuestions.view_add')
-            ->with('success', 'Question deleted successfully.');
+        return back()->with('success', 'Question deleted successfully.');
     }
 
     public function addGroup(Request $request)
