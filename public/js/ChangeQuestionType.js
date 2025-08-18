@@ -5,8 +5,8 @@ class QuestionTypeManager {
         this.typeButtons = document.querySelectorAll('.question-types .types-of');
         this.questionBlocks = document.querySelectorAll('.the-question .question-of');
         this.questionTypeField = document.getElementById('question_type');
-        this.answerLists = document.querySelectorAll('.answer-list');
-        this.form = document.querySelector('form');
+        this.answerLists = document.querySelectorAll('.the-question .answer-list'); // Only target main form
+        this.form = document.querySelector('form:not([action*="edit"])'); // Only target add form
         this.initialize();
     }
 
@@ -44,11 +44,7 @@ class QuestionTypeManager {
             // Enable/disable inputs based on active type
             const inputs = block.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                if (isMatch) {
-                    input.removeAttribute('disabled');
-                } else {
-                    input.setAttribute('disabled', 'disabled');
-                }
+                input.removeAttribute('disabled');
             });
         });
     }
@@ -178,8 +174,9 @@ class QuestionTypeManager {
         document.getElementById('text_question_multiple').value = '';
         document.getElementById('text_question_single').value = '';
         
-        // Clear answer fields
-        const answerInputs = document.querySelectorAll('input[name="answers[]"]');
+        // Clear answer fields in main form only
+        const mainForm = document.querySelector('.the-question');
+        const answerInputs = mainForm.querySelectorAll('input[name="answers[]"]');
         answerInputs.forEach((input, index) => {
             if (index > 0) {
                 input.closest('.answer-row').remove();
@@ -188,13 +185,19 @@ class QuestionTypeManager {
             }
         });
         
-        // Reset to default question type
+        // Reset to default question type but don't clear sessionStorage
         this.setActiveType('text');
+    }
+    
+    // Reset form completely including sessionStorage
+    clearForm() {
+        this.resetForm();
+        sessionStorage.removeItem('selectedQuestionType');
     }
 
     // Clear form after successful submission
     clearFormAfterSuccess() {
-        this.resetForm();
+        this.clearForm();
     }
 }
 
@@ -203,6 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Only initialize if we're on the reviewers questions page
     if (document.querySelector('.question-types')) {
         window.questionTypeManager = new QuestionTypeManager();
+        // Restore the previously selected type
+        window.questionTypeManager.restoreType();
     }
 });
 

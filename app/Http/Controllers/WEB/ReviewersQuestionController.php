@@ -39,59 +39,22 @@ class ReviewersQuestionController extends Controller
     {
         $user_id = auth()->user()->id;
 
-        // Validate the incoming request
+        // Validate the incoming request - accept array of question_ids
         $validatedData = $request->validate([
-            'question_id_1' => 'required|exists:questions,id',
-            'question_id_2' => 'required|exists:questions,id',
-        ]);
-
-        try {
-            // Find both questions and ensure they belong to the authenticated user and same group
-            $question1 = Question::where('id', $validatedData['question_id_1'])
-                ->where('user_id', $user_id)
-                ->firstOrFail();
-            $question2 = Question::where('id', $validatedData['question_id_2'])
-                ->where('user_id', $user_id)
-                ->where('question_group_id', $question1->question_group_id)
-                ->firstOrFail();
-
-            // Swap the order values
-            $tempOrder = $question1->order;
-            $question1->order = $question2->order;
-            $question2->order = $tempOrder;
-
-            // Save both questions
-            $question1->save();
-            $question2->save();
-
-            // Return JSON response for the popup
-            return response()->json([
-                'success' => true,
-                'message' => 'Question order swapped successfully.',
-            ]);
-        } catch (\Exception $e) {
-            // Return error response
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to swap question order: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function reorder(Request $request)
-    {
-        $user_id = auth()->user()->id;
-
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'question_group_id' => 'required|exists:question_groups,id',
             'question_ids' => 'required|array',
             'question_ids.*' => 'exists:questions,id',
         ]);
 
         try {
+            // Get the first question to determine the question group
+            $firstQuestion = Question::where('id', $validatedData['question_ids'][0])
+                ->where('user_id', $user_id)
+                ->firstOrFail();
+            
+            $questionGroupId = $firstQuestion->question_group_id;
+
             // Fetch all questions for the group to ensure they belong to the user
-            $questions = Question::where('question_group_id', $validatedData['question_group_id'])
+            $questions = Question::where('question_group_id', $questionGroupId)
                 ->where('user_id', $user_id)
                 ->get();
 
@@ -105,24 +68,22 @@ class ReviewersQuestionController extends Controller
             }
 
             // Update order based on the provided question_ids array
-            DB::transaction(function () use ($validatedData, $user_id) {
-                foreach ($validatedData['question_ids'] as $index => $questionId) {
-                    Question::where('id', $questionId)
-                        ->where('user_id', $user_id)
-                        ->update(['order' => $index + 1]);
-                }
-            });
+            foreach ($validatedData['question_ids'] as $index => $questionId) {
+                Question::where('id', $questionId)
+                    ->where('user_id', $user_id)
+                    ->update(['order' => $index + 1]);
+            }
 
             // Return JSON response
             return response()->json([
                 'success' => true,
-                'message' => 'Questions reordered successfully.',
+                'message' => 'Questions order updated successfully.',
             ]);
         } catch (\Exception $e) {
             // Return error response
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to reorder questions: ' . $e->getMessage(),
+                'message' => 'Failed to update questions order: ' . $e->getMessage(),
             ], 500);
         }
     }

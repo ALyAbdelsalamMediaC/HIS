@@ -107,12 +107,12 @@
                  </div>  
            </div>
          
-           <!-- Single Choice -->
+                      <!-- Single Choice -->
            <div class="question-of d-none" data-type="single_choice">
                <div class="form-infield">
                  <x-text_input type="text" id="text_question_single" name="question" placeholder="Enter text question" data-name="Text question" value="{{ old('question') }}" />
                </div>
- 
+
                <div class="form-infield">
                  <x-text_label for="answer-1">Answers</x-text_label>
                  <div class="answer-list">
@@ -127,14 +127,12 @@
                    </div>
                  </div>
                </div>  
-               
-              </div>
-              <div class="mt-3 d-flex justify-content-end">
-                <x-button type="submit">Save</x-button>
-              </div>
-
+           </div>
+         
+         <div class="mt-3 d-flex justify-content-end">
+           <x-button type="submit">Save</x-button>
+         </div>
        </div>
-        
       </div>
     </form>
     </div>
@@ -146,59 +144,71 @@
       <h3 class="h3-semibold">Existing Questions ({{ $existingQuestions->count() }})</h3>
     </div>
 
-    <div class="w-100">
+    <div class="w-100" id="sortable">
       @foreach($existingQuestions as $question)
-      <div class="gap-4 d-flex align-items-center w-100" style="border-bottom: 1px solid var(--border-color);">
+      <div class="gap-4 d-flex align-items-center w-100" style="border-bottom: 1px solid var(--border-color);" data-question-id="{{ $question->id }}">
         <div class="order-icon">
           <x-svg-icon name="order" size="15" color="#000" />
         </div>
 
-        <div class="existing-question w-100">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="existing-question-type 
-              @if($question->type === 'text')
-                text-type
-              @elseif($question->type === 'multiple_choice')
-                multiple-choice-type
-              @elseif($question->type === 'single_choice')
-                single-choice-type
-              @endif
-            ">
-              @if($question->type === 'text')
-                <x-svg-icon name="text-question" size="15" color="#973C00" />
-                <span class="h6-semibold">Text</span>
-              @elseif($question->type === 'multiple_choice')
-                <x-svg-icon name="multiple-choice" size="15" color="#35758C" />
-                <span class="h6-semibold">Multiple Choice</span>
-              @elseif($question->type === 'single_choice')
-                <x-svg-icon name="single-check" size="15" color="#087A2A" />
-                <span class="h6-semibold">Single Choice</span>
-              @endif
+          <div class="existing-question w-100">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="existing-question-type 
+                @if($question->type === 'text')
+                  text-type
+                @elseif($question->type === 'multiple_choice')
+                  multiple-choice-type
+                @elseif($question->type === 'single_choice')
+                  single-choice-type
+                @endif
+              ">
+                @if($question->type === 'text')
+                  <x-svg-icon name="text-question" size="15" color="#973C00" />
+                  <span class="h6-semibold">Text</span>
+                @elseif($question->type === 'multiple_choice')
+                  <x-svg-icon name="multiple-choice" size="15" color="#35758C" />
+                  <span class="h6-semibold">Multiple Choice</span>
+                @elseif($question->type === 'single_choice')
+                  <x-svg-icon name="single-check" size="15" color="#087A2A" />
+                  <span class="h6-semibold">Single Choice</span>
+                @endif
+              </div>
+      
+              <div class="gap-2 d-flex align-items-center">
+                          <button type="button" class="p-0 border-0 btn btn-link edit-question-btn" data-bs-toggle="modal" data-bs-target="#editQuestionModal{{ $question->id }}" data-id="{{ $question->id }}">
+           <x-svg-icon name="edit-pen2" size="15" color="#adadad" />
+          </button>
+          <button type="button" class="p-0 border-0 btn btn-link" data-bs-toggle="modal" data-bs-target="#deleteQuestionModal{{ $question->id }}">
+                <x-svg-icon name="trash" size="15" color="#BB1313" />
+          </button>
+              </div>
             </div>
     
-            <div class="gap-2 d-flex align-items-center">
-              <x-svg-icon name="edit-pen2" size="15" color="#adadad"  />
-              <x-svg-icon name="trash" size="15" color="#BB1313" />
+            <div class="mt-3">
+              <h3 class="h6-semibold">{{ $question->content }}</h3>
+    
+              @if($question->answers && $question->answers->count() > 0)
+                <div class="flex-wrap mt-2 d-flex align-items-center" style="gap:20px;">
+                  @foreach($question->answers as $answer)
+                    <h4 class="h6-ragular">{{ $answer->content }}</h4>
+                  @endforeach
+                </div>
+              @endif
             </div>
           </div>
-  
-          <div class="mt-3">
-            <h3 class="h6-semibold">{{ $question->content }}</h3>
-  
-            @if($question->answers && $question->answers->count() > 0)
-              <div class="flex-wrap mt-2 d-flex align-items-center" style="gap:20px;">
-                @foreach($question->answers as $answer)
-                  <h4 class="h6-ragular">{{ $answer->content }}</h4>
-                @endforeach
-              </div>
-            @endif
-          </div>
         </div>
-      </div>
-      @endforeach
+        @endforeach
+      @else
+        <div class="py-5 text-center" style="grid-column: 1 / -1;">
+          <div class="mb-3">
+            <x-svg-icon name="text-question" size="48" color="#ADADAD" />
+          </div>
+          <h4 class="h5-semibold" style="color:#ADADAD; margin-bottom: 8px;">No existing questions</h4>
+          <p class="h6-ragular" style="color:#ADADAD;">Start creating questions first to see them here.</p>
+        </div>
+      @endif
     </div>
   </div>
-  @endif
 
   <!-- Add Group Modal -->
   <x-modal id="addGroupModal" title="Create Group">
@@ -267,16 +277,91 @@
     </div>
   </x-modal>
   @endforeach
+
+  <!-- Edit Question Modals -->
+  @foreach($existingQuestions as $question)
+  <x-modal id="editQuestionModal{{ $question->id }}" title="Edit Question">
+    <form method="POST" action="{{ route('reviewersQuestions.edit', $question->id) }}" class="mt-4" novalidate>
+      @csrf
+      @method('PUT')
+      <input type="hidden" name="question_group_id" value="{{ $question->question_group_id }}">
+      <input type="hidden" name="question_type" value="{{ $question->type }}">
+
+      <!-- Question Content -->
+      <div class="mb-3 form-infield">
+        <x-text_label for="edit_question_{{ $question->id }}" :required="true">Question</x-text_label>
+        <x-text_input type="text" id="edit_question_{{ $question->id }}" name="question" placeholder="Enter question" data-name="Question" value="{{ $question->content }}" />
+        <div id="edit_question_{{ $question->id }}-error-container">
+          <x-input-error :messages="$errors->get('question')" />
+        </div>
+      </div>
+
+      <!-- Answers Section (for multiple/single choice) -->
+      @if($question->type === 'multiple_choice' || $question->type === 'single_choice')
+      <div class="form-infield">
+        <x-text_label>Answers</x-text_label>
+        <div class="answer-list">
+          @if($question->answers && $question->answers->count() > 0)
+            @foreach($question->answers as $index => $answer)
+            <div class="gap-3 d-flex align-items-center answer-row">
+              <x-text_input type="text" name="answers[]" placeholder="Enter answer" data-name="Text answer" value="{{ $answer->content }}" />
+              <div class="actions">
+                <x-button type="button" class="btn-nothing edit-delete-answer" style="{{ $index === 0 ? 'display: none;' : '' }}">
+                  <x-svg-icon name="false" size="17" color="#ADADAD" />
+                </x-button>
+                <x-button type="button" class="edit-add-answer" style="background: #F1F9FA; color:#35758c; {{ $index !== $question->answers->count() - 1 ? 'display: none;' : '' }}">Add</x-button>
+              </div>
+            </div>
+            @endforeach
+          @else
+            <div class="gap-3 d-flex align-items-center answer-row">
+              <x-text_input type="text" name="answers[]" placeholder="Enter answer" data-name="Text answer" />
+              <div class="actions">
+                <x-button type="button" class="btn-nothing edit-delete-answer" style="display: none;">
+                  <x-svg-icon name="false" size="17" color="#ADADAD" />
+                </x-button>
+                <x-button type="button" class="edit-add-answer" style="background: #F1F9FA; color:#35758c;">Add</x-button>
+              </div>
+            </div>
+          @endif
+        </div>
+      </div>
+      @endif
+
+      <div class="mt-3 d-flex justify-content-end">
+        <x-button type="button" class="bg-trans-btn me-2" data-bs-dismiss="modal">Cancel</x-button>
+        <x-button type="submit">Update Question</x-button>
+      </div>
+    </form>
+  </x-modal>
+  @endforeach
+
+  <!-- Delete Question Modals -->
+  @foreach($existingQuestions as $question)
+  <x-modal id="deleteQuestionModal{{ $question->id }}" title="Delete Question">
+    <div class="my-3">
+      <p class="h3-semibold" style="color:black;">Are you sure you want to delete the question "{{ $question->content }}"?</p>
+    </div>
+    <div class="modal-footer">
+      <x-button type="button" style="color:#BB1313; background-color:transparent; border:1px solid #BB1313;" data-bs-dismiss="modal">Cancel</x-button>
+      <form action="{{ route('reviewersQuestions.delete', $question->id) }}" method="POST">
+        @csrf
+        @method('DELETE')
+        <x-button type="submit" style="background-color:#BB1313; color:#fff;">Delete</x-button>
+      </form>
+    </div>
+  </x-modal>
+  @endforeach
 </section>
 
 @endsection
 
 @push('scripts')
-  <script src="{{ asset('js/coutriesAPi.js') }}"></script>
   <script src="{{ asset('js/validations.js') }}"></script>
   <script src="{{ asset('js/showToast.js') }}"></script>
   <script src="{{ asset('js/filters.js') }}"></script>
   <script src="{{ asset('js/ChangeQuestionType.js') }}"></script>
+  <script src="{{ asset('js/QuestionsOrder.js') }}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       let pendingDeleteValue = null;
@@ -335,5 +420,50 @@
         });
       });
     })
+
+    // Handle edit modal answer management - scoped to modals only
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle adding/removing answers in edit modals only
+      document.addEventListener('click', function(e) {
+        const addBtn = e.target.closest('.edit-add-answer');
+        const deleteBtn = e.target.closest('.edit-delete-answer');
+
+        // Only process clicks within edit modals (not the main form)
+        if (addBtn && addBtn.closest('[id^="editQuestionModal"]')) {
+          e.preventDefault();
+          const row = addBtn.closest('.answer-row');
+          const answerList = row.parentElement;
+          const clone = row.cloneNode(true);
+          
+          // Clear input value
+          clone.querySelector('input').value = '';
+          
+          // Show Add button in new row, hide Delete
+          clone.querySelector('.edit-add-answer').style.display = 'inline-block';
+          clone.querySelector('.edit-delete-answer').style.display = 'none';
+          
+          // Hide Add button in current row, show Delete
+          row.querySelector('.edit-add-answer').style.display = 'none';
+          row.querySelector('.edit-delete-answer').style.display = 'inline-block';
+          
+          answerList.appendChild(clone);
+        }
+
+        if (deleteBtn && deleteBtn.closest('[id^="editQuestionModal"]')) {
+          e.preventDefault();
+          const row = deleteBtn.closest('.answer-row');
+          const answerList = row.parentElement;
+          
+          if (answerList.children.length > 1) {
+            row.remove();
+            
+            // Ensure the last row always has Add button visible
+            const lastRow = answerList.lastElementChild;
+            lastRow.querySelector('.edit-add-answer').style.display = 'inline-block';
+            lastRow.querySelector('.edit-delete-answer').style.display = 'none';
+          }
+        }
+      });
+    });
   </script>
 @endpush
