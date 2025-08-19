@@ -14,6 +14,7 @@
         "laravel/sanctum": "^4.1",
         "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.9",
+        "lcobucci/jwt": "^5.5",
         "masbug/flysystem-google-drive-ext": "^2.4",
         "socialiteproviders/apple": "^5.6"
     },

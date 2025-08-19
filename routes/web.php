@@ -191,6 +191,11 @@ Route::get('login/google/callback', [SocialAuthController::class, 'handleGoogleC
 Route::get('login/apple', [SocialAuthController::class, 'redirectToApple'])->name('social.apple.redirect');
 Route::get('login/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
 
+
+use App\Http\Controllers\Auth\AppleAuthController;
+
+Route::get('auth/apple', [AppleAuthController::class, 'redirectToApple'])->name('apple.login');
+Route::get('auth/apple/callback', [AppleAuthController::class, 'handleAppleCallback']);
 Route::post('/logout', function () {
     Auth::logout();
     return redirect()->route('login');
