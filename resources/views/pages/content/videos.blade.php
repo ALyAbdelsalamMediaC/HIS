@@ -168,6 +168,11 @@
                                         </div>
                                     @endif
                                 </div>
+                                @if($item->questionGroup)
+                                    <div class="gap-3 mt-2 d-flex align-items-center">
+                                        <h3 class="h5-semibold" style="color:black; font-size: 14px;">Group: {{ $item->questionGroup->name }}</h3>
+                                    </div>
+                                @endif
                             @endif
                             @if($item->status === 'inreview' && $item->assigned_reviewers->count())
                                 <div class="gap-3 mt-3 d-flex align-items-center">
@@ -206,6 +211,11 @@
                                     </div>
                                     <!-- No plus button here -->
                                 </div>
+                                @if($item->questionGroup)
+                                    <div class="gap-3 mt-2 d-flex align-items-center">
+                                        <h3 class="h5-semibold" style="color:black; font-size: 14px;">Group: {{ $item->questionGroup->name }}</h3>
+                                    </div>
+                                @endif
                             @endif
                             <div class="dashboard-video-card-content-content-down">
                                 <div class="gap-2 d-flex align-items-center">

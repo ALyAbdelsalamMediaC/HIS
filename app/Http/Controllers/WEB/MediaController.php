@@ -96,7 +96,7 @@ class MediaController extends Controller
                 return redirect('https://his.mc-apps.org/get-google-token.php?redirect=' . urlencode(url()->current()));
             }
 
-            $query = Media::with('category', 'subCategory', 'comments')
+            $query = Media::with('category', 'subCategory', 'comments', 'questionGroup')
                 ->withCount('comments');
 
             // Apply role-based filtering
@@ -168,43 +168,43 @@ class MediaController extends Controller
             return back()->with('error', 'Failed to fetch media: ' . $e->getMessage());
         }
     }
-    public function assignTo(Request $request, $id)
-    {
-        try {
-            $sender = Auth::user();
-            // Validate the request
-            $request->validate([
-                'reviewer_ids' => 'nullable|array',
-                'reviewer_ids.*' => 'exists:users,id',
-                'question_group_id' => 'nullable|exists:question_groups,id',
-            ]);
-
-            // Get reviewers and question_group_id from request body
-            $reviewersArray = $request->input('reviewer_ids', []);
-            $questionGroupId = $request->input('question_group_id') ? (int) $request->input('question_group_id') : null;
-            $id = (int) $id;
-            // Clean up reviewers: trim, filter, cast to int
-            $reviewersArray = array_filter(array_map(function ($id) {
-                return (int) trim($id);
-            }, $reviewersArray));
-
-            // Prepare update data
-            $updateData = [];
-
-            // Handle reviewers
-            if (empty($reviewersArray)) {
-                $updateData['assigned_to'] = null;
-                $updateData['status'] = 'pending';
-            } else {
-                $updateData['assigned_to'] = json_encode(array_values($reviewersArray));
-                $updateData['status'] = 'inreview';
-            }
-
-            // Handle question_group_id
-            $updateData['question_group_id'] = $questionGroupId;
-
-            // Update media table using Eloquent
-            Media::where('id', $id)->update($updateData);
+   public function assignTo(Request $request, $id)
+{
+    try {
+        $sender = Auth::user();
+        // Validate the request
+        $request->validate([
+            'reviewer_ids' => 'nullable|array',
+            'reviewer_ids.*' => 'exists:users,id',
+            'question_group_id' => 'nullable|exists:question_groups,id',
+        ]);
+        
+        // Get reviewers and question_group_id from request body
+        $reviewersArray = $request->input('reviewer_ids', []);
+        $questionGroupId = $request->input('question_group_id') ? (int) $request->input('question_group_id') : null;
+        $id = (int) $id;
+        // Clean up reviewers: trim, filter, cast to int
+        $reviewersArray = array_filter(array_map(function ($id) {
+            return (int) trim($id);
+        }, $reviewersArray));
+        
+        // Prepare update data
+        $updateData = [];
+        
+        // Handle reviewers
+        if (empty($reviewersArray)) {
+            $updateData['assigned_to'] = null;
+            $updateData['status'] = 'pending';
+        } else {
+            $updateData['assigned_to'] = json_encode(array_values($reviewersArray));
+            $updateData['status'] = 'inreview';
+        }
+        
+        // Handle question_group_id
+        $updateData['question_group_id'] = $questionGroupId;
+        
+        // Update media table using Eloquent
+        Media::where('id', $id)->update($updateData);
 
             // Send notification to each reviewer (if reviewers are assigned)
             if (!empty($reviewersArray)) {
@@ -428,7 +428,6 @@ class MediaController extends Controller
             $reviewers = User::where('role', 'reviewer')->get();
             return view('pages.content.video.single_video_pending', compact('media', 'QuestionGroup', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
         } elseif ($status === 'declined') {
-            $QuestionGroup = QuestionGroup::all();
 
             if (Media::where('id', $id)->where('status', '!=', 'declined')->exists()) {
                 return redirect()->route('content.videos')->with('error', 'You do not have permission to view declined media.');
@@ -463,11 +462,12 @@ class MediaController extends Controller
                 $myRate = Rate::where('media_id', $id)
                     ->where('user_id', $user->id)
                     ->value('rate');
-                return view('pages.content.video.single_video_declined_reviwer', compact('media', 'replys', 'QuestionGroup', 'replysCount', 'commentsCount', 'commentsData', 'myRate'));
+                return view('pages.content.video.single_video_declined_reviwer', compact('media', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'myRate'));
             }
+            $QuestionGroup = QuestionGroup::all();
 
             // Default: admin view
-            return view('pages.content.video.single_video_declined', compact('media', 'commentsData', 'adminComments', 'assignedReviewers', 'reviewers'));
+            return view('pages.content.video.single_video_declined', compact('media', 'commentsData', 'adminComments', 'assignedReviewers','QuestionGroup', 'reviewers'));
         }
 
         // Default fallback
