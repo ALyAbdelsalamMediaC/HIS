@@ -346,6 +346,9 @@ class MediaController extends Controller
                 $myRate = Rate::where('media_id', $id)
                     ->where('user_id', $user->id)
                     ->value('rate');
+                    $questionGroupId = Media::where('id',$id)->first();
+                    $questionGroupId =$questionGroupId->question_group_id;
+                    $QuestionGroup = QuestionGroup::where('id',$questionGroupId)->with('questions.answers')->first();
                 return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
             }
         } elseif ($status === 'revise') {
