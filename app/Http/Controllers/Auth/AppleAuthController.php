@@ -15,7 +15,6 @@ class AppleAuthController extends Controller
     {
         // Set the client secret dynamically
         config(['services.apple.client_secret' => AppleClientSecret::generate()]);
-
         return Socialite::driver('apple')
             ->scopes(['name', 'email'])
             ->redirect();

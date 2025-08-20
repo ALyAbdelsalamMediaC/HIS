@@ -69,7 +69,7 @@
                     <img src="/images/global/google.svg" alt="google">
                     <span>Continue with Google</span>
                 </a>
-                <a href="{{ route('social.apple.redirect') }}">
+                <a href="{{ route('apple.login') }}">
                 <img src="/images/global/apple.svg" alt="apple">
                 <span>Continue with Apple</span>
                 </a>

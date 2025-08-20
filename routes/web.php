@@ -22,6 +22,7 @@ use App\Http\Controllers\WEB\LikesController;
 use App\Http\Controllers\WEB\NotificationController;
 use App\Http\Controllers\WEB\ReviewersQuestionController;
 use App\Http\Controllers\WEB\ReviewsController;
+use App\Http\Controllers\WEB\SubmissionFormController;
 
 Route::middleware('auth')->group(function () {
 
@@ -157,6 +158,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/settings/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('/bookmarks/{id}', [CategoryController::class, 'getBookmarks']);
+
+    Route::get('/submission_forms', [SubmissionFormController::class, 'index'])->name('submission_forms.index');
+    Route::get('/submission_forms/create', [SubmissionFormController::class, 'create'])->name('submission_forms.create');
+    Route::post('/submission_forms', [SubmissionFormController::class, 'store'])->name('submission_forms.store');
+    Route::get('/submission_forms/{id}', [SubmissionFormController::class, 'show'])->name('submission_forms.show');
+    Route::get('/submission_forms/{id}/edit', [SubmissionFormController::class, 'edit'])->name('submission_forms.edit');
+    Route::put('/submission_forms/{id}', [SubmissionFormController::class, 'update'])->name('submission_forms.update');
+    Route::delete('/submission_forms/{id}', [SubmissionFormController::class, 'destroy'])->name('submission_forms.destroy');
 
 
     Route::prefix('settings/policies')->name('policies.')->group(function () {
