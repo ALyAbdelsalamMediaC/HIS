@@ -349,7 +349,7 @@ class MediaController extends Controller
                     $questionGroupId = Media::where('id',$id)->first();
                     $questionGroupId =$questionGroupId->question_group_id;
                     $QuestionGroup = QuestionGroup::where('id',$questionGroupId)->with('questions.answers')->first();
-                return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate'));
+                return view('pages.content.video.single_video_inreview_reviewer', compact('media', 'likesCount', 'replys', 'replysCount', 'commentsCount', 'commentsData', 'userLiked', 'myRate','QuestionGroup'));
             }
         } elseif ($status === 'revise') {
             if (Media::where('id', $id)->where('status', '!=', 'revise')->exists()) {
