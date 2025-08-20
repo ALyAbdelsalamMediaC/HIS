@@ -45,12 +45,12 @@ class AppleClientSecret
         
         $now = new DateTimeImmutable();
         return $config->builder()
-            ->issuedBy(env('APPLE_TEAM_ID'))
+            ->issuedBy(env('APPLE_TEAM_ID','D8E8M53S66'))
             ->permittedFor('https://appleid.apple.com')
             ->issuedAt($now)
             ->expiresAt($now->modify('+6 months'))
-            ->relatedTo(env('APPLE_CLIENT_ID'))
-            ->withHeader('kid', env('APPLE_KEY_ID'))
+            ->relatedTo(env('APPLE_CLIENT_ID','com.mediacreation.his'))
+            ->withHeader('kid', env('APPLE_KEY_ID', '3QC4V4YNXT'))
             ->getToken($config->signer(), $config->signingKey())
             ->toString();
     }
