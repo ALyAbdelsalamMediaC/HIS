@@ -46,6 +46,7 @@ class AppleClientSecret
         $now = new DateTimeImmutable();
         return $config->builder()
             ->issuedBy(env('APPLE_TEAM_ID','D8E8M53S66'))
+            ->issuedBy(env('APPLE_TEAM_ID','D8E8M53S66'))
             ->permittedFor('https://appleid.apple.com')
             ->issuedAt($now)
             ->expiresAt($now->modify('+6 months'))
