@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('media', function (Blueprint $table) {
-            $table->json('question_group_id')->nullable()->after('assigned_to');
+            $table->integer('question_group_id')->nullable()->after('assigned_to');
         });
     }
 
