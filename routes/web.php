@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\LikesController;
 use App\Http\Controllers\WEB\NotificationController;
+use App\Http\Controllers\WEB\ReviewerAnswerController;
 use App\Http\Controllers\WEB\ReviewersQuestionController;
 use App\Http\Controllers\WEB\ReviewsController;
 use App\Http\Controllers\WEB\SubmissionFormController;
@@ -166,8 +167,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/submission_forms/{id}/edit', [SubmissionFormController::class, 'edit'])->name('submission_forms.edit');
     Route::put('/submission_forms/{id}', [SubmissionFormController::class, 'update'])->name('submission_forms.update');
     Route::delete('/submission_forms/{id}', [SubmissionFormController::class, 'destroy'])->name('submission_forms.destroy');
+    Route::post('/reviewer-answers/{id}', [ReviewerAnswerController::class, 'store'])->name('reviewer-answers.store');
+    Route::get('/reviewer-answers/{id}/edit', [ReviewerAnswerController::class, 'edit'])->name('reviewer-answers.edit');
+    Route::put('/reviewer-answers/{id}', [ReviewerAnswerController::class, 'update'])->name('reviewer-answers.update');
+    Route::delete('/reviewer-answers/{id}', [ReviewerAnswerController::class, 'destroy'])->name('reviewer-answers.destroy');
 
-
+    // Assumed route for media show page
+    Route::get('/media/{id}', [MediaController::class, 'show'])->name('media.show');
     Route::prefix('settings/policies')->name('policies.')->group(function () {
         Route::get('/', [PolicyController::class, 'index'])->name('index');
         Route::get('/create', [PolicyController::class, 'create'])->name('create');
