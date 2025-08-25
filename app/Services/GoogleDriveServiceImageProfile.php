@@ -65,17 +65,16 @@ class GoogleDriveServiceImageProfile
         $fileMetadata = new DriveFile([
             'name' => $name,
             'parents' => [env('GOOGLE_DRIVE_FOLDER_IMAGE_PROFILE')], //  Upload to specific folder
-
+            
         ]);
         $content = file_get_contents($file->getRealPath());
-
+        
         $uploadedFile = $this->service->files->create($fileMetadata, [
             'data' => $content,
             'mimeType' => $file->getMimeType(),
             'uploadType' => 'multipart',
             'fields' => 'id'
         ]);
-
         // Make the file public
         $permission = new \Google\Service\Drive\Permission();
         $permission->setRole('reader');

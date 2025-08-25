@@ -52,13 +52,12 @@ class SettingsController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
                 'phone' => 'required|string',
-                'profile_image' => 'nullable|image|max:2048',
+                'profile_image' => 'nullable|image',
             ]);
-
             $user->name = $validated['name'];
             $user->email = $validated['email'];
             $user->phone = $validated['phone'];
-
+            
             // Handle profile image upload if present (Google Drive)
             if ($request->hasFile('profile_image')) {
                 $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
