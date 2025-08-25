@@ -10,18 +10,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Services\GoogleDriveServiceImageProfile;
+use App\Services\Videos\GoogleDriveServiceImage;
 
 class SettingsController extends Controller
 {
     protected $client;
-    protected $GoogleDriveServiceImageProfile;
+    protected $GoogleDriveServiceImage;
     
 
     public function __construct(
-        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+        GoogleDriveServiceImage $GoogleDriveServiceImage,
     ) {
-        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
-        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+        $this->GoogleDriveServiceImage = $GoogleDriveServiceImage;
+        $this->client = $this->GoogleDriveServiceImage->getClient(); // Ensure this method exists in the service
     }
 
     public function index()
@@ -60,10 +61,10 @@ class SettingsController extends Controller
             
             // Handle profile image upload if present (Google Drive)
             if ($request->hasFile('profile_image')) {
-                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
+                $driveServiceThumbnail = new GoogleDriveServiceImage();
                 if ($request->file('profile_image')->isValid()) {
                     $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-                    $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
+                    $url = $driveServiceThumbnail->uploadImage($request->file('profile_image'), $filename);
                     $user->profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
                 }
             }

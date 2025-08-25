@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Log;
 use App\Models\User;
 use App\Services\GoogleDriveServiceImageProfile;
+use App\Services\Videos\GoogleDriveServiceImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as LaravelLog;
@@ -21,13 +22,13 @@ use Illuminate\Support\Facades\Hash;
 class UserAuthController extends Controller
 {
     protected $client;
-    protected $GoogleDriveServiceImageProfile;
+    protected $GoogleDriveServiceImage;
 
     public function __construct(
-        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+        GoogleDriveServiceImage $GoogleDriveServiceImage
     ) {
-        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
-        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+        $this->GoogleDriveServiceImage = $GoogleDriveServiceImage;
+        $this->client = $this->GoogleDriveServiceImage->getClient(); // Ensure this method exists in the service
     }
 
     public function login(Request $request)
@@ -128,14 +129,14 @@ class UserAuthController extends Controller
 
             $profile_image = null;
 
-            if ($request->hasFile('profile_image')) {
-                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-                if ($request->file('profile_image')->isValid()) {
-                    $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-                    $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-                    $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
-                }
-            }
+            // if ($request->hasFile('profile_image')) {
+            $driveServiceThumbnail = new GoogleDriveServiceImage();
+            // if ($request->file('profile_image')->isValid()) {
+            $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
+            $url = $driveServiceThumbnail->uploadImage($request->file('profile_image'), $filename);
+            $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            // }
+            // }
             $validated['profile_image'] = $profile_image;
             // Create user
             $user = User::create($validated);
@@ -174,13 +175,13 @@ class UserAuthController extends Controller
     {
         try {
             // Validate input
-            $validated = $request->validate([
+            // $validated = $request->validate([
 
-                'user_id' => 'required',
-                'profile_image' => 'nullable|image|max:2048',
-            ]);
+            //     'user_id' => 'required',
+            //     'profile_image' => 'nullable|image|max:2048',
+            // ]);
 
-            $userId = (int) $validated['user_id'];
+            $userId = (int) $request->user_id;
             // Get the authenticated user
             $user = User::where('id', $userId)->first();
 
@@ -191,21 +192,27 @@ class UserAuthController extends Controller
                 ], 401);
             }
             $profile_image = $user->profile_image; // Retain existing image if upload fails
-
             // Handle profile image upload
-            if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
-                $driveServiceThumbnail = new GoogleDriveServiceImageProfile();
-                $filename = time() . '_' . $request->file('profile_image')->getClientOriginalName();
-                $url = $driveServiceThumbnail->uploadImageProfile($request->file('profile_image'), $filename);
-                $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            //    if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
+            $file = $request->file('profile_image');
+            $realPath = $file->getRealPath();
+
+            // Verify that the path is a file, not a directory
+            if (!is_file($realPath)) {
+                throw new \Exception('Uploaded file path is invalid or is a directory: ' . $realPath);
             }
 
+            $driveServiceThumbnail = new GoogleDriveServiceImage();
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $url = $driveServiceThumbnail->uploadImage($file, $filename);
+            $profile_image = 'https://lh3.googleusercontent.com/d/' . $url . '=w1000?authuser=0';
+            // }
             // Update user's profile image
             $user->update(['profile_image' => $profile_image]);
 
             // Log success
             Log::create([
-                'user_id' => $validated['user_id'],
+                'user_id' => $userId,
                 'type' => 'profile_image_update_success',
                 'description' => 'Profile image updated for user: ' . $user->email,
             ]);
@@ -385,7 +392,7 @@ class UserAuthController extends Controller
     }
     public function userInformation(Request $request)
     {
-        
+
         try {
             $user = Auth::user();
 
@@ -395,7 +402,7 @@ class UserAuthController extends Controller
                     'message' => 'User not authenticated',
                 ], 401);
             }
-            $user_data = User::where('id',$user->id)->first();
+            $user_data = User::where('id', $user->id)->first();
             return response()->json([
                 'message' => 'User information retrieved successfully',
                 'user' => $user_data,
