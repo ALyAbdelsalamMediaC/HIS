@@ -20,6 +20,15 @@ use Illuminate\Support\Facades\Hash;
 
 class UserAuthController extends Controller
 {
+    protected $client;
+    protected $GoogleDriveServiceImageProfile;
+
+    public function __construct(
+        GoogleDriveServiceImageProfile $GoogleDriveServiceImageProfile,
+    ) {
+        $this->GoogleDriveServiceImageProfile = $GoogleDriveServiceImageProfile;
+        $this->client = $this->GoogleDriveServiceImageProfile->getClient(); // Ensure this method exists in the service
+    }
 
     public function login(Request $request)
     {
